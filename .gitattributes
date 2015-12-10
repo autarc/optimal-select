@@ -1,0 +1,20 @@
+# Set default behaviour, in case users don't have core.autocrlf set.
+* text eol=lf
+
+# Explicitly declare text files we want to always be normalized and converted
+# to native line endings on checkout.
+*.html  text
+*.css   text
+*.js    text
+*.json  text
+*.yml   text
+*.md    text
+
+# Declare files that will always have CRLF line endings on checkout. Windows specific.
+
+
+# Denote all files that are truly binary and should not be modified.
+*.bmp   binary
+*.gif   binary
+*.jpg   binary
+*.png   binary
