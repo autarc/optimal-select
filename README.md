@@ -42,6 +42,7 @@ var selector = select(element, { excludes: ['href'] })
 
 
 ### CHANGES
+- 1.0.1: add .npmignore
 - 1.0.0: initial release
 
 
