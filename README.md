@@ -11,6 +11,7 @@ A library which creates efficient and robust CSS selectors for HTML elements.
 - allow single and multiple element inputs
 - configurations for excludes can be defined
 - micro library (~ 5kb + no external dependency)
+- shortest path and fastest selection in [comparison](https://github.com/fczbkk/css-selector-generator-benchmark)
 
 
 ### How To Use
@@ -37,9 +38,8 @@ var selector = select(element, { excludes: ['href'] })
 
 ### TODO
 - extend documentation
-- add selection options
-- fork and update the entries of https://github.com/fczbkk/css-selector-generator-benchmark
-  for better comparison
+- check attributes in multi-select
+
 
 ### CHANGES
 - 1.0.0: initial release
