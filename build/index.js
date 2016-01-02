@@ -1,87 +1,31 @@
 /**
  * # Build
  *
- *
+ * Handles the scripts defined in 'package.json'
  */
 
-const path = require('path')
+require('babel-register')
 
-const fs = require('fs-extra')
-const webpack = require('webpack')
-const merge = require('deep-merge')(function (target, source) {
-  if (target instanceof Array) {
-    return [].concat(target, source)
-  }
-  return source
-})
+var path = require('path')
 
-const manifest = require('../package.json')
+global.__DEVELOPMENT__ = !(process.env.NODE_ENV === 'production' || process.argv.length > 2)
 
-const env = {
+// environment (default mode: development)
+var env = {
+  // ROOT: path.resolve(__dirname, '..'),
   SRC: path.resolve(__dirname, '../src'),
-  DIST: path.resolve(__dirname, '..', path.dirname(manifest.main)),
-  FILE: path.basename(manifest.main, path.extname(manifest.main)),
-  EXPORT: 'OptimalSelect',
-  isProduction: (process.env.NODE_ENV === 'production') || process.argv.length > 2
+  LIB: path.resolve(__dirname, '../lib'),
+  DIST: path.resolve(__dirname, '../dist')
 }
 
-if (env.isProduction) {
-  fs.removeSync(env.DIST)
-}
+// ~> define individual transformation order here
+var SourceLibrary = require('./tasks/src-lib')
+var SourceDistribution = require('./tasks/src-dist')
 
-var config = {
-  target: 'web',
-  entry: path.resolve(env.SRC, 'index.js'),
-  resolve: {
-    extensions: ['', '.js']
-  },
-  output: {
-    path: env.DIST,
-    filename: env.FILE + '.js',
-    library: env.EXPORT,
-    libraryTarget: 'umd'
-  },
-  module: {
-    loaders: [
-      {
-        test: /\.jsx?$/,
-        loader: 'babel'
-      }
-    ]
-  }
-}
-
-// development: build + watch
-if (!env.isProduction) {
-  config = merge(config, {
-    devtool: 'source-map-inline',
-    debug: true
-  })
-  return webpack(config).watch(100, notify)
-}
-
-// production: release
-config = merge(config, {
-  devtool: 'sourcemap',
-  plugins: [
-    new webpack.optimize.OccurenceOrderPlugin(),
-    new webpack.optimize.DedupePlugin(),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: true,
-      compress: {
-        warnings: false,
-        screw_ie8: true
-      }
-    })
-  ]
+SourceLibrary(env).then(function () {
+  return SourceDistribution(env)
 })
-
-webpack(config).run(notify)
-
-
-function notify (error, stats) {
-  if (error) {
-    return console.error('error', error)
-  }
-  console.log(new Date().toISOString(), ' - [' + env.EXPORT +']', stats.toString())
-}
+.then(function(){
+  console.log('[BUILD]', __DEVELOPMENT__ ? 'WATCH' : 'RELEASE')
+})
+.catch(console.error.bind(console))
