@@ -67,7 +67,8 @@ export function getMultiSelector (elements, options) {
   var commonAttribute = null
   var commonTagName = null
 
-  for (var element of elements) {
+  for (var i = 0, l = elements.length; i < l; i++) {
+    var element = elements[i]
     if (!commonParentNode) { // 1st entry
       commonParentNode = element.parentNode
       commonClassName = element.className

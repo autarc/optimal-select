@@ -4,8 +4,6 @@
  * Retrieves selector
  */
 
-import './adapter'
-
 /**
  * Get the path of the element
  * @param  {HTMLElement} node    - [description]
