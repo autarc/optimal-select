@@ -11,7 +11,8 @@ import optimize from './optimize'
 const defaultOptions = {
   excludes: [
     'style',
-    'data-reactid'
+    'data-reactid',
+    'data-react-checksum'
   ]
 }
 
