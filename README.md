@@ -28,6 +28,7 @@ document.addEventListener('click', (e) => {
 By default following attributes are excluded for robustness towards changes:
 - style (inline styles often used for dynamic visualizations)
 - data-reactid (reacts element identifier which depends on the current DOM structure)
+- data-react-checksum (react string rendered markup which depends on the current DOM structure)
 
 
 ```js
@@ -39,11 +40,6 @@ var selector = select(element, { excludes: ['href'] })
 ### TODO
 - extend documentation
 - check attributes in multi-select
-
-
-### CHANGES
-- 1.0.1: add .npmignore
-- 1.0.0: initial release
 
 
 ### Development

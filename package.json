@@ -1,34 +1,43 @@
 {
   "name": "optimal-select",
   "description": "Get efficient & robust CSS selectors for HTML elements",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Stefan Dühring | Autarc <autarc@gmail.com>",
   "bugs": {
     "url": "https://github.com/Autarc/optimal-select/issues"
   },
+  "devDependencies": {
+    "babel-loader": "^6.2.0",
+    "babel-plugin-add-module-exports": "^0.1.2",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-stage-0": "^6.3.13",
+    "babel-register": "^6.3.13",
+    "deep-merge": "^1.0.0",
+    "fs-extra": "^0.26.3",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^6.1.1",
+    "gulp-load-plugins": "^1.1.0",
+    "gulp-plumber": "^1.0.1",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-util": "^3.0.7",
+    "gulp-watch": "^4.3.5",
+    "webpack": "^1.12.9"
+  },
   "homepage": "https://github.com/Autarc/optimal-select",
   "keywords": [
     "css",
-    "selector",
-    "path"
+    "path",
+    "selector"
   ],
   "license": "MIT",
-  "main": "dist/optimal-select.js",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Autarc/optimal-select.git"
   },
   "scripts": {
     "build": "NODE_ENV=production node build",
-    "dev": "NODE_ENV=Development node build",
-    "check": "npm outdated -depth 0"
-  },
-  "devDependencies": {
-    "babel-loader": "^6.2.0",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-preset-stage-0": "^6.3.13",
-    "deep-merge": "^1.0.0",
-    "fs-extra": "^0.26.2",
-    "webpack": "^1.12.9"
+    "check": "npm outdated -depth 0",
+    "dev": "NODE_ENV=Development node build"
   }
 }
