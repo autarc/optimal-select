@@ -1,3 +1,10 @@
+## [v2.0.0]
+> Jan 15, 2016
+
+- enable filtering with RegExp to exclude specific property values
+- replace complex key-value and classname selectors with tags
+
+
 ## [v1.0.2]
 > Jan 2, 2016
 

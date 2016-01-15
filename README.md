@@ -9,7 +9,7 @@ A library which creates efficient and robust CSS selectors for HTML elements.
 
 - support UMD (Browser + Node)
 - allow single and multiple element inputs
-- configurations for excludes can be defined
+- configurations for excludes can be defined with filters
 - micro library (~ 5kb + no external dependency)
 - shortest path and fastest selection in [comparison](https://github.com/fczbkk/css-selector-generator-benchmark)
 
@@ -17,7 +17,7 @@ A library which creates efficient and robust CSS selectors for HTML elements.
 ### How To Use
 
 ```js
-import { select } from 'optimize-select' // global: 'OptimalSelect'
+import { select } from 'optimal-select' // global: 'OptimalSelect'
 
 document.addEventListener('click', (e) => {
   var selector = select(e.target)
@@ -32,15 +32,21 @@ By default following attributes are excluded for robustness towards changes:
 
 
 ```js
-// pass the attribute as additional parameters (overwrites defaults)
-var selector = select(element, { excludes: ['href'] })
+// pass the attribute as additional parameters (extends defaults)
+var selector = select(element, {
+  excludes: {
+    'href': '.*',
+    'class': ['^example']
+  }
+})
 ```
 
-
 ### TODO
-- extend documentation
-- check attributes in multi-select
 
+- extend documentation
+- add tests
+- check attributes in multi-select
+- check attributes for complex classname
 
 ### Development
 
