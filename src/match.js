@@ -17,13 +17,13 @@ export default function match (node, options) {
 
   while (element !== document) {
     // global
-    if (checkId(element, path)) break
-    if (checkClassGlobal(element, path)) break
+    if (checkId(element, path, options)) break
+    if (checkClassGlobal(element, path, options)) break
     if (checkAttributeGlobal(element, path, options)) break
     if (checkTagGlobal(element, path)) break
 
     // local
-    checkClassLocal(element, path)
+    checkClassLocal(element, path, options)
 
     // define only one selector each iteration
     if (path.length === length) {
@@ -34,7 +34,7 @@ export default function match (node, options) {
     }
 
     if (path.length === length) {
-      checkClassChild(element, path)
+      checkClassChild(element, path, options)
     }
     if (path.length === length) {
       checkAttributeChild(element, path, options)
@@ -61,8 +61,8 @@ export default function match (node, options) {
  * @param  {Array}       path    - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassGlobal (element, path) {
-  return checkClass(element, path, document)
+function checkClassGlobal (element, path, options) {
+  return checkClass(element, path, document, options)
 }
 
 /**
@@ -71,8 +71,8 @@ function checkClassGlobal (element, path) {
  * @param  {Array}       path    - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassLocal (element, path) {
-  return checkClass(element, path, element.parentNode)
+function checkClassLocal (element, path, options) {
+  return checkClass(element, path, element.parentNode, options)
 }
 
 /**
@@ -81,9 +81,9 @@ function checkClassLocal (element, path) {
  * @param  {Array}       path    - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassChild (element, path) {
-  var className = element.className
-  if (!className) {
+function checkClassChild (element, path, options) {
+  const className = element.className
+  if (!className || compareExcludes(className, options.excludes.class)) {
     return false
   }
   return checkChild(element, path, `.${className.replace(/ /g, '.')}`)
@@ -119,15 +119,19 @@ function checkAttributeLocal (element, path, options) {
  * @return {Boolean}             - [description]
  */
 function checkAttributeChild (element, path, options) {
-  var attributes = element.attributes
+  const attributes = element.attributes
   return Object.keys(attributes).some((key) => {
-    var attribute = attributes[key]
-    var attributeName = attribute.name
-    if (['id', 'class'].concat(options.excludes).indexOf(attributeName) > -1) {
+    const attribute = attributes[key]
+    const attributeName = attribute.name
+    const  attributeValue = attribute.value
+    // include 'id', 'class' check ?
+    // if (['id', 'class'].concat(options.excludes).indexOf(attributeName) > -1) {
+    //   return false
+    // }
+    if (compareExcludes(attributeValue, options.excludes[attributeName])) {
       return false
     }
-    var attributeValue = attribute.value
-    var pattern = `[${attributeName}="${attributeValue}"]`
+    const pattern = `[${attributeName}="${attributeValue}"]`
     return checkChild(element, path, pattern, options)
   })
 }
@@ -184,12 +188,12 @@ function checkId (element, path) {
  * @param  {HTMLElement} parent  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClass (element, path, parent) {
-  var className = element.className
-  if (!className) {
+function checkClass (element, path, parent, options) {
+  const className = element.className
+  if (!className || compareExcludes(className, options.excludes.class)) {
     return false
   }
-  var matches = parent.getElementsByClassName(className)
+  const matches = parent.getElementsByClassName(className)
   if (matches.length === 1) {
     path.unshift(`.${className.replace(/ /g, '.')}`)
     return true
@@ -206,16 +210,16 @@ function checkClass (element, path, parent) {
  * @return {Boolean}             - [description]
  */
 function checkAttribute (element, path, parent, options) {
-  var attributes = element.attributes
+  const attributes = element.attributes
   return Object.keys(attributes).some((key) => {
-    var attribute = attributes[key]
-    var attributeName = attribute.name
-    if (['id', 'class'].concat(options.excludes).indexOf(attributeName) > -1) {
+    const attribute = attributes[key]
+    const attributeName = attribute.name
+    const attributeValue = attribute.value
+    if (compareExcludes(attributeValue, options.excludes[attributeName])) {
       return false
     }
-    var attributeValue = attribute.value
-    var pattern = `[${attributeName}="${attributeValue}"]`
-    var matches = parent.querySelectorAll(pattern)
+    const pattern = `[${attributeName}="${attributeValue}"]`
+    const matches = parent.querySelectorAll(pattern)
     if (matches.length === 1) {
       path.unshift(pattern)
       return true
@@ -231,8 +235,8 @@ function checkAttribute (element, path, parent, options) {
  * @return {Boolean}             - [description]
  */
 function checkTag (element, path, parent) {
-  var tagName = element.tagName.toLowerCase()
-  var matches = parent.getElementsByTagName(tagName)
+  const tagName = element.tagName.toLowerCase()
+  const matches = parent.getElementsByTagName(tagName)
   if (matches.length === 1) {
     path.unshift(tagName)
     return true
@@ -248,8 +252,8 @@ function checkTag (element, path, parent) {
  * @return {Boolean}              - [description]
  */
 function checkChild (element, path, selector) {
-  var parent = element.parentNode
-  var children = parent.children
+  const parent = element.parentNode
+  const children = parent.children
   for (var i = 0, l = children.length; i < l; i++) {
     if (children[i] === element) {
       path.unshift(`> ${selector}:nth-child(${i+1})`)
@@ -257,4 +261,17 @@ function checkChild (element, path, selector) {
     }
   }
   return false
+}
+
+/**
+ * [compareExcludes description]
+ * @param  {String}            value    - [description]
+ * @param  {Null|String|Array} excludes - [description]
+ * @return {Boolean}                    - [description]
+ */
+function compareExcludes (value, excludes) {
+  if (!excludes) {
+    return false
+  }
+  return excludes.some((exclude) => exclude.test(value))
 }

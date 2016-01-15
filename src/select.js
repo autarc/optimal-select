@@ -9,11 +9,11 @@ import match from './match'
 import optimize from './optimize'
 
 const defaultOptions = {
-  excludes: [
-    'style',
-    'data-reactid',
-    'data-react-checksum'
-  ]
+  excludes: {
+    'style': '.*',
+    'data-reactid': '.*',
+    'data-react-checksum': '.*'
+  }
 }
 
 /**
@@ -22,7 +22,15 @@ const defaultOptions = {
  * @param  {Object}            options - [description]
  * @return {String}                    - [description]
  */
-export default function getQuerySelector (input, options = defaultOptions) {
+export default function getQuerySelector (input, options = {}) {
+  options = { ...defaultOptions, ...options }
+  Object.keys(options.excludes).forEach((attribute) => {
+    var patterns = options.excludes[attribute]
+    if (!Array.isArray(patterns)) {
+      patterns = [patterns]
+    }
+    options.excludes[attribute] = patterns.map((pattern) => new RegExp(pattern))
+  })
   if (Array.isArray(input)) {
     return getMultiSelector(input, options)
   }
