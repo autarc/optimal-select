@@ -52,6 +52,30 @@ function optimizePart (prePart, current, postPart, element) {
   if (prePart.length) prePart = `${prePart} `
   if (postPart.length) postPart = ` ${postPart}`
 
+  // robustness: attribute without value (generalization)
+  if (/\[*\]/.test(current)) {
+    const key = current.replace(/=.*$/, ']')
+    var pattern = `${prePart}${key}${postPart}`
+    var matches = document.querySelectorAll(pattern)
+    if (matches.length === 1 && matches[0] === element) {
+      current = key
+    } else {
+      // robustness: replace specific key-value with tag (heuristic)
+      const references = document.querySelectorAll(`${prePart}${key}`)
+      for (var i = 0, l = references.length; i < l; i++) {
+        if (references[i].contains(element)) {
+          const description = references[i].tagName.toLowerCase()
+          var pattern = `${prePart}${description}${postPart}`
+          var matches = document.querySelectorAll(pattern)
+          if (matches.length === 1 && matches[0] === element) {
+            current = description
+          }
+          break
+        }
+      }
+    }
+  }
+
   // robustness: descendant instead child (heuristic)
   if (/>/.test(current)) {
     const descendant = current.replace(/>/, '')
@@ -62,17 +86,7 @@ function optimizePart (prePart, current, postPart, element) {
     }
   }
 
-  // robustness: attribute without value (generalization)
-  if (/\[*\]/.test(current)) {
-    const key = current.replace(/=.*$/, ']')
-    var pattern = `${prePart}${key}${postPart}`
-    var matches = document.querySelectorAll(pattern)
-    if (matches.length === 1 && matches[0] === element) {
-      current = key
-    }
-  }
-
-  // // robustness: 'nth-of-type' instead 'nth-child' (heuristic)
+  // robustness: 'nth-of-type' instead 'nth-child' (heuristic)
   if (/\:nth-child/.test(current)) {
     const type = current.replace(/nth-child/g, 'nth-of-type')
     var pattern = `${prePart}${type}${postPart}`
@@ -92,6 +106,23 @@ function optimizePart (prePart, current, postPart, element) {
       var matches = document.querySelectorAll(pattern)
       if (matches.length === 1 && matches[0] === element) {
         current = partial
+      }
+    }
+    // robustness: degrade complex classname (heuristic)
+    if (current && current.match(/\./g).length > 2) {
+      const references = document.querySelectorAll(`${prePart}${current}`)
+      for (var i = 0, l = references.length; i < l; i++) {
+        if (references[i].contains(element)) {
+          // TODO:
+          // - check using attributes + regard excludes
+          const description = references[i].tagName.toLowerCase()
+          var pattern = `${prePart}${description}${postPart}`
+          var matches = document.querySelectorAll(pattern)
+          if (matches.length === 1 && matches[0] === element) {
+            current = description
+          }
+          break
+        }
       }
     }
   }
