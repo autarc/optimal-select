@@ -9,6 +9,7 @@ import match from './match'
 import optimize from './optimize'
 
 const defaultOptions = {
+  global: window,
   excludes: {
     'style': '.*',
     'data-reactid': '.*',
@@ -44,11 +45,11 @@ export default function getQuerySelector (input, options = {}) {
  * @return {String}              - [description]
  */
 export function getSingleSelector (element, options) {
-
-  if (element instanceof Text) {
+  options = { ...defaultOptions, ...options }
+  if (element instanceof options.global.Text) {
     return getQuerySelector(element.parentNode)
   }
-  if (element instanceof HTMLElement === false) {
+  if (element instanceof options.global.HTMLElement === false) {
     throw new Error('Invalid input!')
   }
 
