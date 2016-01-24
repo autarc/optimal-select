@@ -45,10 +45,10 @@ export default function getQuerySelector (input, options = {}) {
  */
 export function getSingleSelector (element, options) {
 
-  if (element instanceof Text) {
+  if (element.nodeType === 3) {
     return getQuerySelector(element.parentNode)
   }
-  if (element instanceof HTMLElement === false) {
+  if (element.nodeType !== 1) {
     throw new Error('Invalid input!')
   }
 
