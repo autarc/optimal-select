@@ -1,3 +1,9 @@
+## [v2.0.1]
+> Jan 24, 2016
+
+- replace element validation to remove implicit dependency on global window
+
+
 ## [v2.0.0]
 > Jan 15, 2016
 
