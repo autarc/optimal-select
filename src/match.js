@@ -82,7 +82,7 @@ function checkClassLocal (element, path, options) {
  * @return {Boolean}             - [description]
  */
 function checkClassChild (element, path, options) {
-  const className = element.className
+  const className = element.getAttribute('class')
   if (!className || compareExcludes(className, options.excludes.class)) {
     return false
   }
@@ -189,7 +189,7 @@ function checkId (element, path) {
  * @return {Boolean}             - [description]
  */
 function checkClass (element, path, parent, options) {
-  const className = element.className
+  const className = element.getAttribute('class')
   if (!className || compareExcludes(className, options.excludes.class)) {
     return false
   }
