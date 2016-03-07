@@ -2,7 +2,7 @@
  * # Optimize
  *
  * 1.) Improve efficiency through shorter selectors by removing redundancy
- * 2.) Improve robustness through selector tranformation
+ * 2.) Improve robustness through selector transformation
  */
 
 /**
@@ -12,7 +12,9 @@
  * @return {String}               - [description]
  */
 export default function optimize (selector, element) {
-  var path = selector.replace(/> /g, '>').split(' ')
+
+  // chunk parts outside of quotes (http://stackoverflow.com/a/25663729)
+  var path = selector.replace(/> /g, '>').split(/\s+(?=(?:(?:[^"]*"){2})*[^"]*$)/)
 
   if (path.length < 3) {
     return selector
