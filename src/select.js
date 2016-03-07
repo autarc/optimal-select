@@ -8,29 +8,13 @@
 import match from './match'
 import optimize from './optimize'
 
-const defaultOptions = {
-  excludes: {
-    'style': '.*',
-    'data-reactid': '.*',
-    'data-react-checksum': '.*'
-  }
-}
-
 /**
  * Choose action depending on the input (single/multi)
  * @param  {HTMLElement|Array} input   - [description]
  * @param  {Object}            options - [description]
- * @return {String}                    - [description]
+ * @return {string}                    - [description]
  */
 export default function getQuerySelector (input, options = {}) {
-  options = { ...defaultOptions, ...options }
-  Object.keys(options.excludes).forEach((attribute) => {
-    var patterns = options.excludes[attribute]
-    if (!Array.isArray(patterns)) {
-      patterns = [patterns]
-    }
-    options.excludes[attribute] = patterns.map((pattern) => new RegExp(pattern))
-  })
   if (Array.isArray(input)) {
     return getMultiSelector(input, options)
   }
@@ -46,7 +30,7 @@ export default function getQuerySelector (input, options = {}) {
 export function getSingleSelector (element, options) {
 
   if (element.nodeType === 3) {
-    return getQuerySelector(element.parentNode)
+    return getSingleSelector(element.parentNode)
   }
   if (element.nodeType !== 1) {
     throw new Error('Invalid input!')
@@ -68,7 +52,7 @@ export function getSingleSelector (element, options) {
  * Get a selector to match multiple children from a parent
  * @param  {Array}  elements - [description]
  * @param  {Object} options  - [description]
- * @return {String}          - [description]
+ * @return {string}          - [description]
  */
 export function getMultiSelector (elements, options) {
   var commonParentNode = null

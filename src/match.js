@@ -4,6 +4,16 @@
  * Retrieves selector
  */
 
+const defaultIgnore = {
+  attribute (attributeName) {
+    return [
+      'style',
+      'data-reactid',
+      'data-react-checksum'
+    ].indexOf(attributeName) > -1
+  }
+}
+
 /**
  * Get the path of the element
  * @param  {HTMLElement} node    - [description]
@@ -15,32 +25,34 @@ export default function match (node, options) {
   var element = node
   var length = path.length
 
+  const { ignore = {} } = options
+
   while (element !== document) {
     // global
-    if (checkId(element, path, options)) break
-    if (checkClassGlobal(element, path, options)) break
-    if (checkAttributeGlobal(element, path, options)) break
-    if (checkTagGlobal(element, path)) break
+    if (checkId(element, path, ignore)) break
+    if (checkClassGlobal(element, path, ignore)) break
+    if (checkAttributeGlobal(element, path, ignore)) break
+    if (checkTagGlobal(element, path, ignore)) break
 
     // local
-    checkClassLocal(element, path, options)
+    checkClassLocal(element, path, ignore)
 
     // define only one selector each iteration
     if (path.length === length) {
-      checkAttributeLocal(element, path, options)
+      checkAttributeLocal(element, path, ignore)
     }
     if (path.length === length) {
-      checkTagLocal(element, path)
+      checkTagLocal(element, path, ignore)
     }
 
     if (path.length === length) {
-      checkClassChild(element, path, options)
+      checkClassChild(element, path, ignore)
     }
     if (path.length === length) {
-      checkAttributeChild(element, path, options)
+      checkAttributeChild(element, path, ignore)
     }
     if (path.length === length) {
-      checkTagChild(element, path)
+      checkTagChild(element, path, ignore)
     }
 
     element = element.parentNode
@@ -59,31 +71,34 @@ export default function match (node, options) {
  * [checkClassGlobal description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassGlobal (element, path, options) {
-  return checkClass(element, path, document, options)
+function checkClassGlobal (element, path, ignore) {
+  return checkClass(element, path, ignore, document)
 }
 
 /**
  * [checkClassLocal description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassLocal (element, path, options) {
-  return checkClass(element, path, element.parentNode, options)
+function checkClassLocal (element, path, ignore) {
+  return checkClass(element, path, ignore, element.parentNode)
 }
 
 /**
  * [checkClassChild description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassChild (element, path, options) {
+function checkClassChild (element, path, ignore) {
   const className = element.getAttribute('class')
-  if (!className || compareExcludes(className, options.excludes.class)) {
+  if (checkIgnore(ignore.class, className)) {
     return false
   }
   return checkChild(element, path, `.${className.replace(/ /g, '.')}`)
@@ -93,46 +108,42 @@ function checkClassChild (element, path, options) {
  * [checkAttributeGlobal description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
- * @param  {Object}      options - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkAttributeGlobal (element, path, options) {
-  return checkAttribute(element, path, document, options)
+function checkAttributeGlobal (element, path, ignore) {
+  return checkAttribute(element, path, ignore, document)
 }
 
 /**
  * [checkAttributeLocal description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
- * @param  {Object}      options - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkAttributeLocal (element, path, options) {
-  return checkAttribute(element, path, element.parentNode, options)
+function checkAttributeLocal (element, path, ignore) {
+  return checkAttribute(element, path, ignore, element.parentNode)
 }
 
 /**
  * [checkAttributeChild description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
- * @param  {Object}      options - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkAttributeChild (element, path, options) {
+function checkAttributeChild (element, path, ignore) {
   const attributes = element.attributes
   return Object.keys(attributes).some((key) => {
     const attribute = attributes[key]
     const attributeName = attribute.name
-    const  attributeValue = attribute.value
-    // include 'id', 'class' check ?
-    // if (['id', 'class'].concat(options.excludes).indexOf(attributeName) > -1) {
-    //   return false
-    // }
-    if (compareExcludes(attributeValue, options.excludes[attributeName])) {
+    const attributeValue = attribute.value
+    if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
       return false
     }
     const pattern = `[${attributeName}="${attributeValue}"]`
-    return checkChild(element, path, pattern, options)
+    return checkChild(element, path, pattern)
   })
 }
 
@@ -140,41 +151,49 @@ function checkAttributeChild (element, path, options) {
  * [checkTagGlobal description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkTagGlobal (element, path) {
-  return checkTag(element, path, document)
+function checkTagGlobal (element, path, ignore) {
+  return checkTag(element, path, ignore, document)
 }
 
 /**
  * [checkTagLocal description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkTagLocal (element, path) {
-  return checkTag(element, path, element.parentNode)
+function checkTagLocal (element, path, ignore) {
+  return checkTag(element, path, ignore, element.parentNode)
 }
 
 /**
  * [checkTabChildren description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkTagChild (element, path) {
-  return checkChild(element, path, element.tagName.toLowerCase())
+function checkTagChild (element, path, ignore) {
+  const tagName = element.tagName.toLowerCase()
+  if (checkIgnore(ignore.tag, tagName)) {
+    return false
+  }
+  return checkChild(element, path, tagName)
 }
 
 /**
  * [checkId description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkId (element, path) {
+function checkId (element, path, ignore) {
   const id = element.id
-  if (!id) {
+  if (checkIgnore(ignore.id, id)) {
     return false
   }
   path.unshift(`#${id}`)
@@ -185,12 +204,13 @@ function checkId (element, path) {
  * [checkClass description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
+ * @param  {Object}      ignore  - [description]
  * @param  {HTMLElement} parent  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClass (element, path, parent, options) {
+function checkClass (element, path, ignore, parent) {
   const className = element.getAttribute('class')
-  if (!className || compareExcludes(className, options.excludes.class)) {
+  if (checkIgnore(ignore.class, className)) {
     return false
   }
   const matches = parent.getElementsByClassName(className)
@@ -205,17 +225,17 @@ function checkClass (element, path, parent, options) {
  * [checkAttribute description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
+ * @param  {Object}      ignore  - [description]
  * @param  {HTMLElement} parent  - [description]
- * @param  {Object}      options - [description]
  * @return {Boolean}             - [description]
  */
-function checkAttribute (element, path, parent, options) {
+function checkAttribute (element, path, ignore, parent) {
   const attributes = element.attributes
   return Object.keys(attributes).some((key) => {
     const attribute = attributes[key]
     const attributeName = attribute.name
     const attributeValue = attribute.value
-    if (compareExcludes(attributeValue, options.excludes[attributeName])) {
+    if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
       return false
     }
     const pattern = `[${attributeName}="${attributeValue}"]`
@@ -232,10 +252,14 @@ function checkAttribute (element, path, parent, options) {
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
  * @param  {HTMLElement} parent  - [description]
+ * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkTag (element, path, parent) {
+function checkTag (element, path, ignore, parent) {
   const tagName = element.tagName.toLowerCase()
+  if (checkIgnore(ignore.tag, tagName)) {
+    return false
+  }
   const matches = parent.getElementsByTagName(tagName)
   if (matches.length === 1) {
     path.unshift(tagName)
@@ -264,14 +288,20 @@ function checkChild (element, path, selector) {
 }
 
 /**
- * [compareExcludes description]
- * @param  {String}            value    - [description]
- * @param  {Null|String|Array} excludes - [description]
- * @return {Boolean}                    - [description]
+ * [checkIgnore description]
+ * @param  {Function} predicate        [description]
+ * @param  {string}   name             [description]
+ * @param  {string}   value            [description]
+ * @param  {Function} defaultPredicate [description]
+ * @return {boolean}                   [description]
  */
-function compareExcludes (value, excludes) {
-  if (!excludes) {
+function checkIgnore (predicate, name, value, defaultPredicate) {
+  if (!name) {
+    return true
+  }
+  const check = predicate || defaultPredicate
+  if (!check) {
     return false
   }
-  return excludes.some((exclude) => exclude.test(value))
+  return check(name, value, defaultPredicate)
 }
