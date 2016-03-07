@@ -7,9 +7,9 @@
 
 /**
  * Apply different optimization techniques
- * @param  {String}      selector - [description]
+ * @param  {string}      selector - [description]
  * @param  {HTMLElement} element  - [description]
- * @return {String}               - [description]
+ * @return {string}               - [description]
  */
 export default function optimize (selector, element) {
 
@@ -44,11 +44,11 @@ export default function optimize (selector, element) {
 
 /**
  * Improve a chunk of the selector
- * @param  {String}      prePart  - [description]
- * @param  {String}      current  - [description]
- * @param  {String}      postPart - [description]
+ * @param  {string}      prePart  - [description]
+ * @param  {string}      current  - [description]
+ * @param  {string}      postPart - [description]
  * @param  {HTMLElement} element  - [description]
- * @return {String}               - [description]
+ * @return {string}               - [description]
  */
 function optimizePart (prePart, current, postPart, element) {
   if (prePart.length) prePart = `${prePart} `
