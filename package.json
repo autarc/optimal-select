@@ -1,7 +1,7 @@
 {
   "name": "optimal-select",
   "description": "Get efficient & robust CSS selectors for HTML elements",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "author": "Stefan Dühring | Autarc <autarc@gmail.com>",
   "bugs": {
     "url": "https://github.com/Autarc/optimal-select/issues"

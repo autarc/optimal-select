@@ -1,3 +1,9 @@
+## [v2.1.0]
+> Mar 08, 2016
+
+- change `options.excludes` to `options.ignore` and allow the definitions of flexible predicate functions to ignore specific pattern matches
+
+
 ## [v2.0.2]
 > Mar 07, 2016
 

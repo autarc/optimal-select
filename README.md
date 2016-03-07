@@ -9,8 +9,8 @@ A library which creates efficient and robust CSS selectors for HTML elements.
 
 - support UMD (Browser + Node)
 - allow single and multiple element inputs
-- configurations for excludes can be defined with filters
-- micro library (~ 5kb + no external dependency)
+- configurations allow to define custom ignore patterns
+- micro library (~ 5.5kb + no external dependency)
 - shortest path and fastest selection in [comparison](https://github.com/fczbkk/css-selector-generator-benchmark)
 
 
@@ -25,18 +25,25 @@ document.addEventListener('click', (e) => {
 })
 ```
 
-By default following attributes are excluded for robustness towards changes:
-- style (inline styles often used for dynamic visualizations)
+By default following attributes are ignored for robustness towards changes:
+- style (inline styles often temporary and used for dynamic visualizations)
 - data-reactid (reacts element identifier which depends on the current DOM structure)
 - data-react-checksum (react string rendered markup which depends on the current DOM structure)
 
+To define custom filters you can pass the 'ignore' property as a secondary optional parameter.
+You can then specify a validation function for the different types (`id`, `class`, `attribute`, `tag`).
 
 ```js
-// pass the attribute as additional parameters (extends defaults)
 var selector = select(element, {
-  excludes: {
-    'href': '.*',
-    'class': ['^example']
+  ignore: {
+    class (className) {
+      // disregard short classnames
+      return className.length < 3
+    },
+    attribute (name, value, defaultPredicate) {
+      // excluding HTML5 data attributes
+      return (/data-*/).test(name) || defaultPredicate(name, value)
+    }
   }
 })
 ```
@@ -51,5 +58,4 @@ var selector = select(element, {
 
 ### Development
 
-To build your own version run `npm run dev` for development (incl. watch) or
-`npm run build` for production (minified).
+To build your own version run `npm run dev` for development (incl. watch) or `npm run build` for production (minified).
