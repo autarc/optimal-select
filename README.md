@@ -47,6 +47,7 @@ var selector = select(element, {
 - add tests
 - check attributes in multi-select
 - check attributes for complex classname
+- fix ["#3 - Match line breaking attribute values"](https://github.com/Autarc/optimal-select/issues/3)
 
 ### Development
 

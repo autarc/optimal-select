@@ -59,7 +59,7 @@ export function getSingleSelector (element, options) {
   // console.log(`
   //   selector: ${selector}
   //   optimized:${optimized}
-  // `);
+  // `)
 
   return optimized
 }

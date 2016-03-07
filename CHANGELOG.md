@@ -1,3 +1,10 @@
+## [v2.0.2]
+> Mar 07, 2016
+
+- fix splitting of select segments in case attribute values contain spaces
+- lookup the `class` attribute instead of the `className` property to support svg elements
+
+
 ## [v2.0.1]
 > Jan 24, 2016
 
@@ -24,7 +31,7 @@
 ## [v1.0.1]
 > Dec 11, 2015
 
-- add '.npmignore'
+- add `.npmignore`
 
 
 ## [v1.0.0]
