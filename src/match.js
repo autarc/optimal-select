@@ -101,7 +101,7 @@ function checkClassChild (element, path, ignore) {
   if (checkIgnore(ignore.class, className)) {
     return false
   }
-  return checkChild(element, path, `.${className.replace(/ /g, '.')}`)
+  return checkChild(element, path, `.${className.trim().replace(/\s+/g, '.')}`)
 }
 
 /**
@@ -215,7 +215,7 @@ function checkClass (element, path, ignore, parent) {
   }
   const matches = parent.getElementsByClassName(className)
   if (matches.length === 1) {
-    path.unshift(`.${className.replace(/ /g, '.')}`)
+    path.unshift(`.${className.trim().replace(/\s+/g, '.')}`)
     return true
   }
   return false
