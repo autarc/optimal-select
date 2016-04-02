@@ -27,6 +27,19 @@ export default function match (node, options) {
 
   const { ignore = {} } = options
 
+  Object.keys(ignore).forEach((type) => {
+    var predicate = ignore[type]
+    if (typeof predicate === 'function') return
+    if (typeof predicate === 'number') {
+      predicate = predicate.toString()
+    }
+    if (typeof predicate === 'string') {
+      predicate = new RegExp(predicate)
+    }
+    // check class-/attributename for regex
+    ignore[type] = predicate.test.bind(predicate)
+  })
+
   while (element !== document) {
     // global
     if (checkId(element, path, ignore)) break
