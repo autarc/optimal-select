@@ -27,7 +27,11 @@ export default function match (node, options) {
 
   const { ignore = {} } = options
 
+  var ignoreClass = false
   Object.keys(ignore).forEach((type) => {
+    if (type === 'class') {
+      ignoreClass = true
+    }
     var predicate = ignore[type]
     if (typeof predicate === 'function') return
     if (typeof predicate === 'number') {
@@ -39,6 +43,12 @@ export default function match (node, options) {
     // check class-/attributename for regex
     ignore[type] = predicate.test.bind(predicate)
   })
+  if (ignoreClass) {
+    const ignoreAttribute = ignore.attribute
+    ignore.attribute = (name, value, defaultPredicate) => {
+      return ignore.class(value) || ignoreAttribute && ignoreAttribute(name, value, defaultPredicate)
+    }
+  }
 
   while (element !== document) {
     // global
