@@ -1,3 +1,11 @@
+## [v2.2.0]
+> Apr 02, 2016
+
+- improve whitespace matching in classnames (thanks [@paulborges](https://github.com/Autarc/optimal-select/pull/6))
+- enable simplified ignore patterns based on strings/regex
+- fix matching ignored classes as attributes
+
+
 ## [v2.1.0]
 > Mar 08, 2016
 

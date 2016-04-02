@@ -41,9 +41,11 @@ var selector = select(element, {
       return className.length < 3
     },
     attribute (name, value, defaultPredicate) {
-      // excluding HTML5 data attributes
+      // exclude HTML5 data attributes
       return (/data-*/).test(name) || defaultPredicate(name, value)
-    }
+    },
+    // define simplified ignore patterns as a string/regex
+    tag: 'div'
   }
 })
 ```
