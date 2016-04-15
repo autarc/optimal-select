@@ -5,13 +5,17 @@
  * 2.) Improve robustness through selector transformation
  */
 
+import adapt from './adapt'
+
 /**
  * Apply different optimization techniques
  * @param  {string}      selector - [description]
  * @param  {HTMLElement} element  - [description]
  * @return {string}               - [description]
  */
-export default function optimize (selector, element) {
+export default function optimize (selector, element, options = {}) {
+
+  const globalModified = adapt(element, options)
 
   // chunk parts outside of quotes (http://stackoverflow.com/a/25663729)
   var path = selector.replace(/> /g, '>').split(/\s+(?=(?:(?:[^"]*"){2})*[^"]*$)/)
@@ -38,6 +42,10 @@ export default function optimize (selector, element) {
   // optimize start + end
   path[0] = optimizePart('', path[0], path.slice(1).join(' '), element)
   path[path.length-1] = optimizePart(path.slice(0, -1).join(' '), path[path.length-1], '', element)
+
+  if (globalModified) {
+    delete global.document
+  }
 
   return path.join(' ').replace(/>/g, '> ').trim()
 }
@@ -89,7 +97,8 @@ function optimizePart (prePart, current, postPart, element) {
   }
 
   // robustness: 'nth-of-type' instead 'nth-child' (heuristic)
-  if (/\:nth-child/.test(current)) {
+  if (/:nth-child/.test(current)) {
+    // TODO: consider complete coverage of 'nth-of-type' replacement
     const type = current.replace(/nth-child/g, 'nth-of-type')
     var pattern = `${prePart}${type}${postPart}`
     var matches = document.querySelectorAll(pattern)

@@ -5,6 +5,7 @@
  * Applies different matching and optimization strategies for efficiency.
  */
 
+import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
 
@@ -33,17 +34,23 @@ export function getSingleSelector (element, options) {
     return getSingleSelector(element.parentNode)
   }
   if (element.nodeType !== 1) {
-    throw new Error('Invalid input!')
+    throw new Error(`Invalid input - only HTMLElements or representations of them are supported! (not "${typeof element}")`)
   }
 
+  const globalModified = adapt(element, options)
+
   const selector = match(element, options)
-  const optimized = optimize(selector, element)
+  const optimized = optimize(selector, element, options)
 
   // debug
   // console.log(`
   //   selector: ${selector}
   //   optimized:${optimized}
   // `)
+
+  if (globalModified) {
+    delete global.document
+  }
 
   return optimized
 }
@@ -97,7 +104,7 @@ export function getMultiSelector (elements, options) {
     }
   }
 
-  const selector = getSingleSelector(commonParentNode)
+  const selector = getSingleSelector(commonParentNode, options)
   console.log(selector, commonClassName, commonAttribute, commonTagName)
 
   if (commonClassName) {
