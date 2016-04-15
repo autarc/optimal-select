@@ -215,7 +215,7 @@ function checkTagChild (element, path, ignore) {
  * @return {Boolean}             - [description]
  */
 function checkId (element, path, ignore) {
-  const id = element.id
+  const id = element.getAttribute('id')
   if (checkIgnore(ignore.id, id)) {
     return false
   }
@@ -293,6 +293,7 @@ function checkTag (element, path, ignore, parent) {
 
 /**
  * [checkChild description]
+ * Note: childTags is a custom property to use a view filter for tags on for virutal elements
  * @param  {HTMLElement} element  - [description]
  * @param  {Array}       path     - [description]
  * @param  {String}      selector - [description]
@@ -300,7 +301,7 @@ function checkTag (element, path, ignore, parent) {
  */
 function checkChild (element, path, selector) {
   const parent = element.parentNode
-  const children = parent.children
+  const children = parent.childTags || parent.children
   for (var i = 0, l = children.length; i < l; i++) {
     if (children[i] === element) {
       path.unshift(`> ${selector}:nth-child(${i+1})`)
