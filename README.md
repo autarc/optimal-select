@@ -1,4 +1,4 @@
-[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
 # optimal select
 
@@ -7,14 +7,20 @@ A library which creates efficient and robust CSS selectors for HTML elements.
 
 ### Features
 
-- support UMD (Browser + Node)
+- provide UMD integration (usage with Browser + Node)
+- supports the browser environment and the [htmlparser2](https://github.com/fb55/htmlparser2) DOM
 - allow single and multiple element inputs
 - configurations allow to define custom ignore patterns
-- micro library (~ 5.5kb + no external dependency)
+- micro library (~ 11kb + no external dependency)
 - shortest path and fastest selection in [comparison](https://github.com/fczbkk/css-selector-generator-benchmark)
 
 
 ### How To Use
+
+Aside of the [prebundled versions](/dist) the library is also available via npm:
+
+`npm install --save optimal-select`
+
 
 ```js
 import { select } from 'optimal-select' // global: 'OptimalSelect'
@@ -44,11 +50,19 @@ var selector = select(element, {
       // exclude HTML5 data attributes
       return (/data-*/).test(name) || defaultPredicate(name, value)
     },
-    // define simplified ignore patterns as a string/regex
+    // define simplified ignore patterns as a string/number/regex
     tag: 'div'
-  }
+  },
 })
 ```
+
+
+### Client & Server
+
+The latest version `optimal-select` allows the generation and optimization of selectors on virtual environments. It uses the basic structure the [htmlparser2](https://github.com/fb55/htmlparser2) [DOM](https://github.com/fb55/domhandler) provides and adds some utilities to create the same results as the browser. Other libraries like [cheerio](https://github.com/cheeriojs/cheerio) are built on top of these and therefore compatible.
+
+In contrast to the browser does server environments not have a global context which defines their scope. Therefore one can either be specified explicit as a node using the `context` options field or automatically extracted from the provided input element. Checkout [the example](/example/index.js) for more details.
+
 
 ### TODO
 
@@ -57,6 +71,7 @@ var selector = select(element, {
 - check attributes in multi-select
 - check attributes for complex classname
 - fix ["#3 - Match line breaking attribute values"](https://github.com/Autarc/optimal-select/issues/3)
+
 
 ### Development
 

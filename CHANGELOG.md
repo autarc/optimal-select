@@ -1,3 +1,9 @@
+## [v3.0.0]
+> Apr 15, 2016
+
+- add support for virtual representations based on the htmlparser2 DOM
+
+
 ## [v2.2.0]
 > Apr 02, 2016
 
