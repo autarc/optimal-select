@@ -62,30 +62,55 @@ export function getSingleSelector (element, options) {
  * @return {string}          - [description]
  */
 export function getMultiSelector (elements, options) {
-  var commonParentNode = null
-  var commonClassName = null
-  var commonAttribute = null
-  var commonTagName = null
+  const firstEl = elements[0];
+  let commonClassName = firstEl.className;
+  let commonTagName = firstEl.tagName;
+  let candidate;
 
-  for (var i = 0, l = elements.length; i < l; i++) {
-    var element = elements[i]
-    if (!commonParentNode) { // 1st entry
-      commonParentNode = element.parentNode
-      commonClassName = element.className
-      // commonAttribute = element.attributes
-      commonTagName = element.tagName
-    } else if (commonParentNode !== element.parentNode) {
-      return console.log('Can\'t be efficiently mapped. It probably best to use multiple single selectors instead!')
+  const getParentNodes = function(el) {
+    const nodes = [];
+    while(el.parentNode && el.parentNode !== document.body) {
+      el = el.parentNode;
+      nodes.push(el);
     }
-    if (element.className !== commonClassName) {
-      var classNames = []
-      var longer, shorter
-      if (element.className.length > commonClassName.length) {
-        longer = element.className
+    return nodes;
+  }
+
+  const findSimilarParents = function(props1, props2) {
+    const similar = [];
+    let i, j;
+    for (i = 0; i < props1.length; i++) {
+      node1 = props1[i];
+      for (j = 0; j < props2.length; j++) {
+        node2 = props2[j];
+        if (node1 === node2 || (node1.tagName === node2.tagName && node1.className === node2.className)) {
+          similar.push(node1);
+          similar.concat(findSimilarParents(props1.slice(i), props2.slice(j)));
+          return similar;
+        }
+      }
+    }
+    return similar;
+  }
+
+
+  let commonParentNodes = getParentNodes(firstEl);
+
+  for (var i = 1; i < elements.length; i++) {
+    const candidate = elements[i];
+    commonParentNodes = (commonParentNodes, getParentNodes(candidate));
+    console.log(commonParentNodes);
+
+    if (candidate.className !== commonClassName) {
+      let classNames = [];
+
+      let longer, shorter
+      if (candidate.className.length > commonClassName.length) {
+        longer = candidate.className
         shorter = commonClassName
       } else {
         longer = commonClassName
-        shorter = element.className
+        shorter = candidate.className
       }
       shorter.split(' ').forEach((name) => {
         if (longer.indexOf(name) > -1) {
@@ -94,27 +119,49 @@ export function getMultiSelector (elements, options) {
       })
       commonClassName = classNames.join(' ')
     }
-    // TODO:
-    // - check attributes
-    // if (element.attributes !== commonAttribute) {
-    //
-    // }
-    if (element.tagName !== commonTagName) {
+
+    if (candidate.tagName !== commonTagName) {
       commonTagName = null
     }
   }
 
-  const selector = getSingleSelector(commonParentNode, options)
-  console.log(selector, commonClassName, commonAttribute, commonTagName)
+  let selectors = [];
+  if (commonParentNodes) {
+    const parentSelectors = commonParentNodes.map(el => {
+      let selector = el.tagName;
+      if (el.id !== '') {
+        selector += '#' + el.id;
+      } else if (el.className !== '') {
+        selector += '.' + el.className;
+      }
+      return selector + ' ';
+    });
+    parentSelectors.reverse();
 
-  if (commonClassName) {
-    return `${selector} > .${commonClassName.replace(/ /g, '.')}`
+    // lets attempt to make the selector shorter
+    const originalCount = document.querySelectorAll(parentSelectors.join(' ')).length;
+    while(parentSelectors.length > 2) {
+      const candidateForRemoval = parentSelectors.shift();
+      const newCount = document.querySelectorAll(parentSelectors.join(' ')).length;
+      if (newCount !== originalCount) {
+        parentSelectors.unshift(candidateForRemoval);
+        break;
+      }
+    }
+    selectors.push(parentSelectors.join(' ') + ' ');
   }
-  // if (commonAttribute) {
-  //
-  // }
   if (commonTagName) {
-    return `${selector} > ${commonTagName.toLowerCase()}`
+    selectors.push(`${commonTagName.toLowerCase()}`);
   }
-  return `${selector} > *`
+  if (commonClassName) {
+    selectors.push(`.${commonClassName.replace(/ /g, '.')}`);
+  }
+  if (selectors.length === 0) {
+    selectors = elements.map(e => getSingleSelector(e, options));
+    console.log(selectors.join(','), commonClassName, commonTagName);
+    return selectors.join(',');
+  } else {
+    console.log(selectors.join(''), commonClassName, commonTagName);
+    return selectors.join('');
+  }
 }
