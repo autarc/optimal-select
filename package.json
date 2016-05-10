@@ -4,7 +4,7 @@
   "version": "3.0.1",
   "author": "Stefan Dühring | Autarc <autarc@gmail.com>",
   "bugs": {
-    "url": "https://github.com/Autarc/optimal-select/issues"
+    "url": "https://github.com/jbwyme/optimal-select/issues"
   },
   "devDependencies": {
     "babel": "^6.5.2",
@@ -15,7 +15,7 @@
     "rollup": "^0.26.2",
     "rollup-plugin-babel": "^2.4.0"
   },
-  "homepage": "https://github.com/Autarc/optimal-select",
+  "homepage": "https://github.com/jbwyme/optimal-select",
   "keywords": [
     "css",
     "path",
@@ -26,7 +26,7 @@
   "jsnext:main": "build/index.es6.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Autarc/optimal-select.git"
+    "url": "https://github.com/jbwyme/optimal-select.git"
   },
   "scripts": {
     "build": "./node_modules/rollup/bin/rollup -c rollup.config.cjs.js && ./node_modules/rollup/bin/rollup -c rollup.config.es6.js"
