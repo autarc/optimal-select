@@ -1,4 +1,4 @@
-export select from './select'
-export optimize from './optimize'
+import select from './select'
+import optimize from './optimize'
 
-export default from './select'
+export {select, optimize}
