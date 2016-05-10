@@ -31,7 +31,7 @@
     "selector"
   ],
   "license": "MIT",
-  "main": "lib/index.js",
+  "main": "dist/optimal-select.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Autarc/optimal-select.git"
