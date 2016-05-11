@@ -922,6 +922,23 @@ function optimizePart(prePart, current, postPart, element) {
 }
 
 /**
+ * Filter out specific classes from a className
+ * @param {String}  className   - [description]
+ * @params {Object} options     - [description]
+ * @return {string}             - [description]
+ */
+function filteredClassName(className, options) {
+  var _options, _options$classesToFil;
+
+  var classesToFilter = (_options = options, _options$classesToFil = _options.classesToFilter, classesToFilter = _options$classesToFil === undefined ? [] : _options$classesToFil, _options);
+  var filteredClasses = className.split(' ').filter(function (c) {
+    return !classesToFilter.includes(c);
+  });
+  filteredClasses.sort();
+  return filteredClasses.join(' ');
+}
+
+/**
  * Choose action depending on the input (single/multi)
  * @param  {HTMLElement|Array} input   - [description]
  * @param  {Object}            options - [description]
@@ -998,8 +1015,15 @@ function getMultiSelector(elements, options) {
       node1 = props1[i];
       for (j = 0; j < props2.length; j++) {
         node2 = props2[j];
-        if (node1 === node2 || node1.tagName === node2.tagName && node1.className === node2.className) {
-          similar.push(node1);
+        var similarNode = null;
+        if (node1 === node2 || node1.id === node2.id) {
+          similarNode = node1;
+        } else if (node1.tagName === node2.tagName && filteredClassName(node1.className, options) === filteredClassName(node2.className, options)) {
+          similarNode = document.createElement(node1.tagName);
+          similarNode.className = filteredClassName(node1.className, options);
+        }
+        if (similarNode) {
+          similar.push(similarNode);
           similar.concat(findSimilarParents(props1.slice(i), props2.slice(j)));
           return similar;
         }

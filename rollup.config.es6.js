@@ -6,7 +6,9 @@ export default {
   dest: 'build/index.es6.js',
   plugins: [
     babel({
-      exclude: 'node_modules/**'
+      babelrc: false,
+      exclude: 'node_modules/**',
+      presets: ['es2015-rollup']
     })
   ]
 };

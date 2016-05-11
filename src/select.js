@@ -10,6 +10,19 @@ import match from './match'
 import optimize from './optimize'
 
 /**
+ * Filter out specific classes from a className
+ * @param {String}  className   - [description]
+ * @params {Object} options     - [description]
+ * @return {string}             - [description]
+ */
+export function filteredClassName(className, options = {}) {
+  const classesToFilter = options.classesToFilter || [];
+  const filteredClasses = className.split(' ').filter(c => !classesToFilter.includes(c));
+  filteredClasses.sort();
+  return filteredClasses.join(' ');
+}
+
+/**
  * Choose action depending on the input (single/multi)
  * @param  {HTMLElement|Array} input   - [description]
  * @param  {Object}            options - [description]
@@ -83,8 +96,15 @@ export function getMultiSelector (elements, options) {
       node1 = props1[i];
       for (j = 0; j < props2.length; j++) {
         node2 = props2[j];
-        if (node1 === node2 || (node1.tagName === node2.tagName && node1.className === node2.className)) {
-          similar.push(node1);
+        let similarNode = null;
+        if (node1 === node2 || node1.id === node2.id) {
+          similarNode = node1;
+        } else if (node1.tagName === node2.tagName && filteredClassName(node1.className, options) === filteredClassName(node2.className, options)) {
+          similarNode = document.createElement(node1.tagName);
+          similarNode.className = filteredClassName(node1.className, options);
+        }
+        if (similarNode) {
+          similar.push(similarNode);
           similar.concat(findSimilarParents(props1.slice(i), props2.slice(j)));
           return similar;
         }
@@ -164,4 +184,35 @@ export function getMultiSelector (elements, options) {
     console.log(selectors.join(''), commonClassName, commonTagName);
     return selectors.join('');
   }
+}
+
+// Polyfill
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes#Browser_compatibility
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(searchElement /*, fromIndex*/ ) {
+    'use strict';
+    var O = Object(this);
+    var len = parseInt(O.length) || 0;
+    if (len === 0) {
+      return false;
+    }
+    var n = parseInt(arguments[1]) || 0;
+    var k;
+    if (n >= 0) {
+      k = n;
+    } else {
+      k = len + n;
+      if (k < 0) {k = 0;}
+    }
+    var currentElement;
+    while (k < len) {
+      currentElement = O[k];
+      if (searchElement === currentElement ||
+         (searchElement !== searchElement && currentElement !== currentElement)) { // NaN !== NaN
+        return true;
+      }
+      k++;
+    }
+    return false;
+  };
 }

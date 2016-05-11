@@ -6,7 +6,9 @@ export default {
   dest: './build/index.cjs.js',
   plugins: [
     babel({
-      exclude: 'node_modules/**'
+      babelrc: false,
+      exclude: 'node_modules/**',
+      presets: ["es2015-rollup"]
     })
   ]
 };

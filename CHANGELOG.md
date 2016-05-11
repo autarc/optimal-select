@@ -1,3 +1,11 @@
+## [v3.1.0]
+> May 11, 2016
+
+- make getMultiSelector more intelligent
+- lint using ESLint
+- test using Mocha/Chai
+
+
 ## [v3.0.0]
 > Apr 15, 2016
 

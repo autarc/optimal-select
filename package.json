@@ -1,17 +1,24 @@
 {
   "name": "optimal-select",
   "description": "Get efficient & robust CSS selectors for HTML elements",
-  "version": "3.0.1",
-  "author": "Stefan Dühring | Autarc <autarc@gmail.com>",
+  "version": "3.1.0",
+  "author": "Josh Wymer | Mixpanel  <josh@mixpanel.com>",
   "bugs": {
     "url": "https://github.com/jbwyme/optimal-select/issues"
   },
   "devDependencies": {
     "babel": "^6.5.2",
+    "babel-core": "^6.8.0",
+    "babel-preset-es2015": "^6.6.0",
     "babel-preset-es2015-rollup": "^1.1.1",
+    "chai": "^3.5.0",
     "cheerio": "^0.20.0",
     "deep-merge": "^1.0.0",
+    "eslint": "^2.9.0",
     "fs-extra": "^0.26.7",
+    "jsdom": "^9.0.0",
+    "mocha": "^2.4.5",
+    "mocha-jsdom": "^1.1.0",
     "rollup": "^0.26.2",
     "rollup-plugin-babel": "^2.4.0"
   },
@@ -29,6 +36,8 @@
     "url": "https://github.com/jbwyme/optimal-select.git"
   },
   "scripts": {
-    "build": "./node_modules/rollup/bin/rollup -c rollup.config.cjs.js && ./node_modules/rollup/bin/rollup -c rollup.config.es6.js"
+    "build": "./node_modules/rollup/bin/rollup -c rollup.config.cjs.js && ./node_modules/rollup/bin/rollup -c rollup.config.es6.js",
+    "lint": "./node_modules/eslint/bin/eslint.js ./src ./tests",
+    "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register tests/**"
   }
 }
