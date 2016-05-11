@@ -927,10 +927,10 @@ function optimizePart(prePart, current, postPart, element) {
  * @params {Object} options     - [description]
  * @return {string}             - [description]
  */
-function filteredClassName(className, options) {
-  var _options, _options$classesToFil;
+function filteredClassName(className) {
+  var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-  var classesToFilter = (_options = options, _options$classesToFil = _options.classesToFilter, classesToFilter = _options$classesToFil === undefined ? [] : _options$classesToFil, _options);
+  var classesToFilter = options.classesToFilter || [];
   var filteredClasses = className.split(' ').filter(function (c) {
     return !classesToFilter.includes(c);
   });
@@ -1107,6 +1107,40 @@ function getMultiSelector(elements, options) {
     console.log(selectors.join(''), commonClassName, commonTagName);
     return selectors.join('');
   }
+}
+
+// Polyfill
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes#Browser_compatibility
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function (searchElement /*, fromIndex*/) {
+    'use strict';
+
+    var O = Object(this);
+    var len = parseInt(O.length) || 0;
+    if (len === 0) {
+      return false;
+    }
+    var n = parseInt(arguments[1]) || 0;
+    var k;
+    if (n >= 0) {
+      k = n;
+    } else {
+      k = len + n;
+      if (k < 0) {
+        k = 0;
+      }
+    }
+    var currentElement;
+    while (k < len) {
+      currentElement = O[k];
+      if (searchElement === currentElement || searchElement !== searchElement && currentElement !== currentElement) {
+        // NaN !== NaN
+        return true;
+      }
+      k++;
+    }
+    return false;
+  };
 }
 
 export { getQuerySelector as select, optimize };
