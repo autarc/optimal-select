@@ -152,7 +152,7 @@ export function getMultiSelector (elements, options) {
       if (el.id !== '') {
         selector += '#' + el.id;
       } else if (el.className !== '') {
-        selector += '.' + el.className;
+        selector += '.' + el.className.split(' ').join('.');
       }
       return selector;
     });
@@ -178,10 +178,8 @@ export function getMultiSelector (elements, options) {
   }
   if (selectors.length === 0) {
     selectors = elements.map(e => getSingleSelector(e, options));
-    console.log(selectors.join(','), commonClassName, commonTagName);
     return selectors.join(',');
   } else {
-    console.log(selectors.join(''), commonClassName, commonTagName);
     return selectors.join('');
   }
 }
