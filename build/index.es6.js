@@ -1037,7 +1037,6 @@ function getMultiSelector(elements, options) {
   for (var i = 1; i < elements.length; i++) {
     var _candidate = elements[i];
     commonParentNodes = (commonParentNodes, getParentNodes(_candidate));
-    console.log(commonParentNodes);
 
     if (_candidate.className !== commonClassName) {
       (function () {
@@ -1065,10 +1064,11 @@ function getMultiSelector(elements, options) {
       commonTagName = null;
     }
   }
+  commonParentNodes.reverse();
 
   var selectors = [];
   if (commonParentNodes) {
-    var parentSelectors = commonParentNodes.map(function (el) {
+    selectors = commonParentNodes.map(function (el) {
       var selector = el.tagName.toLowerCase();
       if (el.id !== '') {
         selector += '#' + el.id;
@@ -1077,26 +1077,28 @@ function getMultiSelector(elements, options) {
       }
       return selector;
     });
-    parentSelectors.reverse();
-
-    // lets attempt to make the selector shorter
-    var originalCount = document.querySelectorAll(parentSelectors.join(' ')).length;
-    while (parentSelectors.length > 2) {
-      var candidateForRemoval = parentSelectors.shift();
-      var newCount = document.querySelectorAll(parentSelectors.join(' ')).length;
-      if (newCount !== originalCount) {
-        parentSelectors.unshift(candidateForRemoval);
-        break;
-      }
-    }
-    selectors.push(parentSelectors.join(' ') + ' ');
   }
+
+  var targetSelectorParts = [];
   if (commonTagName) {
-    selectors.push('' + commonTagName.toLowerCase());
+    targetSelectorParts.push('' + commonTagName.toLowerCase());
   }
   if (commonClassName) {
-    selectors.push('.' + commonClassName.replace(/ /g, '.'));
+    targetSelectorParts.push('.' + commonClassName.replace(/ /g, '.'));
   }
+  selectors.push(targetSelectorParts.join(''));
+
+  // lets attempt to make the selector shorter
+  var originalCount = document.querySelectorAll(selectors.join(' ')).length;
+  while (selectors.length > 1) {
+    var candidateForRemoval = selectors.shift();
+    var newCount = document.querySelectorAll(selectors.join(' ')).length;
+    if (newCount !== originalCount) {
+      selectors.unshift(candidateForRemoval);
+      break;
+    }
+  }
+
   if (selectors.length === 0) {
     selectors = elements.map(function (e) {
       return getSingleSelector(e, options);
