@@ -148,13 +148,13 @@ export function getMultiSelector (elements, options) {
   let selectors = [];
   if (commonParentNodes) {
     const parentSelectors = commonParentNodes.map(el => {
-      let selector = el.tagName;
+      let selector = el.tagName.toLowerCase();
       if (el.id !== '') {
         selector += '#' + el.id;
       } else if (el.className !== '') {
         selector += '.' + el.className;
       }
-      return selector + ' ';
+      return selector;
     });
     parentSelectors.reverse();
 

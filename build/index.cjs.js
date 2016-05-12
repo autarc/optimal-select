@@ -1071,13 +1071,13 @@ function getMultiSelector(elements, options) {
   var selectors = [];
   if (commonParentNodes) {
     var parentSelectors = commonParentNodes.map(function (el) {
-      var selector = el.tagName;
+      var selector = el.tagName.toLowerCase();
       if (el.id !== '') {
         selector += '#' + el.id;
       } else if (el.className !== '') {
         selector += '.' + el.className;
       }
-      return selector + ' ';
+      return selector;
     });
     parentSelectors.reverse();
 
