@@ -180,9 +180,9 @@ export function getMultiSelector (elements, options) {
 
   if (selectors.length === 0) {
     selectors = elements.map(e => getSingleSelector(e, options));
-    return selectors.join(',');
+    return selectors.join(', ');
   } else {
-    return selectors.join('');
+    return selectors.join(' ');
   }
 }
 

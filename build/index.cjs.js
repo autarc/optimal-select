@@ -1105,9 +1105,9 @@ function getMultiSelector(elements, options) {
     selectors = elements.map(function (e) {
       return getSingleSelector(e, options);
     });
-    return selectors.join(',');
+    return selectors.join(', ');
   } else {
-    return selectors.join('');
+    return selectors.join(' ');
   }
 }
 
