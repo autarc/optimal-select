@@ -1075,7 +1075,7 @@ function getMultiSelector(elements, options) {
       if (el.id !== '') {
         selector += '#' + el.id;
       } else if (el.className !== '') {
-        selector += '.' + el.className;
+        selector += '.' + el.className.split(' ').join('.');
       }
       return selector;
     });
@@ -1103,10 +1103,8 @@ function getMultiSelector(elements, options) {
     selectors = elements.map(function (e) {
       return getSingleSelector(e, options);
     });
-    console.log(selectors.join(','), commonClassName, commonTagName);
     return selectors.join(',');
   } else {
-    console.log(selectors.join(''), commonClassName, commonTagName);
     return selectors.join('');
   }
 }
