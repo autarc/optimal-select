@@ -1075,7 +1075,7 @@ function getMultiSelector(elements, options) {
       if (el.id !== '') {
         selector += '#' + el.id;
       } else if (el.className !== '') {
-        selector += '.' + el.className.split(' ').join('.');
+        selector += '.' + el.className.replace(/ /g, '.');
       }
       return selector;
     });
@@ -1091,14 +1091,21 @@ function getMultiSelector(elements, options) {
   selectors.push(targetSelectorParts.join(''));
 
   // lets attempt to make the selector shorter
-  var originalCount = document.querySelectorAll(selectors.join(' ')).length;
-  while (selectors.length > 1) {
-    var candidateForRemoval = selectors.shift();
-    var newCount = document.querySelectorAll(selectors.join(' ')).length;
-    if (newCount !== originalCount) {
-      selectors.unshift(candidateForRemoval);
-      break;
+  try {
+    var originalCount = document.querySelectorAll(selectors.join(' ')).length;
+    while (selectors.length > 1) {
+      var candidateForRemoval = selectors.shift();
+      var newCount = document.querySelectorAll(selectors.join(' ')).length;
+      if (newCount !== originalCount) {
+        selectors.unshift(candidateForRemoval);
+        break;
+      }
     }
+  } catch (e) {
+    console.log('Unable to execute generic selector, returning explicit selector', e);
+    return elements.map(function (e) {
+      return getSingleSelector(e, options);
+    }).join(', ');
   }
 
   if (selectors.length === 0) {

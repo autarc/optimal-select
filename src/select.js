@@ -125,22 +125,22 @@ export function getMultiSelector (elements, options) {
 
       let longer, shorter
       if (candidate.className.length > commonClassName.length) {
-        longer = candidate.className
-        shorter = commonClassName
+        longer = candidate.className;
+        shorter = commonClassName;
       } else {
-        longer = commonClassName
-        shorter = candidate.className
+        longer = commonClassName;
+        shorter = candidate.className;
       }
       shorter.split(' ').forEach((name) => {
         if (longer.indexOf(name) > -1) {
-          classNames.push(name)
+          classNames.push(name);
         }
-      })
-      commonClassName = classNames.join(' ')
+      });
+      commonClassName = classNames.join(' ');
     }
 
     if (candidate.tagName !== commonTagName) {
-      commonTagName = null
+      commonTagName = null;
     }
   }
   commonParentNodes.reverse();
@@ -152,7 +152,7 @@ export function getMultiSelector (elements, options) {
       if (el.id !== '') {
         selector += '#' + el.id;
       } else if (el.className !== '') {
-        selector += '.' + el.className.split(' ').join('.');
+        selector += '.' + el.className.replace(/ /g, '.');
       }
       return selector;
     });
@@ -168,14 +168,19 @@ export function getMultiSelector (elements, options) {
   selectors.push(targetSelectorParts.join(''));
 
   // lets attempt to make the selector shorter
-  const originalCount = document.querySelectorAll(selectors.join(' ')).length;
-  while(selectors.length > 1) {
-    const candidateForRemoval = selectors.shift();
-    const newCount = document.querySelectorAll(selectors.join(' ')).length;
-    if (newCount !== originalCount) {
-      selectors.unshift(candidateForRemoval);
-      break;
+  try {
+    const originalCount = document.querySelectorAll(selectors.join(' ')).length;
+    while(selectors.length > 1) {
+      const candidateForRemoval = selectors.shift();
+      const newCount = document.querySelectorAll(selectors.join(' ')).length;
+      if (newCount !== originalCount) {
+        selectors.unshift(candidateForRemoval);
+        break;
+      }
     }
+  } catch (e) {
+    console.log('Unable to execute generic selector, returning explicit selector', e);
+    return elements.map(e => getSingleSelector(e, options)).join(', ');
   }
 
   if (selectors.length === 0) {

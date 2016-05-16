@@ -1,7 +1,7 @@
 {
   "name": "optimal-select",
   "description": "Get efficient & robust CSS selectors for HTML elements",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "author": "Josh Wymer | Mixpanel  <josh@mixpanel.com>",
   "bugs": {
     "url": "https://github.com/jbwyme/optimal-select/issues"
