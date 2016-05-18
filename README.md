@@ -41,6 +41,7 @@ You can then specify a validation function for the different types (`id`, `class
 
 ```js
 var selector = select(element, {
+  root: document, // default reference
   ignore: {
     class (className) {
       // disregard short classnames
@@ -52,14 +53,16 @@ var selector = select(element, {
     },
     // define simplified ignore patterns as a string/number/regex
     tag: 'div'
-  },
+  }
 })
 ```
+
+Furthermore the `root` option allows to define the container element (default: `document`).
 
 
 ### Client & Server
 
-The latest version `optimal-select` allows the generation and optimization of selectors on virtual environments. It uses the basic structure the [htmlparser2](https://github.com/fb55/htmlparser2) [DOM](https://github.com/fb55/domhandler) provides and adds some utilities to create the same results as the browser. Other libraries like [cheerio](https://github.com/cheeriojs/cheerio) are built on top of these and therefore compatible.
+The latest version `optimal-select` allows the generation and optimization of selectors on virtual environments. It uses the basic structure the [htmlparser2](https://github.com/fb55/htmlparser2) [DOM](https://github.com/fb55/domhandler) provides and adds some utilities to create the same results as the browser (note: the `withDOMLv1` option has to be enabled). Other libraries like [cheerio](https://github.com/cheeriojs/cheerio) are built on top of these and therefore compatible.
 
 In contrast to the browser does server environments not have a global context which defines their scope. Therefore one can either be specified explicit as a node using the `context` options field or automatically extracted from the provided input element. Checkout [the example](/example/index.js) for more details.
 

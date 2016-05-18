@@ -25,9 +25,13 @@ export default function match (node, options) {
   var element = node
   var length = path.length
 
-  const { ignore = {} } = options
+  const {
+    root = document,
+    ignore = {}
+  } = options
 
   var ignoreClass = false
+
   Object.keys(ignore).forEach((type) => {
     if (type === 'class') {
       ignoreClass = true
@@ -43,6 +47,7 @@ export default function match (node, options) {
     // check class-/attributename for regex
     ignore[type] = predicate.test.bind(predicate)
   })
+
   if (ignoreClass) {
     const ignoreAttribute = ignore.attribute
     ignore.attribute = (name, value, defaultPredicate) => {
@@ -50,12 +55,13 @@ export default function match (node, options) {
     }
   }
 
-  while (element !== document) {
+  while (element !== root) {
+
     // global
     if (checkId(element, path, ignore)) break
-    if (checkClassGlobal(element, path, ignore)) break
-    if (checkAttributeGlobal(element, path, ignore)) break
-    if (checkTagGlobal(element, path, ignore)) break
+    if (checkClassGlobal(element, path, ignore, root)) break
+    if (checkAttributeGlobal(element, path, ignore, root)) break
+    if (checkTagGlobal(element, path, ignore, root)) break
 
     // local
     checkClassLocal(element, path, ignore)
@@ -82,7 +88,7 @@ export default function match (node, options) {
     length = path.length
   }
 
-  if (element === document) {
+  if (element === root) {
     path.unshift('*')
   }
 
@@ -97,8 +103,8 @@ export default function match (node, options) {
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassGlobal (element, path, ignore) {
-  return checkClass(element, path, ignore, document)
+function checkClassGlobal (element, path, ignore, root) {
+  return checkClass(element, path, ignore, root)
 }
 
 /**
@@ -134,8 +140,8 @@ function checkClassChild (element, path, ignore) {
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkAttributeGlobal (element, path, ignore) {
-  return checkAttribute(element, path, ignore, document)
+function checkAttributeGlobal (element, path, ignore, root) {
+  return checkAttribute(element, path, ignore, root)
 }
 
 /**
@@ -177,8 +183,8 @@ function checkAttributeChild (element, path, ignore) {
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkTagGlobal (element, path, ignore) {
-  return checkTag(element, path, ignore, document)
+function checkTagGlobal (element, path, ignore, root) {
+  return checkTag(element, path, ignore, root)
 }
 
 /**

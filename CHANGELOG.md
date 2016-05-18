@@ -1,3 +1,9 @@
+## [v3.1.0]
+> May 18, 2016
+
+- add `options.root` to allow the definition of the container element
+
+
 ## [v3.0.0]
 > Apr 15, 2016
 
