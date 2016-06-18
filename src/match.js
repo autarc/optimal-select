@@ -347,5 +347,5 @@ function checkIgnore (predicate, name, value, defaultPredicate) {
   if (!check) {
     return false
   }
-  return check(name, value, defaultPredicate)
+  return check(name, value || name, defaultPredicate)
 }
