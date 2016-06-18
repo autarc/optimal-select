@@ -1,3 +1,10 @@
+## [v3.2.0]
+> June 18, 2016
+
+- add `options.skip` to allow the definition of elements which shouldn't be considered
+- use `name` fallback for the ignore predicate function of `class`
+
+
 ## [v3.1.0]
 > May 18, 2016
 
