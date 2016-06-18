@@ -38,6 +38,7 @@ export default (env) => {
         loaders: [
           {
             test: /\.js$/,
+            exclude: /node_modules/,
             loader: 'babel'
           }
         ]
@@ -66,20 +67,10 @@ export default (env) => {
     // = production:debug
     const ProductionDebugConfig = merge(config, {
       debug: true,
-      devtool: 'sourcemap',
       plugins: [
         new webpack.DefinePlugin({
           'process.env': {
             'NODE_ENV': JSON.stringify('development')
-          }
-        }),
-        new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.optimize.DedupePlugin(),
-        new webpack.optimize.UglifyJsPlugin({
-          sourceMap: true,
-          compress: {
-            warnings: false,
-            screw_ie8: true
           }
         })
       ]
@@ -87,7 +78,7 @@ export default (env) => {
 
     // = production:min
     const ProductionMinConfig = merge(config, {
-      debug: false,
+      devtool: 'sourcemap',
       output: {
         filename: config.output.filename.replace('.js', '.min.js')
       },
@@ -100,6 +91,7 @@ export default (env) => {
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.UglifyJsPlugin({
+          sourceMap: true,
           compress: {
             warnings: false,
             screw_ie8: true
