@@ -27,8 +27,20 @@ export default function match (node, options) {
 
   const {
     root = document,
+    skip = null,
     ignore = {}
   } = options
+
+  const skipCompare = skip && (Array.isArray(skip) ? skip : [skip]).map((entry) => {
+    if (typeof entry !== 'function') {
+      return (element) => element === entry
+    }
+    return entry
+  })
+
+  const skipChecks = (element) => {
+    return skip && skipCompare.some((compare) => compare(element))
+  }
 
   var ignoreClass = false
 
@@ -57,31 +69,33 @@ export default function match (node, options) {
 
   while (element !== root) {
 
-    // global
-    if (checkId(element, path, ignore)) break
-    if (checkClassGlobal(element, path, ignore, root)) break
-    if (checkAttributeGlobal(element, path, ignore, root)) break
-    if (checkTagGlobal(element, path, ignore, root)) break
+    if (skipChecks(element) !== true) {
+      // global
+      if (checkId(element, path, ignore)) break
+      if (checkClassGlobal(element, path, ignore, root)) break
+      if (checkAttributeGlobal(element, path, ignore, root)) break
+      if (checkTagGlobal(element, path, ignore, root)) break
 
-    // local
-    checkClassLocal(element, path, ignore)
+      // local
+      checkClassLocal(element, path, ignore)
 
-    // define only one selector each iteration
-    if (path.length === length) {
-      checkAttributeLocal(element, path, ignore)
-    }
-    if (path.length === length) {
-      checkTagLocal(element, path, ignore)
-    }
+      // define only one selector each iteration
+      if (path.length === length) {
+        checkAttributeLocal(element, path, ignore)
+      }
+      if (path.length === length) {
+        checkTagLocal(element, path, ignore)
+      }
 
-    if (path.length === length) {
-      checkClassChild(element, path, ignore)
-    }
-    if (path.length === length) {
-      checkAttributeChild(element, path, ignore)
-    }
-    if (path.length === length) {
-      checkTagChild(element, path, ignore)
+      if (path.length === length) {
+        checkClassChild(element, path, ignore)
+      }
+      if (path.length === length) {
+        checkAttributeChild(element, path, ignore)
+      }
+      if (path.length === length) {
+        checkTagChild(element, path, ignore)
+      }
     }
 
     element = element.parentNode

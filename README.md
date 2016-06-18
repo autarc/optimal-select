@@ -42,6 +42,10 @@ You can then specify a validation function for the different types (`id`, `class
 ```js
 var selector = select(element, {
   root: document, // default reference
+  skip: (traverseNode) {
+    // ignore select information of the direct parent
+    return traverseNode === element.parentNode
+  },
   ignore: {
     class (className) {
       // disregard short classnames
@@ -58,7 +62,7 @@ var selector = select(element, {
 ```
 
 Furthermore the `root` option allows to define the container element (default: `document`).
-
+The `skip` option allows to define a `function`, a single `node` or an `array` of nodes which should  be ignored as the selector is created (default: `null`).
 
 ### Client & Server
 
