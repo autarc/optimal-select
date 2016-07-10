@@ -18,7 +18,6 @@
     "fs-extra": "^0.26.7",
     "jsdom": "^9.0.0",
     "mocha": "^2.4.5",
-    "mocha-jsdom": "^1.1.0",
     "rollup": "^0.26.2",
     "rollup-plugin-babel": "^2.4.0"
   },
@@ -36,7 +35,7 @@
     "url": "https://github.com/jbwyme/optimal-select.git"
   },
   "scripts": {
-    "build": "./node_modules/rollup/bin/rollup -c rollup.config.cjs.js && ./node_modules/rollup/bin/rollup -c rollup.config.es6.js",
+    "build": "./node_modules/rollup/bin/rollup -c rollup.config.cjs.js && ./node_modules/rollup/bin/rollup -c rollup.config.es6.js && ./node_modules/rollup/bin/rollup -c rollup.config.umd.js",
     "lint": "./node_modules/eslint/bin/eslint.js ./src ./tests",
     "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register tests/**"
   }
