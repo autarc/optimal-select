@@ -1,3 +1,5 @@
+import { filteredClassName } from './select.js';
+
 /**
  * # Match
  *
@@ -27,7 +29,7 @@ export default function match (node, options) {
 
   const { ignore = {} } = options
 
-  var ignoreClass = false
+  var ignoreClass = !!options.classesToFilter;
   Object.keys(ignore).forEach((type) => {
     if (type === 'class') {
       ignoreClass = true
@@ -53,7 +55,7 @@ export default function match (node, options) {
   while (element !== document) {
     // global
     if (checkId(element, path, ignore)) break
-    if (checkClassGlobal(element, path, ignore)) break
+    if (checkClassGlobal(element, path, ignore, options)) break
     if (checkAttributeGlobal(element, path, ignore)) break
     if (checkTagGlobal(element, path, ignore)) break
 
@@ -97,8 +99,8 @@ export default function match (node, options) {
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassGlobal (element, path, ignore) {
-  return checkClass(element, path, ignore, document)
+function checkClassGlobal (element, path, ignore, options) {
+  return checkClass(element, path, ignore, document, options)
 }
 
 /**
@@ -231,14 +233,15 @@ function checkId (element, path, ignore) {
  * @param  {HTMLElement} parent  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClass (element, path, ignore, parent) {
+function checkClass (element, path, ignore, parent, options) {
   const className = element.getAttribute('class')
   if (checkIgnore(ignore.class, className)) {
     return false
   }
-  const matches = parent.getElementsByClassName(className)
+  const filteredClasses = filteredClassName(className, options);
+  const matches = parent.getElementsByClassName(filteredClasses)
   if (matches.length === 1) {
-    path.unshift(`.${className.trim().replace(/\s+/g, '.')}`)
+    path.unshift(`.${filteredClasses.trim().replace(/\s+/g, '.')}`)
     return true
   }
   return false
