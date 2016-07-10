@@ -18,7 +18,6 @@
     "fs-extra": "^0.26.7",
     "jsdom": "^9.0.0",
     "mocha": "^2.4.5",
-    "mocha-jsdom": "^1.1.0",
     "rollup": "^0.26.2",
     "rollup-plugin-babel": "^2.4.0"
   },
