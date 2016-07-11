@@ -480,11 +480,7 @@
     var length = path.length;
 
     var _options$ignore = options.ignore;
-    var ignore = _options$ignore === undefined ? {
-      class: function _class() {
-        return false;
-      }
-    } : _options$ignore;
+    var ignore = _options$ignore === undefined ? {} : _options$ignore;
 
 
     var ignoreClass = !!options.classesToFilter;
@@ -505,6 +501,11 @@
     });
     if (ignoreClass) {
       (function () {
+        if (!ignore.class) {
+          ignore.class = function () {
+            return false;
+          };
+        }
         var ignoreAttribute = ignore.attribute;
         ignore.attribute = function (name, value, defaultPredicate) {
           return ignore.class(value) || ignoreAttribute && ignoreAttribute(name, value, defaultPredicate);
