@@ -76,7 +76,7 @@ export default function match (node, options) {
     }
 
     if (path.length === length) {
-      checkClassChild(element, path, ignore)
+      checkClassChild(element, path, ignore, options)
     }
     if (path.length === length) {
       checkAttributeChild(element, path, ignore)
@@ -126,12 +126,13 @@ function checkClassLocal (element, path, ignore, options) {
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassChild (element, path, ignore) {
+function checkClassChild (element, path, ignore, options) {
   const className = element.getAttribute('class')
   if (checkIgnore(ignore.class, className)) {
     return false
   }
-  return checkChild(element, path, `.${className.trim().replace(/\s+/g, '.')}`)
+  const filteredClasses = filteredClassName(className, options);
+  return checkChild(element, path, `.${filteredClasses.trim().replace(/\s+/g, '.')}`)
 }
 
 /**

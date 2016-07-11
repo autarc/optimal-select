@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { select } from '../src/index.js';
 import { filteredClassName } from '../src/select.js';
 
-var document = jsdom.jsdom('<div class="foo bar"></div><div id="baz"></div>');
+var document = jsdom.jsdom('<div class="bar bam"></div><div class="foo"></div><div id="baz"></div>');
 global.document = document;
 
 describe('test select.js', function() {
@@ -24,17 +24,48 @@ describe('test select.js', function() {
   });
 
   describe('filter out "classesToFilter" when generating CSS selector', function() {
-    var div = document.getElementsByClassName('foo')[0];
+    var divOneClass = document.getElementsByClassName('foo')[0];
+    var divMultipleClasses = document.getElementsByClassName('bar')[0];
+
     it('should not filter out any classes by default', function() {
-      var selector = select(div);
-      expect(selector).to.equal('.bar.foo');
+      var selector = select(divOneClass);
+      expect(selector).to.equal('.foo');
     });
 
-    it('should filter out any classes when "classesToFilter" is specified', function() {
-      var selector = select(div, {
-        classesToFilter: ['foo']
+    it('should exclude the class when "classesToFilter" is specified and the element only has one class', function() {
+      var selector = select(divOneClass, {
+        classesToFilter: ['foo'],
+        ignore: {
+          attribute: function(name, val) {
+            if (name === 'class') {
+              return val === 'foo';
+            }
+            return false;
+          },
+          class: function(className) {
+            return className === 'foo';
+          }
+        }
       });
-      expect(selector).to.equal('.bar');
+      expect(selector).to.equal('body > div:nth-child(2)');
+    });
+
+    it('should filter out classes in "classesToFilter"', function() {
+      var selector = select(divMultipleClasses, {
+        classesToFilter: ['bar'],
+        ignore: {
+          attribute: function(name, val) {
+            if (name === 'class') {
+              return val === 'bar';
+            }
+            return false;
+          },
+          class: function(className) {
+            return className === 'bar';
+          }
+        }
+      });
+      expect(selector).to.equal('.bam');
     });
   });
 
@@ -59,7 +90,7 @@ describe('test select.js', function() {
           }
         }
       });
-      expect(selector).to.equal('body > div:nth-child(2)');
+      expect(selector).to.equal('body > div:nth-child(3)');
     });
   });
 });
