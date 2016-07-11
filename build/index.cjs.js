@@ -478,7 +478,11 @@ function match(node, options) {
   var length = path.length;
 
   var _options$ignore = options.ignore;
-  var ignore = _options$ignore === undefined ? {} : _options$ignore;
+  var ignore = _options$ignore === undefined ? {
+    class: function _class() {
+      return false;
+    }
+  } : _options$ignore;
 
 
   var ignoreClass = !!options.classesToFilter;
@@ -514,7 +518,7 @@ function match(node, options) {
     if (checkTagGlobal(element, path, ignore)) break;
 
     // local
-    checkClassLocal(element, path, ignore);
+    checkClassLocal(element, path, ignore, options);
 
     // define only one selector each iteration
     if (path.length === length) {
@@ -563,8 +567,8 @@ function checkClassGlobal(element, path, ignore, options) {
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassLocal(element, path, ignore) {
-  return checkClass(element, path, ignore, element.parentNode);
+function checkClassLocal(element, path, ignore, options) {
+  return checkClass(element, path, ignore, element.parentNode, options);
 }
 
 /**
