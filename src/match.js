@@ -27,7 +27,7 @@ export default function match (node, options) {
   var element = node
   var length = path.length
 
-  const { ignore = {} } = options
+  const { ignore = {class(){return false;}} } = options
 
   var ignoreClass = !!options.classesToFilter;
   Object.keys(ignore).forEach((type) => {
@@ -60,7 +60,7 @@ export default function match (node, options) {
     if (checkTagGlobal(element, path, ignore)) break
 
     // local
-    checkClassLocal(element, path, ignore)
+    checkClassLocal(element, path, ignore, options)
 
     // define only one selector each iteration
     if (path.length === length) {
@@ -110,8 +110,8 @@ function checkClassGlobal (element, path, ignore, options) {
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassLocal (element, path, ignore) {
-  return checkClass(element, path, ignore, element.parentNode)
+function checkClassLocal (element, path, ignore, options) {
+  return checkClass(element, path, ignore, element.parentNode, options)
 }
 
 /**
