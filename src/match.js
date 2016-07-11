@@ -27,7 +27,7 @@ export default function match (node, options) {
   var element = node
   var length = path.length
 
-  const { ignore = {class(){return false;}} } = options
+  const { ignore = {} } = options
 
   var ignoreClass = !!options.classesToFilter;
   Object.keys(ignore).forEach((type) => {
@@ -46,6 +46,11 @@ export default function match (node, options) {
     ignore[type] = predicate.test.bind(predicate)
   })
   if (ignoreClass) {
+    if (!ignore.class) {
+      ignore.class = function() {
+        return false;
+      };
+    }
     const ignoreAttribute = ignore.attribute
     ignore.attribute = (name, value, defaultPredicate) => {
       return ignore.class(value) || ignoreAttribute && ignoreAttribute(name, value, defaultPredicate)
