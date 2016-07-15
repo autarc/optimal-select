@@ -93,5 +93,15 @@ describe('test select.js', function() {
       expect(selector).to.equal('body > div:nth-child(3)');
     });
   });
+
+  describe('CSS selector formatting', function() {
+    it('should properly escape the CSS selector', function() {
+      var div = document.createElement('div');
+      div.setAttribute('class', 'C($navlink) Td(n):h D(b)');
+      document.body.appendChild(div);
+      var selector = select(div);
+      expect(selector).to.equal('.C\\(\\$navlink\\).D\\(b\\).Td\\(n\\)\\3Ah');
+    });
+  });
 });
 

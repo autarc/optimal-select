@@ -1,3 +1,5 @@
+import cssesc from 'cssesc';
+
 import { filteredClassName } from './select.js';
 
 /**
@@ -93,7 +95,7 @@ export default function match (node, options) {
     path.unshift('*')
   }
 
-  return path.join(' ')
+  return path.join(' ');
 }
 
 
@@ -240,17 +242,20 @@ function checkId (element, path, ignore) {
  * @return {Boolean}             - [description]
  */
 function checkClass (element, path, ignore, parent, options) {
-  const className = element.getAttribute('class')
+  const className = element.getAttribute('class');
   if (checkIgnore(ignore.class, className)) {
-    return false
+    return false;
   }
   const filteredClasses = filteredClassName(className, options);
-  const matches = parent.getElementsByClassName(filteredClasses)
+  const matches = parent.getElementsByClassName(filteredClasses);
   if (matches.length === 1) {
-    path.unshift(`.${filteredClasses.trim().replace(/\s+/g, '.')}`)
-    return true
+    const classSelector = filteredClasses.trim().split(' ').map(c => {
+      return cssesc(c, {isIdentifier: true});
+    }).join('.');
+    path.unshift(`.${classSelector}`);
+    return true;
   }
-  return false
+  return false;
 }
 
 /**
