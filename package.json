@@ -38,5 +38,8 @@
     "build": "./node_modules/rollup/bin/rollup -c rollup.config.cjs.js && ./node_modules/rollup/bin/rollup -c rollup.config.es6.js && ./node_modules/rollup/bin/rollup -c rollup.config.umd.js",
     "lint": "./node_modules/eslint/bin/eslint.js ./src ./tests",
     "test": "./node_modules/mocha/bin/mocha --compilers js:babel-core/register tests/**"
+  },
+  "dependencies": {
+    "cssesc": "^0.1.0"
   }
 }
