@@ -59,7 +59,7 @@ export default function match (node, options) {
     }
   }
 
-  while (element !== document) {
+  while (element !== document.body) {
     // global
     if (checkId(element, path, ignore)) break
     if (checkClassGlobal(element, path, ignore, options)) break
