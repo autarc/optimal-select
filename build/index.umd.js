@@ -1,8 +1,10 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.OptimalSelect = global.OptimalSelect || {})));
-}(this, function (exports) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('cssesc')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'cssesc'], factory) :
+  (factory((global.OptimalSelect = global.OptimalSelect || {}),global.cssesc));
+}(this, function (exports,cssesc) { 'use strict';
+
+  cssesc = 'default' in cssesc ? cssesc['default'] : cssesc;
 
   var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
     return typeof obj;
@@ -513,7 +515,7 @@
       })();
     }
 
-    while (element !== document) {
+    while (element !== document.body) {
       // global
       if (checkId(element, path, ignore)) break;
       if (checkClassGlobal(element, path, ignore, options)) break;
@@ -702,7 +704,10 @@
     var filteredClasses = filteredClassName(className, options);
     var matches = parent.getElementsByClassName(filteredClasses);
     if (matches.length === 1) {
-      path.unshift('.' + filteredClasses.trim().replace(/\s+/g, '.'));
+      var classSelector = filteredClasses.trim().split(' ').map(function (c) {
+        return cssesc(c, { isIdentifier: true });
+      }).join('.');
+      path.unshift('.' + classSelector);
       return true;
     }
     return false;

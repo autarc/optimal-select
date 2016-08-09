@@ -1,3 +1,5 @@
+import cssesc from 'cssesc';
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -507,7 +509,7 @@ function match(node, options) {
     })();
   }
 
-  while (element !== document) {
+  while (element !== document.body) {
     // global
     if (checkId(element, path, ignore)) break;
     if (checkClassGlobal(element, path, ignore, options)) break;
@@ -696,7 +698,10 @@ function checkClass(element, path, ignore, parent, options) {
   var filteredClasses = filteredClassName(className, options);
   var matches = parent.getElementsByClassName(filteredClasses);
   if (matches.length === 1) {
-    path.unshift('.' + filteredClasses.trim().replace(/\s+/g, '.'));
+    var classSelector = filteredClasses.trim().split(' ').map(function (c) {
+      return cssesc(c, { isIdentifier: true });
+    }).join('.');
+    path.unshift('.' + classSelector);
     return true;
   }
   return false;
