@@ -509,7 +509,7 @@ function match(node, options) {
     })();
   }
 
-  while (element !== document.body) {
+  while (element !== document) {
     // global
     if (checkId(element, path, ignore)) break;
     if (checkClassGlobal(element, path, ignore, options)) break;
