@@ -1,7 +1,5 @@
 import cssesc from 'cssesc';
 
-import { filteredClassName } from './select.js';
-
 /**
  * # Match
  *
@@ -62,12 +60,12 @@ export default function match (node, options) {
   while (element !== document) {
     // global
     if (checkId(element, path, ignore)) break
-    if (checkClassGlobal(element, path, ignore, options)) break
+    if (checkClassesGlobal(element, path, ignore, options)) break
     if (checkAttributeGlobal(element, path, ignore)) break
     if (checkTagGlobal(element, path, ignore)) break
 
     // local
-    checkClassLocal(element, path, ignore, options)
+    checkClassesLocal(element, path, ignore, options)
 
     // define only one selector each iteration
     if (path.length === length) {
@@ -78,7 +76,7 @@ export default function match (node, options) {
     }
 
     if (path.length === length) {
-      checkClassChild(element, path, ignore, options)
+      checkClassesChild(element, path, ignore, options)
     }
     if (path.length === length) {
       checkAttributeChild(element, path, ignore)
@@ -100,41 +98,40 @@ export default function match (node, options) {
 
 
 /**
- * [checkClassGlobal description]
+ * [checkClassesGlobal description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassGlobal (element, path, ignore, options) {
-  return checkClass(element, path, ignore, document, options)
+function checkClassesGlobal (element, path, ignore, options) {
+  return checkClasses(element, path, ignore, document, options)
 }
 
 /**
- * [checkClassLocal description]
+ * [checkClassesLocal description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassLocal (element, path, ignore, options) {
-  return checkClass(element, path, ignore, element.parentNode, options)
+function checkClassesLocal (element, path, ignore, options) {
+  return checkClasses(element, path, ignore, element.parentNode, options)
 }
 
 /**
- * [checkClassChild description]
+ * [checkClassesChild description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
  * @param  {Object}      ignore  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClassChild (element, path, ignore, options) {
-  const className = element.getAttribute('class')
-  if (checkIgnore(ignore.class, className)) {
-    return false
+function checkClassesChild (element, path, ignore, options) {
+  const classes = _getFilteredClasses(element, ignore);
+  if (!classes.length) {
+    return false;
   }
-  const filteredClasses = filteredClassName(className, options);
-  return checkChild(element, path, `.${filteredClasses.trim().replace(/\s+/g, '.')}`)
+  return checkChild(element, path, '.' + classes.join('.'));
 }
 
 /**
@@ -167,16 +164,15 @@ function checkAttributeLocal (element, path, ignore) {
  * @return {Boolean}             - [description]
  */
 function checkAttributeChild (element, path, ignore) {
-  const attributes = element.attributes
-  return Object.keys(attributes).some((key) => {
-    const attribute = attributes[key]
-    const attributeName = attribute.name
-    const attributeValue = attribute.value
+  const attributes = _getAttributes(element);
+  return attributes.some(attribute => {
+    const attributeName = attribute.name;
+    const attributeValue = attribute.value;
     if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
-      return false
+      return false;
     }
-    const pattern = `[${attributeName}="${attributeValue}"]`
-    return checkChild(element, path, pattern)
+    const pattern = `[${attributeName}="${attributeValue}"]`;
+    return checkChild(element, path, pattern);
   })
 }
 
@@ -233,29 +229,48 @@ function checkId (element, path, ignore) {
   return true
 }
 
+function _getFilteredClasses (element, ignore) {
+  const className = element.className.trim();
+
+  if (!className) {
+    return [];
+  }
+
+  let classes = className.split(' ');
+  if (ignore.class) {
+    classes = classes.filter(c => !ignore.class(c));
+  }
+
+  return classes;
+}
+
 /**
- * [checkClass description]
+ * [checkClasses description]
  * @param  {HTMLElement} element - [description]
  * @param  {Array}       path    - [description]
  * @param  {Object}      ignore  - [description]
  * @param  {HTMLElement} parent  - [description]
  * @return {Boolean}             - [description]
  */
-function checkClass (element, path, ignore, parent, options) {
-  const className = element.getAttribute('class');
-  if (checkIgnore(ignore.class, className)) {
+function checkClasses (element, path, ignore, parent, options) {
+  const classes = _getFilteredClasses(element, ignore);
+  if (!classes.length) {
     return false;
   }
-  const filteredClasses = filteredClassName(className, options);
-  const matches = parent.getElementsByClassName(filteredClasses);
+  const matches = parent.getElementsByClassName(classes.join(' '));
   if (matches.length === 1) {
-    const classSelector = filteredClasses.trim().split(' ').map(c => {
+    const classSelector = '.' + classes.map(c => {
       return cssesc(c, {isIdentifier: true});
     }).join('.');
-    path.unshift(`.${classSelector}`);
+    path.unshift(classSelector);
     return true;
   }
+
   return false;
+}
+
+function _getAttributes(element) {
+  return Array.from(element.attributes).filter(attr => !['id', 'class'].includes(attr.name));
 }
 
 /**
@@ -267,21 +282,20 @@ function checkClass (element, path, ignore, parent, options) {
  * @return {Boolean}             - [description]
  */
 function checkAttribute (element, path, ignore, parent) {
-  const attributes = element.attributes
-  return Object.keys(attributes).some((key) => {
-    const attribute = attributes[key]
-    const attributeName = attribute.name
-    const attributeValue = attribute.value
+  const attributes = _getAttributes(element);
+  return attributes.some(attribute => {
+    const attributeName = attribute.name;
+    const attributeValue = attribute.value;
     if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
-      return false
+      return false;
     }
-    const pattern = `[${attributeName}="${attributeValue}"]`
-    const matches = parent.querySelectorAll(pattern)
+    const pattern = `[${attributeName}="${attributeValue}"]`;
+    const matches = parent.querySelectorAll(pattern);
     if (matches.length === 1) {
-      path.unshift(pattern)
-      return true
+      path.unshift(pattern);
+      return true;
     }
-  })
+  });
 }
 
 /**

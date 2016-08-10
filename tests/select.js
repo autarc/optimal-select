@@ -7,23 +7,7 @@ var document = jsdom.jsdom('<div class="bar bam"></div><div class="foo"></div><d
 global.document = document;
 
 describe('test select.js', function() {
-  describe('filter out "classesToFilter" from className', function() {
-    const options = {
-      classesToFilter: ['badClass', 'badClass2'],
-    }
-
-    it('should filter out "classesToFilter"', function() {
-      expect(filteredClassName('goodClass', options)).to.equal('goodClass');
-      expect(filteredClassName('goodClass badClass', options)).to.equal('goodClass');
-      expect(filteredClassName('goodClass badClass badClass2', options)).to.equal('goodClass');
-    });
-
-    it('should return sorted classNames', function() {
-      expect(filteredClassName('c d a e b f badClass', options)).to.equal('a b c d e f');
-    });
-  });
-
-  describe('filter out "classesToFilter" when generating CSS selector', function() {
+  describe('filter out classes when generating CSS selector', function() {
     var divOneClass = document.getElementsByClassName('foo')[0];
     var divMultipleClasses = document.getElementsByClassName('bar')[0];
 
@@ -32,36 +16,22 @@ describe('test select.js', function() {
       expect(selector).to.equal('.foo');
     });
 
-    it('should exclude the class when "classesToFilter" is specified and the element only has one class', function() {
+    it('should exclude using className when all of the elements classes should be ignored', function() {
       var selector = select(divOneClass, {
-        classesToFilter: ['foo'],
         ignore: {
-          attribute: function(name, val) {
-            if (name === 'class') {
-              return val === 'foo';
-            }
-            return false;
-          },
-          class: function(className) {
-            return className === 'foo';
+          class: function(_class) {
+            return _class === 'foo';
           }
         }
       });
       expect(selector).to.equal('body > div:nth-child(2)');
     });
 
-    it('should filter out classes in "classesToFilter"', function() {
+    it('should exclude individual classes according to the ignore object', function() {
       var selector = select(divMultipleClasses, {
-        classesToFilter: ['bar'],
         ignore: {
-          attribute: function(name, val) {
-            if (name === 'class') {
-              return val === 'bar';
-            }
-            return false;
-          },
-          class: function(className) {
-            return className === 'bar';
+          class: function(_class) {
+            return _class === 'bar';
           }
         }
       });
@@ -79,12 +49,6 @@ describe('test select.js', function() {
     it('should filter out any ids when passed the correct ignore params', function() {
       var selector = select(div, {
         ignore: {
-          attribute: function(name, val) {
-            if (name === 'id') {
-              return val === 'baz';
-            }
-            return false;
-          },
           id: function(id) {
             return id === 'baz';
           }
@@ -100,7 +64,7 @@ describe('test select.js', function() {
       div.setAttribute('class', 'C($navlink) Td(n):h D(b)');
       document.body.appendChild(div);
       var selector = select(div);
-      expect(selector).to.equal('.C\\(\\$navlink\\).D\\(b\\).Td\\(n\\)\\3Ah');
+      expect(selector).to.equal('.C\\(\\$navlink\\).Td\\(n\\)\\3Ah.D\\(b\\)');
     });
   });
 });

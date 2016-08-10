@@ -10,19 +10,6 @@ import match from './match'
 import optimize from './optimize'
 
 /**
- * Filter out specific classes from a className
- * @param {String}  className   - [description]
- * @params {Object} options     - [description]
- * @return {string}             - [description]
- */
-export function filteredClassName(className, options = {}) {
-  const classesToFilter = options.classesToFilter || [];
-  const filteredClasses = className.split(' ').filter(c => !!c && !c.includes('(') && !classesToFilter.includes(c));
-  filteredClasses.sort();
-  return filteredClasses.join(' ');
-}
-
-/**
  * Choose action depending on the input (single/multi)
  * @param  {HTMLElement|Array} input   - [description]
  * @param  {Object}            options - [description]
@@ -54,12 +41,6 @@ export function getSingleSelector (element, options) {
 
   const selector = match(element, options)
   const optimized = optimize(selector, element, options)
-
-  // debug
-  // console.log(`
-  //   selector: ${selector}
-  //   optimized:${optimized}
-  // `)
 
   if (globalModified) {
     delete global.document
