@@ -17,7 +17,7 @@ import optimize from './optimize'
  */
 export function filteredClassName(className, options = {}) {
   const classesToFilter = options.classesToFilter || [];
-  const filteredClasses = className.split(' ').filter(c => !classesToFilter.includes(c));
+  const filteredClasses = className.split(' ').filter(c => !!c && !c.includes('(') && !classesToFilter.includes(c));
   filteredClasses.sort();
   return filteredClasses.join(' ');
 }
