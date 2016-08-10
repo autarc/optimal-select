@@ -1,4 +1,4 @@
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
+[![Build Status](https://travis-ci.org/jbwyme/optimal-select.svg?branch=master)](https://travis-ci.org/jbwyme/optimal-select)
 
 # optimal select
 
