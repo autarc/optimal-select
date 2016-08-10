@@ -949,7 +949,7 @@
 
     var classesToFilter = options.classesToFilter || [];
     var filteredClasses = className.split(' ').filter(function (c) {
-      return !classesToFilter.includes(c);
+      return !!c && !c.includes('(') && !classesToFilter.includes(c);
     });
     filteredClasses.sort();
     return filteredClasses.join(' ');
