@@ -31,7 +31,7 @@ export default function getQuerySelector (input, options = {}) {
 export function getSingleSelector (element, options) {
 
   if (element.nodeType === 3) {
-    return getSingleSelector(element.parentNode)
+    return getSingleSelector(element.parentNode, options)
   }
   if (element.nodeType !== 1) {
     throw new Error(`Invalid input - only HTMLElements or representations of them are supported! (not "${typeof element}")`)
