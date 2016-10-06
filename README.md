@@ -47,11 +47,11 @@ var selector = select(element, {
     return traverseNode === element.parentNode
   },
   ignore: {
-    class (className) {
+class:function (className) {
       // disregard short classnames
       return className.length < 3
     },
-    attribute (name, value, defaultPredicate) {
+    attribute:function (name, value, defaultPredicate) {
       // exclude HTML5 data attributes
       return (/data-*/).test(name) || defaultPredicate(name, value)
     },
