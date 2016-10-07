@@ -25,7 +25,7 @@ export default function optimize (selector, element, options = {}) {
   var path = selector.replace(/> /g, '>').split(/\s+(?=(?:(?:[^"]*"){2})*[^"]*$)/)
 
   if (path.length < 3) {
-    return selector
+    return optimizePart('', selector, '', element)
   }
 
   const shortened = [path.pop()]
@@ -117,10 +117,10 @@ function optimizePart (prePart, current, postPart, element) {
                                 .sort((curr, next) => curr.length - next.length)
     while (names.length) {
       var partial = current.replace(names.shift(), '').trim()
-      if (partial === '>') {
+      var pattern = `${prePart}${partial}${postPart}`
+      if (!pattern || partial === '>') {
         break
       }
-      var pattern = `${prePart}${partial}${postPart}`
       var matches = document.querySelectorAll(pattern)
       if (matches.length === 1 && matches[0] === element) {
         current = partial
