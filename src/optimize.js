@@ -15,6 +15,10 @@ import adapt from './adapt'
  */
 export default function optimize (selector, element, options = {}) {
 
+  if (!element || element.nodeType !== 1) {
+    throw new Error(`Invalid input - to compare HTMLElements its necessary to provide a reference of the node! (missing "element")`)
+  }
+
   const globalModified = adapt(element, options)
 
   // chunk parts outside of quotes (http://stackoverflow.com/a/25663729)
