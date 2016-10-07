@@ -1,3 +1,13 @@
+## [v3.3.0]
+> October 7, 2016
+
+- fix missing pass options to `getSingleSelector` ([#16](https://github.com/Autarc/optimal-select/pull/16), by [@Zhuoqing](https://github.com/Zhuoqing))
+- fix optimization of child selectors with multiple classnames
+- apply optimizations on simple selectors
+- add default options and parameter checks for public API
+- improve `getMultiSelector` for matching nested descendants
+
+
 ## [v3.2.0]
 > June 18, 2016
 
@@ -20,7 +30,7 @@
 ## [v2.2.0]
 > Apr 02, 2016
 
-- improve whitespace matching in classnames (thanks [@paulborges](https://github.com/Autarc/optimal-select/pull/6))
+- improve whitespace matching in classnames ([#6](https://github.com/Autarc/optimal-select/pull/6) by [@paulborges](https://github.com/pauloborges))
 - enable simplified ignore patterns based on strings/regex
 - fix matching ignored classes as attributes
 

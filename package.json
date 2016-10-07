@@ -1,30 +1,30 @@
 {
   "name": "optimal-select",
   "description": "Get efficient & robust CSS selectors for HTML elements",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "author": "Stefan Dühring | Autarc <autarc@gmail.com>",
   "bugs": {
     "url": "https://github.com/Autarc/optimal-select/issues"
   },
   "devDependencies": {
-    "babel-loader": "^6.2.4",
+    "babel-loader": "^6.2.5",
     "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-stage-0": "^6.5.0",
-    "babel-register": "^6.9.0",
-    "cheerio": "^0.20.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "babel-register": "^6.16.3",
+    "cheerio": "^0.22.0",
     "deep-merge": "^1.0.0",
     "fs-extra": "^0.30.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
-    "gulp-load-plugins": "^1.2.4",
+    "gulp-load-plugins": "^1.3.0",
     "gulp-plumber": "^1.1.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-util": "^3.0.7",
-    "gulp-watch": "^4.3.6",
+    "gulp-watch": "^4.3.10",
     "http-server": "^0.9.0",
     "open-url": "^2.0.2",
-    "webpack": "^1.13.1"
+    "webpack": "^1.13.2"
   },
   "homepage": "https://github.com/Autarc/optimal-select",
   "keywords": [
@@ -39,6 +39,7 @@
     "url": "https://github.com/Autarc/optimal-select.git"
   },
   "scripts": {
+    "prepublish": "npm run build",
     "build": "NODE_ENV=production node build",
     "check": "npm outdated -depth 0",
     "example": "open-url 'http:/localhost:8080/example' && http-server",

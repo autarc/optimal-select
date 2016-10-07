@@ -59,7 +59,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = exports.optimize = exports.select = undefined;
+	exports.default = exports.common = exports.optimize = exports.select = undefined;
 
 	var _select2 = __webpack_require__(1);
 
@@ -69,10 +69,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _optimize3 = _interopRequireDefault(_optimize2);
 
+	var _common2 = __webpack_require__(5);
+
+	var _common = _interopRequireWildcard(_common2);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.select = _select3.default;
 	exports.optimize = _optimize3.default;
+	exports.common = _common;
 	exports.default = _select3.default;
 
 /***/ },
@@ -108,16 +115,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _optimize2 = _interopRequireDefault(_optimize);
 
+	var _common = __webpack_require__(5);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 	/**
 	 * Choose action depending on the input (single/multi)
-	 * @param  {HTMLElement|Array} input   - [description]
-	 * @param  {Object}            options - [description]
-	 * @return {string}                    - [description]
+	 *
+	 * @param  {HTMLElement|Array.<HTMLElement>} input   - [description]
+	 * @param  {Object}                          options - [description]
+	 * @return {string}                                  - [description]
 	 */
 	function getQuerySelector(input) {
-	  var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 	  if (Array.isArray(input)) {
 	    return getMultiSelector(input, options);
@@ -127,14 +139,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Get a selector for the provided element
+	 *
 	 * @param  {HTMLElement} element - [description]
 	 * @param  {Object}      options - [description]
-	 * @return {String}              - [description]
+	 * @return {string}              - [description]
 	 */
-	function getSingleSelector(element, options) {
+	function getSingleSelector(element) {
+	  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
 
 	  if (element.nodeType === 3) {
-	    return getSingleSelector(element.parentNode);
+	    element = element.parentNode;
 	  }
 	  if (element.nodeType !== 1) {
 	    throw new Error('Invalid input - only HTMLElements or representations of them are supported! (not "' + (typeof element === 'undefined' ? 'undefined' : _typeof(element)) + '")');
@@ -147,8 +162,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // debug
 	  // console.log(`
-	  //   selector: ${selector}
-	  //   optimized:${optimized}
+	  //   selector:  ${selector}
+	  //   optimized: ${optimized}
 	  // `)
 
 	  if (globalModified) {
@@ -159,68 +174,90 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Get a selector to match multiple children from a parent
-	 * @param  {Array}  elements - [description]
-	 * @param  {Object} options  - [description]
-	 * @return {string}          - [description]
+	 * Get a selector to match multiple descendants from an ancestor
+	 *
+	 * @param  {Array.<HTMLElement>} elements - [description]
+	 * @param  {Object}              options  - [description]
+	 * @return {string}                       - [description]
 	 */
-	function getMultiSelector(elements, options) {
-	  var commonParentNode = null;
-	  var commonClassName = null;
-	  var commonAttribute = null;
-	  var commonTagName = null;
+	function getMultiSelector(elements) {
+	  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-	  for (var i = 0, l = elements.length; i < l; i++) {
-	    var element = elements[i];
-	    if (!commonParentNode) {
-	      // 1st entry
-	      commonParentNode = element.parentNode;
-	      commonClassName = element.className;
-	      // commonAttribute = element.attributes
-	      commonTagName = element.tagName;
-	    } else if (commonParentNode !== element.parentNode) {
-	      return console.log('Can\'t be efficiently mapped. It probably best to use multiple single selectors instead!');
-	    }
-	    if (element.className !== commonClassName) {
-	      var classNames = [];
-	      var longer, shorter;
-	      if (element.className.length > commonClassName.length) {
-	        longer = element.className;
-	        shorter = commonClassName;
-	      } else {
-	        longer = commonClassName;
-	        shorter = element.className;
-	      }
-	      shorter.split(' ').forEach(function (name) {
-	        if (longer.indexOf(name) > -1) {
-	          classNames.push(name);
-	        }
-	      });
-	      commonClassName = classNames.join(' ');
-	    }
-	    // TODO:
-	    // - check attributes
-	    // if (element.attributes !== commonAttribute) {
-	    //
-	    // }
-	    if (element.tagName !== commonTagName) {
-	      commonTagName = null;
-	    }
+
+	  if (elements.some(function (element) {
+	    return element.nodeType !== 1;
+	  })) {
+	    throw new Error('Invalid input - only an Array of HTMLElements or representations of them is supported!');
 	  }
 
-	  var selector = getSingleSelector(commonParentNode, options);
-	  console.log(selector, commonClassName, commonAttribute, commonTagName);
+	  var globalModified = (0, _adapt2.default)(elements[0], options);
 
-	  if (commonClassName) {
-	    return selector + ' > .' + commonClassName.replace(/ /g, '.');
+	  var ancestor = (0, _common.getCommonAncestor)(elements, options);
+	  var ancestorSelector = getSingleSelector(ancestor, options);
+
+	  // TODO: consider usage of multiple selectors + parent-child relation
+	  var commonSelectors = getCommonSelectors(elements);
+	  var descendantSelector = commonSelectors[0];
+
+	  var selector = ancestorSelector + ' ' + descendantSelector;
+	  var selectorMatches = [].concat(_toConsumableArray(document.querySelectorAll(selector)));
+
+	  if (!elements.every(function (element) {
+	    return selectorMatches.some(function (entry) {
+	      return entry === element;
+	    });
+	  })) {
+	    // TODO: cluster matches to split into similar groups for sub selections
+	    return console.warn('\n      The selected elements can\'t be efficiently mapped.\n      Its probably best to use multiple single selectors instead!\n    ', elements);
 	  }
-	  // if (commonAttribute) {
-	  //
-	  // }
-	  if (commonTagName) {
-	    return selector + ' > ' + commonTagName.toLowerCase();
+
+	  if (globalModified) {
+	    delete global.document;
 	  }
-	  return selector + ' > *';
+
+	  return selector;
+	}
+
+	/**
+	 * Get selectors to describe a set of elements
+	 *
+	 * @param  {Array.<HTMLElements>} elements - [description]
+	 * @return {string}                        - [description]
+	 */
+	function getCommonSelectors(elements) {
+	  var _getCommonProperties = (0, _common.getCommonProperties)(elements);
+
+	  var classes = _getCommonProperties.classes;
+	  var attributes = _getCommonProperties.attributes;
+	  var tag = _getCommonProperties.tag;
+
+
+	  var selectorPath = [];
+
+	  if (tag) {
+	    selectorPath.push(tag);
+	  }
+
+	  if (classes) {
+	    var classSelector = classes.map(function (name) {
+	      return '.' + name;
+	    }).join('');
+	    selectorPath.push(classSelector);
+	  }
+
+	  if (attributes) {
+	    var attributeSelector = Object.keys(attributes).reduce(function (parts, name) {
+	      parts.push('[' + name + '="' + attributes[name] + '"]');
+	      return parts;
+	    }, []).join('');
+	    selectorPath.push(attributeSelector);
+	  }
+
+	  if (selectorPath.length) {
+	    // TODO: check for parent-child relation
+	  }
+
+	  return [selectorPath.join('')];
 	}
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
@@ -249,10 +286,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	/**
-	 * [adapt description]
-	 * @param  {[type]} element [description]
-	 * @param  {[type]} options [description]
-	 * @return {[type]}         [description]
+	 * Modify the context based on the environment
+	 *
+	 * @param  {HTMLELement} element - [description]
+	 * @param  {Object}      options - [description]
+	 * @return {boolean}             - [description]
 	 */
 	function adapt(element, options) {
 
@@ -406,9 +444,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [getInstructions description]
-	 * @param  {[type]} selectors [description]
-	 * @return {[type]}           [description]
+	 * Retrieve transformation steps
+	 *
+	 * @param  {Array.<string>}   selectors - [description]
+	 * @return {Array.<Function>}           - [description]
 	 */
 	function getInstructions(selectors) {
 	  return selectors.split(' ').reverse().map(function (selector, step) {
@@ -425,147 +464,149 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var validate = null;
 	    var instruction = null;
 
-	    switch (true) {
+	    (function () {
+	      switch (true) {
 
-	      // child: '>'
-	      case />/.test(type):
-	        instruction = function checkParent(node) {
-	          return function (validate) {
-	            return validate(node.parent) && node.parent;
+	        // child: '>'
+	        case />/.test(type):
+	          instruction = function checkParent(node) {
+	            return function (validate) {
+	              return validate(node.parent) && node.parent;
+	            };
 	          };
-	        };
-	        break;
+	          break;
 
-	      // class: '.'
-	      case /^\./.test(type):
-	        var names = type.substr(1).split('.');
-	        validate = function validate(node) {
-	          var nodeClassName = node.attribs.class;
-	          return nodeClassName && names.every(function (name) {
-	            return nodeClassName.indexOf(name) > -1;
-	          });
-	        };
-	        instruction = function checkClass(node, root) {
-	          if (discover) {
-	            return node.getElementsByClassName(names.join(' '));
-	          }
-	          return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
-	        };
-	        break;
-
-	      // attribute: '[key="value"]'
-	      case /^\[/.test(type):
-	        var _type$replace$split = type.replace(/\[|\]|"/g, '').split('=');
-
-	        var _type$replace$split2 = _slicedToArray(_type$replace$split, 2);
-
-	        var attributeKey = _type$replace$split2[0];
-	        var attributeValue = _type$replace$split2[1];
-
-	        validate = function validate(node) {
-	          var hasAttribute = Object.keys(node.attribs).indexOf(attributeKey) > -1;
-	          if (hasAttribute) {
-	            // regard optional attributeValue
-	            if (!attributeValue || node.attribs[attributeKey] === attributeValue) {
-	              return true;
+	        // class: '.'
+	        case /^\./.test(type):
+	          var names = type.substr(1).split('.');
+	          validate = function validate(node) {
+	            var nodeClassName = node.attribs.class;
+	            return nodeClassName && names.every(function (name) {
+	              return nodeClassName.indexOf(name) > -1;
+	            });
+	          };
+	          instruction = function checkClass(node, root) {
+	            if (discover) {
+	              return node.getElementsByClassName(names.join(' '));
 	            }
-	          }
-	          return false;
-	        };
-	        instruction = function checkAttribute(node, root) {
-	          if (discover) {
-	            var _ret = function () {
-	              var NodeList = [];
-	              traverseDescendants([node], function (descendant) {
-	                if (validate(descendant)) {
-	                  NodeList.push(descendant);
-	                }
-	              });
-	              return {
-	                v: NodeList
-	              };
-	            }();
+	            return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
+	          };
+	          break;
 
-	            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-	          }
-	          return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
-	        };
-	        break;
+	        // attribute: '[key="value"]'
+	        case /^\[/.test(type):
+	          var _type$replace$split = type.replace(/\[|\]|"/g, '').split('=');
 
-	      // id: '#'
-	      case /^#/.test(type):
-	        var id = type.substr(1);
-	        validate = function validate(node) {
-	          return node.attribs.id === id;
-	        };
-	        instruction = function checkId(node, root) {
-	          if (discover) {
-	            var _ret2 = function () {
-	              var NodeList = [];
-	              traverseDescendants([node], function (descendant, done) {
-	                if (validate(descendant)) {
-	                  NodeList.push(descendant);
-	                  done();
-	                }
-	              });
-	              return {
-	                v: NodeList
-	              };
-	            }();
+	          var _type$replace$split2 = _slicedToArray(_type$replace$split, 2);
 
-	            if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
-	          }
-	          return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
-	        };
-	        break;
+	          var attributeKey = _type$replace$split2[0];
+	          var attributeValue = _type$replace$split2[1];
 
-	      // universal: '*'
-	      case /\*/.test(type):
-	        validate = function validate(node) {
-	          return true;
-	        };
-	        instruction = function checkUniversal(node, root) {
-	          if (discover) {
-	            var _ret3 = function () {
-	              var NodeList = [];
-	              traverseDescendants([node], function (descendant) {
-	                return NodeList.push(descendant);
-	              });
-	              return {
-	                v: NodeList
-	              };
-	            }();
+	          validate = function validate(node) {
+	            var hasAttribute = Object.keys(node.attribs).indexOf(attributeKey) > -1;
+	            if (hasAttribute) {
+	              // regard optional attributeValue
+	              if (!attributeValue || node.attribs[attributeKey] === attributeValue) {
+	                return true;
+	              }
+	            }
+	            return false;
+	          };
+	          instruction = function checkAttribute(node, root) {
+	            if (discover) {
+	              var _ret2 = function () {
+	                var NodeList = [];
+	                traverseDescendants([node], function (descendant) {
+	                  if (validate(descendant)) {
+	                    NodeList.push(descendant);
+	                  }
+	                });
+	                return {
+	                  v: NodeList
+	                };
+	              }();
 
-	            if ((typeof _ret3 === 'undefined' ? 'undefined' : _typeof(_ret3)) === "object") return _ret3.v;
-	          }
-	          return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
-	        };
-	        break;
+	              if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
+	            }
+	            return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
+	          };
+	          break;
 
-	      // tag: '...'
-	      default:
-	        validate = function validate(node) {
-	          return node.name === type;
-	        };
-	        instruction = function checkTag(node, root) {
-	          if (discover) {
-	            var _ret4 = function () {
-	              var NodeList = [];
-	              traverseDescendants([node], function (descendant) {
-	                if (validate(descendant)) {
-	                  NodeList.push(descendant);
-	                }
-	              });
-	              return {
-	                v: NodeList
-	              };
-	            }();
+	        // id: '#'
+	        case /^#/.test(type):
+	          var id = type.substr(1);
+	          validate = function validate(node) {
+	            return node.attribs.id === id;
+	          };
+	          instruction = function checkId(node, root) {
+	            if (discover) {
+	              var _ret3 = function () {
+	                var NodeList = [];
+	                traverseDescendants([node], function (descendant, done) {
+	                  if (validate(descendant)) {
+	                    NodeList.push(descendant);
+	                    done();
+	                  }
+	                });
+	                return {
+	                  v: NodeList
+	                };
+	              }();
 
-	            if ((typeof _ret4 === 'undefined' ? 'undefined' : _typeof(_ret4)) === "object") return _ret4.v;
-	          }
-	          return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
-	        };
-	    }
+	              if ((typeof _ret3 === 'undefined' ? 'undefined' : _typeof(_ret3)) === "object") return _ret3.v;
+	            }
+	            return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
+	          };
+	          break;
+
+	        // universal: '*'
+	        case /\*/.test(type):
+	          validate = function validate(node) {
+	            return true;
+	          };
+	          instruction = function checkUniversal(node, root) {
+	            if (discover) {
+	              var _ret4 = function () {
+	                var NodeList = [];
+	                traverseDescendants([node], function (descendant) {
+	                  return NodeList.push(descendant);
+	                });
+	                return {
+	                  v: NodeList
+	                };
+	              }();
+
+	              if ((typeof _ret4 === 'undefined' ? 'undefined' : _typeof(_ret4)) === "object") return _ret4.v;
+	            }
+	            return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
+	          };
+	          break;
+
+	        // tag: '...'
+	        default:
+	          validate = function validate(node) {
+	            return node.name === type;
+	          };
+	          instruction = function checkTag(node, root) {
+	            if (discover) {
+	              var _ret5 = function () {
+	                var NodeList = [];
+	                traverseDescendants([node], function (descendant) {
+	                  if (validate(descendant)) {
+	                    NodeList.push(descendant);
+	                  }
+	                });
+	                return {
+	                  v: NodeList
+	                };
+	              }();
+
+	              if ((typeof _ret5 === 'undefined' ? 'undefined' : _typeof(_ret5)) === "object") return _ret5.v;
+	            }
+	            return typeof node === 'function' ? node(validate) : getAncestor(node, root, validate);
+	          };
+	      }
+	    })();
 
 	    if (!pseudo) {
 	      return instruction;
@@ -607,10 +648,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * Recursive walki
-	 * @param  {[type]} nodes   [description]
-	 * @param  {[type]} handler [description]
-	 * @return {[type]}         [description]
+	 * Walking recursive to invoke callbacks
+	 *
+	 * @param {Array.<HTMLElement>} nodes   - [description]
+	 * @param {Function}            handler - [description]
 	 */
 	function traverseDescendants(nodes, handler) {
 	  nodes.forEach(function (node) {
@@ -625,11 +666,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [getAncestor description]
-	 * @param  {[type]} node     [description]
-	 * @param  {[type]} root     [description]
-	 * @param  {[type]} validate [description]
-	 * @return {[type]}          [description]
+	 * Bubble up from bottom to top
+	 *
+	 * @param  {HTMLELement} node     - [description]
+	 * @param  {HTMLELement} root     - [description]
+	 * @param  {Function}    validate - [description]
+	 * @return {HTMLELement}          - [description]
 	 */
 	function getAncestor(node, root, validate) {
 	  while (node.parent) {
@@ -670,15 +712,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Get the path of the element
+	 *
 	 * @param  {HTMLElement} node    - [description]
 	 * @param  {Object}      options - [description]
-	 * @return {String}              - [description]
+	 * @return {string}              - [description]
 	 */
 	function match(node, options) {
-	  var path = [];
-	  var element = node;
-	  var length = path.length;
-
 	  var _options$root = options.root;
 	  var root = _options$root === undefined ? document : _options$root;
 	  var _options$skip = options.skip;
@@ -686,6 +725,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var _options$ignore = options.ignore;
 	  var ignore = _options$ignore === undefined ? {} : _options$ignore;
 
+
+	  var path = [];
+	  var element = node;
+	  var length = path.length;
 
 	  var skipCompare = skip && (Array.isArray(skip) ? skip : [skip]).map(function (entry) {
 	    if (typeof entry !== 'function') {
@@ -772,33 +815,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [checkClassGlobal description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Preset 'checkClass' with global data
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkClassGlobal(element, path, ignore, root) {
 	  return checkClass(element, path, ignore, root);
 	}
 
 	/**
-	 * [checkClassLocal description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Preset 'checkClass' with local data
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkClassLocal(element, path, ignore) {
 	  return checkClass(element, path, ignore, element.parentNode);
 	}
 
 	/**
-	 * [checkClassChild description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Preset 'checkChild' with class data
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkClassChild(element, path, ignore) {
 	  var className = element.getAttribute('class');
@@ -809,33 +855,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [checkAttributeGlobal description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Preset 'checkAttribute' with global data
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkAttributeGlobal(element, path, ignore, root) {
 	  return checkAttribute(element, path, ignore, root);
 	}
 
 	/**
-	 * [checkAttributeLocal description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Preset 'checkAttribute' with local data
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkAttributeLocal(element, path, ignore) {
 	  return checkAttribute(element, path, ignore, element.parentNode);
 	}
 
 	/**
-	 * [checkAttributeChild description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Preset 'checkChild' with attribute data
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkAttributeChild(element, path, ignore) {
 	  var attributes = element.attributes;
@@ -852,33 +901,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [checkTagGlobal description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Preset 'checkTag' with global data
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkTagGlobal(element, path, ignore, root) {
 	  return checkTag(element, path, ignore, root);
 	}
 
 	/**
-	 * [checkTagLocal description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Preset 'checkTag' with local data
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkTagLocal(element, path, ignore) {
 	  return checkTag(element, path, ignore, element.parentNode);
 	}
 
 	/**
-	 * [checkTabChildren description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Preset 'checkChild' with tag data
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkTagChild(element, path, ignore) {
 	  var tagName = element.tagName.toLowerCase();
@@ -889,11 +941,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [checkId description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Lookup unique identifier
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkId(element, path, ignore) {
 	  var id = element.getAttribute('id');
@@ -905,12 +958,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [checkClass description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @param  {HTMLElement} parent  - [description]
-	 * @return {Boolean}             - [description]
+	 * Lookup class identifier
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @param  {HTMLElement}    parent  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkClass(element, path, ignore, parent) {
 	  var className = element.getAttribute('class');
@@ -926,12 +980,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [checkAttribute description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @param  {HTMLElement} parent  - [description]
-	 * @return {Boolean}             - [description]
+	 * Lookup attribute identifier
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @param  {HTMLElement}    parent  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkAttribute(element, path, ignore, parent) {
 	  var attributes = element.attributes;
@@ -952,12 +1007,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [checkTag description]
-	 * @param  {HTMLElement} element - [description]
-	 * @param  {Array}       path    - [description]
-	 * @param  {HTMLElement} parent  - [description]
-	 * @param  {Object}      ignore  - [description]
-	 * @return {Boolean}             - [description]
+	 * Lookup tag identifier
+	 *
+	 * @param  {HTMLElement}    element - [description]
+	 * @param  {Array.<string>} path    - [description]
+	 * @param  {HTMLElement}    parent  - [description]
+	 * @param  {Object}         ignore  - [description]
+	 * @return {boolean}                - [description]
 	 */
 	function checkTag(element, path, ignore, parent) {
 	  var tagName = element.tagName.toLowerCase();
@@ -973,12 +1029,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [checkChild description]
+	 * Lookup child identfier
+	 *
 	 * Note: childTags is a custom property to use a view filter for tags on for virutal elements
-	 * @param  {HTMLElement} element  - [description]
-	 * @param  {Array}       path     - [description]
-	 * @param  {String}      selector - [description]
-	 * @return {Boolean}              - [description]
+	 *
+	 * @param  {HTMLElement}    element  - [description]
+	 * @param  {Array.<string>} path     - [description]
+	 * @param  {String}         selector - [description]
+	 * @return {boolean}                 - [description]
 	 */
 	function checkChild(element, path, selector) {
 	  var parent = element.parentNode;
@@ -993,12 +1051,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * [checkIgnore description]
-	 * @param  {Function} predicate        [description]
-	 * @param  {string}   name             [description]
-	 * @param  {string}   value            [description]
-	 * @param  {Function} defaultPredicate [description]
-	 * @return {boolean}                   [description]
+	 * Validate with custom and default functions
+	 *
+	 * @param  {Function} predicate        - [description]
+	 * @param  {string}   name             - [description]
+	 * @param  {string}   value            - [description]
+	 * @param  {Function} defaultPredicate - [description]
+	 * @return {boolean}                   - [description]
 	 */
 	function checkIgnore(predicate, name, value, defaultPredicate) {
 	  if (!name) {
@@ -1031,13 +1090,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Apply different optimization techniques
+	 *
 	 * @param  {string}      selector - [description]
 	 * @param  {HTMLElement} element  - [description]
 	 * @return {string}               - [description]
 	 */
 	function optimize(selector, element) {
-	  var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+	  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
+
+	  if (!element || element.nodeType !== 1) {
+	    throw new Error('Invalid input - to compare HTMLElements its necessary to provide a reference of the node! (missing "element")');
+	  }
 
 	  var globalModified = (0, _adapt2.default)(element, options);
 
@@ -1045,7 +1109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var path = selector.replace(/> /g, '>').split(/\s+(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
 	  if (path.length < 3) {
-	    return selector;
+	    return optimizePart('', selector, '', element);
 	  }
 
 	  var shortened = [path.pop()];
@@ -1076,6 +1140,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Improve a chunk of the selector
+	 *
 	 * @param  {string}      prePart  - [description]
 	 * @param  {string}      current  - [description]
 	 * @param  {string}      postPart - [description]
@@ -1146,8 +1211,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return curr.length - next.length;
 	    });
 	    while (names.length) {
-	      var partial = current.replace(names.shift(), '');
+	      var partial = current.replace(names.shift(), '').trim();
 	      var pattern = '' + prePart + partial + postPart;
+	      if (!pattern || partial === '>') {
+	        break;
+	      }
 	      var matches = document.querySelectorAll(pattern);
 	      if (matches.length === 1 && matches[0] === element) {
 	        current = partial;
@@ -1176,6 +1244,182 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	module.exports = exports['default'];
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.getCommonAncestor = getCommonAncestor;
+	exports.getCommonProperties = getCommonProperties;
+	/**
+	 * # Common
+	 *
+	 * Group similars
+	 */
+
+	/**
+	 * Find the last common ancestor of elements
+	 *
+	 * @param  {Array.<HTMLElements>} elements - [description]
+	 * @return {HTMLElement}                   - [description]
+	 */
+	function getCommonAncestor(elements) {
+	  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	  var _options$root = options.root;
+	  var root = _options$root === undefined ? document : _options$root;
+	  var _options$skip = options.skip;
+	  var skip = _options$skip === undefined ? null : _options$skip;
+	  var _options$ignore = options.ignore;
+	  var ignore = _options$ignore === undefined ? {} : _options$ignore;
+
+
+	  var ancestors = [];
+
+	  elements.forEach(function (element, index) {
+	    var parents = [];
+	    while (element !== root) {
+	      element = element.parentNode;
+	      parents.unshift(element);
+	    }
+	    ancestors[index] = parents;
+	  });
+
+	  ancestors.sort(function (curr, next) {
+	    return curr.length - next.length;
+	  });
+
+	  var shallowAncestor = ancestors.shift();
+
+	  var ancestor = null;
+
+	  var _loop = function _loop() {
+	    var parent = shallowAncestor[i];
+	    var missing = ancestors.some(function (otherParents) {
+	      return !otherParents.some(function (otherParent) {
+	        return otherParent === parent;
+	      });
+	    });
+
+	    if (missing) {
+	      // TODO: find similar sub-parents, not the top root, e.g. sharing a class selector
+	      return 'break';
+	    }
+
+	    ancestor = parent;
+	  };
+
+	  for (var i = 0, l = shallowAncestor.length; i < l; i++) {
+	    var _ret = _loop();
+
+	    if (_ret === 'break') break;
+	  }
+
+	  return ancestor;
+	}
+
+	/**
+	 * Get a set of common properties of elements
+	 *
+	 * @param  {Array.<HTMLElement>} elements - [description]
+	 * @return {Object}                       - [description]
+	 */
+	function getCommonProperties(elements) {
+
+	  var commonProperties = {
+	    classes: [],
+	    attributes: {},
+	    tag: null
+	  };
+
+	  elements.forEach(function (element) {
+	    var commonClasses = commonProperties.classes;
+	    var commonAttributes = commonProperties.attributes;
+	    var commonTag = commonProperties.tag;
+
+	    // ~ classes
+
+	    if (commonClasses !== undefined) {
+	      (function () {
+	        var classes = element.getAttribute('class').trim().split(' ');
+	        // TODO: restructure, cleanup, 2x set, 2x delete || always replacing with new collection instead modify
+	        if (classes.length) {
+	          if (!commonClasses.length) {
+	            commonProperties.classes = classes;
+	          } else {
+	            commonClasses = commonClasses.filter(function (entry) {
+	              return classes.some(function (name) {
+	                return name === entry;
+	              });
+	            });
+	            if (commonClasses.length) {
+	              commonProperties.classes = commonClasses;
+	            } else {
+	              delete commonProperties.classes;
+	            }
+	          }
+	        } else {
+	          delete commonProperties.classes;
+	        }
+	      })();
+	    }
+
+	    // ~ attributes
+	    if (commonAttributes !== undefined) {
+	      (function () {
+	        var elementAttributes = element.attributes;
+	        var attributes = Object.keys(elementAttributes).reduce(function (attributes, key) {
+	          var attribute = elementAttributes[key];
+	          var attributeName = attribute.name;
+	          if (attributeName !== 'class') {
+	            attributes[attributeName] = attribute.value;
+	          }
+	          return attributes;
+	        }, {});
+
+	        var attributesNames = Object.keys(attributes);
+	        var commonAttributesNames = Object.keys(commonAttributes);
+
+	        if (attributesNames.length) {
+	          if (!commonAttributesNames.length) {
+	            commonProperties.attributes = attributes;
+	          } else {
+	            commonAttributes = commonAttributesNames.reduce(function (nextCommonAttributes, name) {
+	              var value = commonAttributes[name];
+	              if (valeu === attributes[name]) {
+	                nextCommonAttributes[name] = value;
+	              }
+	              return nextCommonAttributes;
+	            }, {});
+	            if (Object.keys(commonAttributes).length) {
+	              commonProperties.attributes = commonAttributes;
+	            } else {
+	              delete commonProperties.attributes;
+	            }
+	          }
+	        } else {
+	          delete commonProperties.attributes;
+	        }
+	      })();
+	    }
+
+	    // ~ tag
+	    if (commonTag !== undefined) {
+	      var tag = element.tagName.toLowerCase();
+	      if (!commonTag) {
+	        commonProperties.tag = tag;
+	      } else if (tag !== commonTag) {
+	        delete commonProperties.tag;
+	      }
+	    }
+	  });
+
+	  return commonProperties;
+	}
 
 /***/ }
 /******/ ])
