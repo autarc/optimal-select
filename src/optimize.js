@@ -116,7 +116,10 @@ function optimizePart (prePart, current, postPart, element) {
     const names = current.trim().split('.').slice(1).map((name) => `.${name}`)
                                 .sort((curr, next) => curr.length - next.length)
     while (names.length) {
-      var partial = current.replace(names.shift(), '')
+      var partial = current.replace(names.shift(), '').trim()
+      if (partial === '>') {
+        break
+      }
       var pattern = `${prePart}${partial}${postPart}`
       var matches = document.querySelectorAll(pattern)
       if (matches.length === 1 && matches[0] === element) {
