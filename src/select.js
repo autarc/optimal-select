@@ -12,9 +12,10 @@ import { getCommonAncestor, getCommonProperties } from './common'
 
 /**
  * Choose action depending on the input (single/multi)
- * @param  {HTMLElement|Array} input   - [description]
- * @param  {Object}            options - [description]
- * @return {string}                    - [description]
+ *
+ * @param  {HTMLElement|Array.<HTMLElement>} input   - [description]
+ * @param  {Object}                          options - [description]
+ * @return {string}                                  - [description]
  */
 export default function getQuerySelector (input, options = {}) {
   if (Array.isArray(input)) {
@@ -25,6 +26,7 @@ export default function getQuerySelector (input, options = {}) {
 
 /**
  * Get a selector for the provided element
+ *
  * @param  {HTMLElement} element - [description]
  * @param  {Object}      options - [description]
  * @return {string}              - [description]
@@ -58,9 +60,10 @@ export function getSingleSelector (element, options = {}) {
 
 /**
  * Get a selector to match multiple descendants from an ancestor
- * @param  {Array}  elements - [description]
- * @param  {Object} options  - [description]
- * @return {string}          - [description]
+ *
+ * @param  {Array.<HTMLElement>} elements - [description]
+ * @param  {Object}              options  - [description]
+ * @return {string}                       - [description]
  */
 export function getMultiSelector (elements, options = {}) {
 
@@ -96,9 +99,10 @@ export function getMultiSelector (elements, options = {}) {
 }
 
 /**
- * Get selectors for a set of elements
- * @param  {Array}  elements - [description]
- * @return {string}          - [description]
+ * Get selectors to describe a set of elements
+ *
+ * @param  {Array.<HTMLElements>} elements - [description]
+ * @return {string}                        - [description]
  */
 function getCommonSelectors (elements) {
 

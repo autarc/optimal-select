@@ -16,20 +16,22 @@ const defaultIgnore = {
 
 /**
  * Get the path of the element
+ *
  * @param  {HTMLElement} node    - [description]
  * @param  {Object}      options - [description]
- * @return {String}              - [description]
+ * @return {string}              - [description]
  */
 export default function match (node, options) {
-  const path = []
-  var element = node
-  var length = path.length
 
   const {
     root = document,
     skip = null,
     ignore = {}
   } = options
+
+  const path = []
+  var element = node
+  var length = path.length
 
   const skipCompare = skip && (Array.isArray(skip) ? skip : [skip]).map((entry) => {
     if (typeof entry !== 'function') {
@@ -111,33 +113,36 @@ export default function match (node, options) {
 
 
 /**
- * [checkClassGlobal description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Preset 'checkClass' with global data
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkClassGlobal (element, path, ignore, root) {
   return checkClass(element, path, ignore, root)
 }
 
 /**
- * [checkClassLocal description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Preset 'checkClass' with local data
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkClassLocal (element, path, ignore) {
   return checkClass(element, path, ignore, element.parentNode)
 }
 
 /**
- * [checkClassChild description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Preset 'checkChild' with class data
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkClassChild (element, path, ignore) {
   const className = element.getAttribute('class')
@@ -148,33 +153,36 @@ function checkClassChild (element, path, ignore) {
 }
 
 /**
- * [checkAttributeGlobal description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Preset 'checkAttribute' with global data
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkAttributeGlobal (element, path, ignore, root) {
   return checkAttribute(element, path, ignore, root)
 }
 
 /**
- * [checkAttributeLocal description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Preset 'checkAttribute' with local data
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkAttributeLocal (element, path, ignore) {
   return checkAttribute(element, path, ignore, element.parentNode)
 }
 
 /**
- * [checkAttributeChild description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Preset 'checkChild' with attribute data
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkAttributeChild (element, path, ignore) {
   const attributes = element.attributes
@@ -191,33 +199,36 @@ function checkAttributeChild (element, path, ignore) {
 }
 
 /**
- * [checkTagGlobal description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Preset 'checkTag' with global data
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkTagGlobal (element, path, ignore, root) {
   return checkTag(element, path, ignore, root)
 }
 
 /**
- * [checkTagLocal description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Preset 'checkTag' with local data
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkTagLocal (element, path, ignore) {
   return checkTag(element, path, ignore, element.parentNode)
 }
 
 /**
- * [checkTabChildren description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Preset 'checkChild' with tag data
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkTagChild (element, path, ignore) {
   const tagName = element.tagName.toLowerCase()
@@ -228,11 +239,12 @@ function checkTagChild (element, path, ignore) {
 }
 
 /**
- * [checkId description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Lookup unique identifier
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkId (element, path, ignore) {
   const id = element.getAttribute('id')
@@ -244,12 +256,13 @@ function checkId (element, path, ignore) {
 }
 
 /**
- * [checkClass description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @param  {HTMLElement} parent  - [description]
- * @return {Boolean}             - [description]
+ * Lookup class identifier
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @param  {HTMLElement}    parent  - [description]
+ * @return {boolean}                - [description]
  */
 function checkClass (element, path, ignore, parent) {
   const className = element.getAttribute('class')
@@ -265,12 +278,13 @@ function checkClass (element, path, ignore, parent) {
 }
 
 /**
- * [checkAttribute description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {Object}      ignore  - [description]
- * @param  {HTMLElement} parent  - [description]
- * @return {Boolean}             - [description]
+ * Lookup attribute identifier
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {Object}         ignore  - [description]
+ * @param  {HTMLElement}    parent  - [description]
+ * @return {boolean}                - [description]
  */
 function checkAttribute (element, path, ignore, parent) {
   const attributes = element.attributes
@@ -291,12 +305,13 @@ function checkAttribute (element, path, ignore, parent) {
 }
 
 /**
- * [checkTag description]
- * @param  {HTMLElement} element - [description]
- * @param  {Array}       path    - [description]
- * @param  {HTMLElement} parent  - [description]
- * @param  {Object}      ignore  - [description]
- * @return {Boolean}             - [description]
+ * Lookup tag identifier
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {HTMLElement}    parent  - [description]
+ * @param  {Object}         ignore  - [description]
+ * @return {boolean}                - [description]
  */
 function checkTag (element, path, ignore, parent) {
   const tagName = element.tagName.toLowerCase()
@@ -312,12 +327,14 @@ function checkTag (element, path, ignore, parent) {
 }
 
 /**
- * [checkChild description]
+ * Lookup child identfier
+ *
  * Note: childTags is a custom property to use a view filter for tags on for virutal elements
- * @param  {HTMLElement} element  - [description]
- * @param  {Array}       path     - [description]
- * @param  {String}      selector - [description]
- * @return {Boolean}              - [description]
+ *
+ * @param  {HTMLElement}    element  - [description]
+ * @param  {Array.<string>} path     - [description]
+ * @param  {String}         selector - [description]
+ * @return {boolean}                 - [description]
  */
 function checkChild (element, path, selector) {
   const parent = element.parentNode
@@ -332,12 +349,13 @@ function checkChild (element, path, selector) {
 }
 
 /**
- * [checkIgnore description]
- * @param  {Function} predicate        [description]
- * @param  {string}   name             [description]
- * @param  {string}   value            [description]
- * @param  {Function} defaultPredicate [description]
- * @return {boolean}                   [description]
+ * Validate with custom and default functions
+ *
+ * @param  {Function} predicate        - [description]
+ * @param  {string}   name             - [description]
+ * @param  {string}   value            - [description]
+ * @param  {Function} defaultPredicate - [description]
+ * @return {boolean}                   - [description]
  */
 function checkIgnore (predicate, name, value, defaultPredicate) {
   if (!name) {

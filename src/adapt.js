@@ -5,10 +5,11 @@
  */
 
 /**
- * [adapt description]
- * @param  {[type]} element [description]
- * @param  {[type]} options [description]
- * @return {[type]}         [description]
+ * Modify the context based on the environment
+ *
+ * @param  {HTMLELement} element - [description]
+ * @param  {Object}      options - [description]
+ * @return {boolean}             - [description]
  */
 export default function adapt (element, options) {
 
@@ -147,9 +148,10 @@ export default function adapt (element, options) {
 }
 
 /**
- * [getInstructions description]
- * @param  {[type]} selectors [description]
- * @return {[type]}           [description]
+ * Retrieve transformation steps
+ *
+ * @param  {Array.<string>}   selectors - [description]
+ * @return {Array.<Function>}           - [description]
  */
 function getInstructions (selectors) {
   return selectors.split(' ').reverse().map((selector, step) => {
@@ -300,10 +302,10 @@ function getInstructions (selectors) {
 }
 
 /**
- * Recursive walki
- * @param  {[type]} nodes   [description]
- * @param  {[type]} handler [description]
- * @return {[type]}         [description]
+ * Walking recursive to invoke callbacks
+ *
+ * @param {Array.<HTMLElement>} nodes   - [description]
+ * @param {Function}            handler - [description]
  */
 function traverseDescendants (nodes, handler) {
   nodes.forEach((node) => {
@@ -316,11 +318,12 @@ function traverseDescendants (nodes, handler) {
 }
 
 /**
- * [getAncestor description]
- * @param  {[type]} node     [description]
- * @param  {[type]} root     [description]
- * @param  {[type]} validate [description]
- * @return {[type]}          [description]
+ * Bubble up from bottom to top
+ *
+ * @param  {HTMLELement} node     - [description]
+ * @param  {HTMLELement} root     - [description]
+ * @param  {Function}    validate - [description]
+ * @return {HTMLELement}          - [description]
  */
 function getAncestor (node, root, validate) {
   while (node.parent) {

@@ -6,8 +6,9 @@
 
 /**
  * Find the last common ancestor of elements
- * @param  {Array}       elements - [description]
- * @return {HTMLElement}          - [description]
+ *
+ * @param  {Array.<HTMLElements>} elements - [description]
+ * @return {HTMLElement}                   - [description]
  */
 export function getCommonAncestor (elements, options = {}) {
 
@@ -53,8 +54,9 @@ export function getCommonAncestor (elements, options = {}) {
 
 /**
  * Get a set of common properties of elements
- * @param  {Array}  elements - [description]
- * @return {Object}          - [description]
+ *
+ * @param  {Array.<HTMLElement>} elements - [description]
+ * @return {Object}                       - [description]
  */
 export function getCommonProperties (elements) {
 

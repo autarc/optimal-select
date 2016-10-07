@@ -9,6 +9,7 @@ import adapt from './adapt'
 
 /**
  * Apply different optimization techniques
+ *
  * @param  {string}      selector - [description]
  * @param  {HTMLElement} element  - [description]
  * @return {string}               - [description]
@@ -56,6 +57,7 @@ export default function optimize (selector, element, options = {}) {
 
 /**
  * Improve a chunk of the selector
+ *
  * @param  {string}      prePart  - [description]
  * @param  {string}      current  - [description]
  * @param  {string}      postPart - [description]
