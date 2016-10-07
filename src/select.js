@@ -8,6 +8,7 @@
 import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
+import { getCommonAncestor, getCommonProperties } from './common'
 
 /**
  * Choose action depending on the input (single/multi)
@@ -26,12 +27,12 @@ export default function getQuerySelector (input, options = {}) {
  * Get a selector for the provided element
  * @param  {HTMLElement} element - [description]
  * @param  {Object}      options - [description]
- * @return {String}              - [description]
+ * @return {string}              - [description]
  */
-export function getSingleSelector (element, options) {
+export function getSingleSelector (element, options = {}) {
 
   if (element.nodeType === 3) {
-    return getSingleSelector(element.parentNode, options)
+    element = element.parentNode
   }
   if (element.nodeType !== 1) {
     throw new Error(`Invalid input - only HTMLElements or representations of them are supported! (not "${typeof element}")`)
@@ -44,8 +45,8 @@ export function getSingleSelector (element, options) {
 
   // debug
   // console.log(`
-  //   selector: ${selector}
-  //   optimized:${optimized}
+  //   selector:  ${selector}
+  //   optimized: ${optimized}
   // `)
 
   if (globalModified) {
@@ -56,65 +57,77 @@ export function getSingleSelector (element, options) {
 }
 
 /**
- * Get a selector to match multiple children from a parent
+ * Get a selector to match multiple descendants from an ancestor
  * @param  {Array}  elements - [description]
  * @param  {Object} options  - [description]
  * @return {string}          - [description]
  */
-export function getMultiSelector (elements, options) {
-  var commonParentNode = null
-  var commonClassName = null
-  var commonAttribute = null
-  var commonTagName = null
+export function getMultiSelector (elements, options = {}) {
 
-  for (var i = 0, l = elements.length; i < l; i++) {
-    var element = elements[i]
-    if (!commonParentNode) { // 1st entry
-      commonParentNode = element.parentNode
-      commonClassName = element.className
-      // commonAttribute = element.attributes
-      commonTagName = element.tagName
-    } else if (commonParentNode !== element.parentNode) {
-      return console.log('Can\'t be efficiently mapped. It probably best to use multiple single selectors instead!')
-    }
-    if (element.className !== commonClassName) {
-      var classNames = []
-      var longer, shorter
-      if (element.className.length > commonClassName.length) {
-        longer = element.className
-        shorter = commonClassName
-      } else {
-        longer = commonClassName
-        shorter = element.className
-      }
-      shorter.split(' ').forEach((name) => {
-        if (longer.indexOf(name) > -1) {
-          classNames.push(name)
-        }
-      })
-      commonClassName = classNames.join(' ')
-    }
-    // TODO:
-    // - check attributes
-    // if (element.attributes !== commonAttribute) {
-    //
-    // }
-    if (element.tagName !== commonTagName) {
-      commonTagName = null
-    }
+  if (elements.some((element) => element.nodeType !== 1)) {
+    throw new Error(`Invalid input - only an Array of HTMLElements or representations of them is supported!`)
   }
 
-  const selector = getSingleSelector(commonParentNode, options)
-  console.log(selector, commonClassName, commonAttribute, commonTagName)
+  const globalModified = adapt(elements[0], options)
 
-  if (commonClassName) {
-    return `${selector} > .${commonClassName.replace(/ /g, '.')}`
+  const ancestor = getCommonAncestor(elements, options)
+  const ancestorSelector = getSingleSelector(ancestor, options)
+
+  // TODO: consider usage of multiple selectors + parent-child relation
+  const commonSelectors = getCommonSelectors(elements)
+  const descendantSelector = commonSelectors[0]
+
+  const selector = `${ancestorSelector} ${descendantSelector}`
+  const selectorMatches = [...document.querySelectorAll(selector)]
+
+  if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
+    // TODO: cluster matches to split into similar groups for sub selections
+    return console.warn(`
+      The selected elements can\'t be efficiently mapped.
+      Its probably best to use multiple single selectors instead!
+    `, elements)
   }
-  // if (commonAttribute) {
-  //
-  // }
-  if (commonTagName) {
-    return `${selector} > ${commonTagName.toLowerCase()}`
+
+  if (globalModified) {
+    delete global.document
   }
-  return `${selector} > *`
+
+  return selector
 }
+
+/**
+ * Get selectors for a set of elements
+ * @param  {Array}  elements - [description]
+ * @return {string}          - [description]
+ */
+function getCommonSelectors (elements) {
+
+  const { classes, attributes, tag } = getCommonProperties(elements)
+
+  const selectorPath = []
+
+   if (tag) {
+     selectorPath.push(tag)
+   }
+
+   if (classes) {
+     const classSelector = classes.map((name) => `.${name}`).join('')
+     selectorPath.push(classSelector)
+   }
+
+   if (attributes) {
+     const attributeSelector = Object.keys(attributes).reduce((parts, name) => {
+       parts.push(`[${name}="${attributes[name]}"]`)
+       return parts
+     }, []).join('')
+     selectorPath.push(attributeSelector)
+   }
+
+   if (selectorPath.length) {
+     // TODO: check for parent-child relation
+   }
+
+   return [
+     selectorPath.join('')
+   ]
+ }
