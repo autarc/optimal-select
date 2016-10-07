@@ -80,21 +80,27 @@ The `skip` value allows to define a `function`, a single `node` or an `array` of
 ### API
 
 `getQuerySelector (input, [options])` // alias: `select`, `default`
+
 Convinience function which automatically uses either `getSingleSelector` or `getMultiSelector`
 
 `getSingleSelector(element, [options])`
+
 Retrieve a unique CSS selector of the element
 
 `getMultiSelector (elements, [options])`
+
 Retrieve a unique CSS selector of the elements
 
 `optimize (selector, element, [options])`
+
 Improve the CSS selector
 
 `getCommonAncestor(elements, [options])`
+
 Retrieve the closest ancestor of the elements
 
 `getCommonProperties(elements, [options])`
+
 Retrieve a set of common properties of the elements
 
 
