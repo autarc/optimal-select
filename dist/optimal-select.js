@@ -1389,7 +1389,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          } else {
 	            commonAttributes = commonAttributesNames.reduce(function (nextCommonAttributes, name) {
 	              var value = commonAttributes[name];
-	              if (valeu === attributes[name]) {
+	              if (value === attributes[name]) {
 	                nextCommonAttributes[name] = value;
 	              }
 	              return nextCommonAttributes;
