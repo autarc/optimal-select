@@ -1,3 +1,9 @@
+## [v3.3.1]
+> October 28, 2016
+
+- fix check for available class attribute
+
+
 ## [v3.3.0]
 > October 7, 2016
 
