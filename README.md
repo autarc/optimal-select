@@ -13,7 +13,7 @@ A library which creates efficient and robust CSS selectors for HTML elements.
 - supports the browser environment and the [htmlparser2](https://github.com/fb55/htmlparser2) DOM
 - allow single and multiple element inputs
 - configurations allow to define custom ignore patterns
-- micro library (~ 12kb + no external dependency)
+- micro library (~ 13kb + no external dependency)
 - shortest path and fastest selection in [comparison](https://github.com/fczbkk/css-selector-generator-benchmark)
 
 
@@ -79,22 +79,34 @@ The `skip` value allows to define a `function`, a single `node` or an `array` of
 
 ### API
 
-`getQuerySelector (input, [options])` // alias: `select`, `default`
+```js
+  getQuerySelector (input, [options]) // alias: 'select'
+```
 Convinience function which automatically uses either `getSingleSelector` or `getMultiSelector`
 
-`getSingleSelector(element, [options])`
+```js
+  getSingleSelector(element, [options])
+```
 Retrieve a unique CSS selector of the element
 
-`getMultiSelector (elements, [options])`
+```js
+  getMultiSelector (elements, [options])
+```
 Retrieve a unique CSS selector of the elements
 
-`optimize (selector, element, [options])`
+```js
+  optimize (selector, element, [options])
+```
 Improve the CSS selector
 
-`getCommonAncestor(elements, [options])`
+```js
+  getCommonAncestor(elements, [options])
+```
 Retrieve the closest ancestor of the elements
 
-`getCommonProperties(elements, [options])`
+```js
+  getCommonProperties(elements, [options])
+```
 Retrieve a set of common properties of the elements
 
 
