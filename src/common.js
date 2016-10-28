@@ -76,9 +76,9 @@ export function getCommonProperties (elements) {
 
     // ~ classes
     if (commonClasses !== undefined) {
-      const classes = element.getAttribute('class').trim().split(' ')
-      // TODO: restructure, cleanup, 2x set, 2x delete || always replacing with new collection instead modify
-      if (classes.length) {
+      var classes = element.getAttribute('class')
+      if (classes) {
+        classes = classes.trim().split(' ')
         if (!commonClasses.length) {
           commonProperties.classes = classes
         } else {
@@ -90,6 +90,7 @@ export function getCommonProperties (elements) {
           }
         }
       } else {
+        // TODO: restructure removal as 2x set / 2x delete, instead of modify always replacing with new collection
         delete commonProperties.classes
       }
     }
