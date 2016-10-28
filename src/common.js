@@ -116,7 +116,7 @@ export function getCommonProperties (elements) {
         } else {
           commonAttributes = commonAttributesNames.reduce((nextCommonAttributes, name) => {
             const value = commonAttributes[name]
-            if (valeu === attributes[name]) {
+            if (value === attributes[name]) {
               nextCommonAttributes[name] = value
             }
             return nextCommonAttributes
