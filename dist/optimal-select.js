@@ -1344,28 +1344,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // ~ classes
 
 	    if (commonClasses !== undefined) {
-	      (function () {
-	        var classes = element.getAttribute('class').trim().split(' ');
-	        // TODO: restructure, cleanup, 2x set, 2x delete || always replacing with new collection instead modify
-	        if (classes.length) {
-	          if (!commonClasses.length) {
-	            commonProperties.classes = classes;
-	          } else {
-	            commonClasses = commonClasses.filter(function (entry) {
-	              return classes.some(function (name) {
-	                return name === entry;
-	              });
-	            });
-	            if (commonClasses.length) {
-	              commonProperties.classes = commonClasses;
-	            } else {
-	              delete commonProperties.classes;
-	            }
-	          }
+	      var classes = element.getAttribute('class');
+	      if (classes) {
+	        classes = classes.trim().split(' ');
+	        if (!commonClasses.length) {
+	          commonProperties.classes = classes;
 	        } else {
-	          delete commonProperties.classes;
+	          commonClasses = commonClasses.filter(function (entry) {
+	            return classes.some(function (name) {
+	              return name === entry;
+	            });
+	          });
+	          if (commonClasses.length) {
+	            commonProperties.classes = commonClasses;
+	          } else {
+	            delete commonProperties.classes;
+	          }
 	        }
-	      })();
+	      } else {
+	        // TODO: restructure removal as 2x set / 2x delete, instead of modify always replacing with new collection
+	        delete commonProperties.classes;
+	      }
 	    }
 
 	    // ~ attributes
