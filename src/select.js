@@ -18,10 +18,10 @@ import { getCommonAncestor, getCommonProperties } from './common'
  * @return {string}                                  - [description]
  */
 export default function getQuerySelector (input, options = {}) {
-  if (Array.isArray(input)) {
-    return getMultiSelector(input, options)
+  if (!input.length) {
+    return getSingleSelector(input, options)
   }
-  return getSingleSelector(input, options)
+  return getMultiSelector(input, options)
 }
 
 /**
@@ -67,6 +67,10 @@ export function getSingleSelector (element, options = {}) {
  */
 export function getMultiSelector (elements, options = {}) {
 
+  if (!Array.isArray(elements)) {
+    elements = [...elements]
+  }
+
   if (elements.some((element) => element.nodeType !== 1)) {
     throw new Error(`Invalid input - only an Array of HTMLElements or representations of them is supported!`)
   }
@@ -76,11 +80,11 @@ export function getMultiSelector (elements, options = {}) {
   const ancestor = getCommonAncestor(elements, options)
   const ancestorSelector = getSingleSelector(ancestor, options)
 
-  // TODO: consider usage of multiple selectors + parent-child relation
+  // TODO: consider usage of multiple selectors + parent-child relation + check for part redundancy
   const commonSelectors = getCommonSelectors(elements)
   const descendantSelector = commonSelectors[0]
 
-  const selector = `${ancestorSelector} ${descendantSelector}`
+  const selector = optimize(`${ancestorSelector} ${descendantSelector}`, elements, options)
   const selectorMatches = [...document.querySelectorAll(selector)]
 
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
@@ -110,28 +114,28 @@ function getCommonSelectors (elements) {
 
   const selectorPath = []
 
-   if (tag) {
-     selectorPath.push(tag)
-   }
+  if (tag) {
+    selectorPath.push(tag)
+  }
 
-   if (classes) {
-     const classSelector = classes.map((name) => `.${name}`).join('')
-     selectorPath.push(classSelector)
-   }
+  if (classes) {
+    const classSelector = classes.map((name) => `.${name}`).join('')
+    selectorPath.push(classSelector)
+  }
 
-   if (attributes) {
-     const attributeSelector = Object.keys(attributes).reduce((parts, name) => {
-       parts.push(`[${name}="${attributes[name]}"]`)
-       return parts
-     }, []).join('')
-     selectorPath.push(attributeSelector)
-   }
+  if (attributes) {
+    const attributeSelector = Object.keys(attributes).reduce((parts, name) => {
+      parts.push(`[${name}="${attributes[name]}"]`)
+      return parts
+    }, []).join('')
+    selectorPath.push(attributeSelector)
+  }
 
-   if (selectorPath.length) {
-     // TODO: check for parent-child relation
-   }
+  if (selectorPath.length) {
+    // TODO: check for parent-child relation
+  }
 
-   return [
-     selectorPath.join('')
-   ]
- }
+  return [
+    selectorPath.join('')
+  ]
+}
