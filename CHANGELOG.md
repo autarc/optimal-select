@@ -1,3 +1,9 @@
+## [v3.4.0]
+> November 4, 2016
+
+- enable optimization for selectors of multiple elements
+
+
 ## [v3.3.1]
 > October 28, 2016
 

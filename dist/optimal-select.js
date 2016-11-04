@@ -131,10 +131,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	function getQuerySelector(input) {
 	  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-	  if (Array.isArray(input)) {
-	    return getMultiSelector(input, options);
+	  if (!input.length) {
+	    return getSingleSelector(input, options);
 	  }
-	  return getSingleSelector(input, options);
+	  return getMultiSelector(input, options);
 	}
 
 	/**
@@ -184,6 +184,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 
+	  if (!Array.isArray(elements)) {
+	    elements = [].concat(_toConsumableArray(elements));
+	  }
+
 	  if (elements.some(function (element) {
 	    return element.nodeType !== 1;
 	  })) {
@@ -195,11 +199,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var ancestor = (0, _common.getCommonAncestor)(elements, options);
 	  var ancestorSelector = getSingleSelector(ancestor, options);
 
-	  // TODO: consider usage of multiple selectors + parent-child relation
+	  // TODO: consider usage of multiple selectors + parent-child relation + check for part redundancy
 	  var commonSelectors = getCommonSelectors(elements);
 	  var descendantSelector = commonSelectors[0];
 
-	  var selector = ancestorSelector + ' ' + descendantSelector;
+	  var selector = (0, _optimize2.default)(ancestorSelector + ' ' + descendantSelector, elements, options);
 	  var selectorMatches = [].concat(_toConsumableArray(document.querySelectorAll(selector)));
 
 	  if (!elements.every(function (element) {
@@ -1088,28 +1092,43 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } } /**
+	                                                                                                                                                                                                     * # Optimize
+	                                                                                                                                                                                                     *
+	                                                                                                                                                                                                     * 1.) Improve efficiency through shorter selectors by removing redundancy
+	                                                                                                                                                                                                     * 2.) Improve robustness through selector transformation
+	                                                                                                                                                                                                     */
+
 	/**
 	 * Apply different optimization techniques
 	 *
-	 * @param  {string}      selector - [description]
-	 * @param  {HTMLElement} element  - [description]
-	 * @return {string}               - [description]
+	 * @param  {string}                          selector - [description]
+	 * @param  {HTMLElement|Array.<HTMLElement>} element  - [description]
+	 * @param  {Object}                          options  - [description]
+	 * @return {string}                                   - [description]
 	 */
-	function optimize(selector, element) {
+	function optimize(selector, elements) {
 	  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
 
-	  if (!element || element.nodeType !== 1) {
-	    throw new Error('Invalid input - to compare HTMLElements its necessary to provide a reference of the node! (missing "element")');
+	  // convert single entry and NodeList
+	  if (!Array.isArray(elements)) {
+	    elements = !elements.length ? [elements] : [].concat(_toConsumableArray(elements));
 	  }
 
-	  var globalModified = (0, _adapt2.default)(element, options);
+	  if (!elements.length || elements.some(function (element) {
+	    return element.nodeType !== 1;
+	  })) {
+	    throw new Error('Invalid input - to compare HTMLElements its necessary to provide a reference of the selected node(s)! (missing "elements")');
+	  }
+
+	  var globalModified = (0, _adapt2.default)(elements[0], options);
 
 	  // chunk parts outside of quotes (http://stackoverflow.com/a/25663729)
 	  var path = selector.replace(/> /g, '>').split(/\s+(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
 	  if (path.length < 3) {
-	    return optimizePart('', selector, '', element);
+	    return optimizePart('', selector, '', elements);
 	  }
 
 	  var shortened = [path.pop()];
@@ -1120,16 +1139,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var pattern = prePart + ' ' + postPart;
 	    var matches = document.querySelectorAll(pattern);
-	    if (matches.length !== 1) {
-	      shortened.unshift(optimizePart(prePart, current, postPart, element));
+	    if (matches.length !== elements.length) {
+	      shortened.unshift(optimizePart(prePart, current, postPart, elements));
 	    }
 	  }
 	  shortened.unshift(path[0]);
 	  path = shortened;
 
 	  // optimize start + end
-	  path[0] = optimizePart('', path[0], path.slice(1).join(' '), element);
-	  path[path.length - 1] = optimizePart(path.slice(0, -1).join(' '), path[path.length - 1], '', element);
+	  path[0] = optimizePart('', path[0], path.slice(1).join(' '), elements);
+	  path[path.length - 1] = optimizePart(path.slice(0, -1).join(' '), path[path.length - 1], '', elements);
 
 	  if (globalModified) {
 	    delete global.document;
@@ -1141,20 +1160,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Improve a chunk of the selector
 	 *
-	 * @param  {string}      prePart  - [description]
-	 * @param  {string}      current  - [description]
-	 * @param  {string}      postPart - [description]
-	 * @param  {HTMLElement} element  - [description]
-	 * @return {string}               - [description]
+	 * @param  {string}              prePart  - [description]
+	 * @param  {string}              current  - [description]
+	 * @param  {string}              postPart - [description]
+	 * @param  {Array.<HTMLElement>} elements - [description]
+	 * @return {string}                       - [description]
 	 */
-	/**
-	 * # Optimize
-	 *
-	 * 1.) Improve efficiency through shorter selectors by removing redundancy
-	 * 2.) Improve robustness through selector transformation
-	 */
-
-	function optimizePart(prePart, current, postPart, element) {
+	function optimizePart(prePart, current, postPart, elements) {
 	  if (prePart.length) prePart = prePart + ' ';
 	  if (postPart.length) postPart = ' ' + postPart;
 
@@ -1163,21 +1175,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var key = current.replace(/=.*$/, ']');
 	    var pattern = '' + prePart + key + postPart;
 	    var matches = document.querySelectorAll(pattern);
-	    if (matches.length === 1 && matches[0] === element) {
+	    if (compareResults(matches, elements)) {
 	      current = key;
 	    } else {
-	      // robustness: replace specific key-value with tag (heuristic)
+	      // robustness: replace specific key-value with base tag (heuristic)
 	      var references = document.querySelectorAll('' + prePart + key);
-	      for (var i = 0, l = references.length; i < l; i++) {
-	        if (references[i].contains(element)) {
-	          var description = references[i].tagName.toLowerCase();
-	          var pattern = '' + prePart + description + postPart;
-	          var matches = document.querySelectorAll(pattern);
-	          if (matches.length === 1 && matches[0] === element) {
+
+	      var _loop = function _loop() {
+	        var reference = references[i];
+	        if (elements.some(function (element) {
+	          return reference.contains(element);
+	        })) {
+	          var description = reference.tagName.toLowerCase();
+	          pattern = '' + prePart + description + postPart;
+	          matches = document.querySelectorAll(pattern);
+
+	          if (compareResults(matches, elements)) {
 	            current = description;
 	          }
-	          break;
+	          return 'break';
 	        }
+	      };
+
+	      for (var i = 0, l = references.length; i < l; i++) {
+	        var pattern;
+	        var matches;
+
+	        var _ret = _loop();
+
+	        if (_ret === 'break') break;
 	      }
 	    }
 	  }
@@ -1187,7 +1213,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var descendant = current.replace(/>/, '');
 	    var pattern = '' + prePart + descendant + postPart;
 	    var matches = document.querySelectorAll(pattern);
-	    if (matches.length === 1 && matches[0] === element) {
+	    if (compareResults(matches, elements)) {
 	      current = descendant;
 	    }
 	  }
@@ -1198,7 +1224,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var type = current.replace(/nth-child/g, 'nth-of-type');
 	    var pattern = '' + prePart + type + postPart;
 	    var matches = document.querySelectorAll(pattern);
-	    if (matches.length === 1 && matches[0] === element) {
+	    if (compareResults(matches, elements)) {
 	      current = type;
 	    }
 	  }
@@ -1217,30 +1243,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	        break;
 	      }
 	      var matches = document.querySelectorAll(pattern);
-	      if (matches.length === 1 && matches[0] === element) {
+	      if (compareResults(matches, elements)) {
 	        current = partial;
 	      }
 	    }
 	    // robustness: degrade complex classname (heuristic)
 	    if (current && current.match(/\./g).length > 2) {
 	      var _references = document.querySelectorAll('' + prePart + current);
-	      for (var i = 0, l = _references.length; i < l; i++) {
-	        if (_references[i].contains(element)) {
+
+	      var _loop2 = function _loop2() {
+	        var reference = _references[i];
+	        if (elements.some(function (element) {
+	          return reference.contains(element);
+	        })) {
 	          // TODO:
 	          // - check using attributes + regard excludes
-	          var _description = _references[i].tagName.toLowerCase();
-	          var pattern = '' + prePart + _description + postPart;
-	          var matches = document.querySelectorAll(pattern);
-	          if (matches.length === 1 && matches[0] === element) {
-	            current = _description;
+	          var description = reference.tagName.toLowerCase();
+	          pattern = '' + prePart + description + postPart;
+	          matches = document.querySelectorAll(pattern);
+
+	          if (compareResults(matches, elements)) {
+	            current = description;
 	          }
-	          break;
+	          return 'break';
 	        }
+	      };
+
+	      for (var i = 0, l = _references.length; i < l; i++) {
+	        var pattern;
+	        var matches;
+
+	        var _ret2 = _loop2();
+
+	        if (_ret2 === 'break') break;
 	      }
 	    }
 	  }
 
 	  return current;
+	}
+
+	/**
+	 * Evaluate matches with expected elements
+	 *
+	 * @param  {Array.<HTMLElement>} matches  - [description]
+	 * @param  {Array.<HTMLElement>} elements - [description]
+	 * @return {Boolean}                      - [description]
+	 */
+	function compareResults(matches, elements) {
+	  var length = matches.length;
+
+	  return length === elements.length && elements.every(function (element) {
+	    for (var i = 0; i < length; i++) {
+	      if (matches[i] === element) {
+	        return true;
+	      }
+	    }
+	    return false;
+	  });
 	}
 	module.exports = exports['default'];
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))

@@ -13,7 +13,7 @@ A library which creates efficient and robust CSS selectors for HTML elements.
 - supports the browser environment and the [htmlparser2](https://github.com/fb55/htmlparser2) DOM
 - allow single and multiple element inputs
 - configurations allow to define custom ignore patterns
-- micro library (~ 13kb + no external dependency)
+- micro library (~ 14kb + no external dependency)
 - shortest path and fastest selection in [comparison](https://github.com/fczbkk/css-selector-generator-benchmark)
 
 
@@ -82,20 +82,22 @@ The `skip` value allows to define a `function`, a single `node` or an `array` of
 ```js
   getQuerySelector (input, [options]) // alias: 'select'
 ```
-Convinience function which automatically uses either `getSingleSelector` or `getMultiSelector`
+Convenience function which automatically uses either `getSingleSelector` or `getMultiSelector`
 
 ```js
   getSingleSelector(element, [options])
 ```
 Retrieve a unique CSS selector of the element
+Element is a DOM ode
 
 ```js
-  getMultiSelector (elements, [options])
+  getMultiSelector(elements, [options])
 ```
 Retrieve a unique CSS selector of the elements
+Elements is an array with a list of DOM nodes
 
 ```js
-  optimize (selector, element, [options])
+  optimize(selector, elements, [options])
 ```
 Improve the CSS selector
 
@@ -112,21 +114,22 @@ Retrieve a set of common properties of the elements
 
 ### Client & Server
 
-The latest version `optimal-select` allows the generation and optimization of selectors on virtual environments. It uses the basic structure the [htmlparser2](https://github.com/fb55/htmlparser2) [DOM](https://github.com/fb55/domhandler) provides and adds some utilities to create the same results as the browser (note: the `withDOMLv1` option has to be enabled). Other libraries like [cheerio](https://github.com/cheeriojs/cheerio) are built on top of these and therefore compatible.
+The latest version of `optimal-select` allows the generation and optimization of selectors on virtual environments. It uses the basic structure the [htmlparser2](https://github.com/fb55/htmlparser2) [DOM](https://github.com/fb55/domhandler) provides and adds some utilities to create the same results as the browser (note: the `withDOMLv1` option has to be enabled). Other libraries like [cheerio](https://github.com/cheeriojs/cheerio) are built on top of these and therefore compatible.
 
-In contrast to the browser does server environments not have a global context which defines their scope. Therefore one can either be specified explicit as a node using the `context` options field or automatically extracted from the provided input element. Checkout [the example](/example/index.js) for more details.
+In contrast to the browser does server environments not have a global context which defines their scope. Therefore one can either be specified explicit through a node using the `context` options field or automatically extracted from the provided input element. Checkout [the example](/example/index.js) for more details.
 
 
 ## TODO
 
 - extend documentation
 - add automatic tests (e.g. [using jsdom](https://github.com/jbwyme/optimal-select/blob/master/tests/select.js))
-- improve child-relation and grouping of multi-select
+- improve child-relation and grouping of `getMultiSelector`
+- define `strict` option for optimizations of multiple elements
 - check attributes for complex classnames
 - fix ["#3 - Match line breaking attribute values"](https://github.com/Autarc/optimal-select/issues/3)
 - fix [#8 - Full coverage for "nth-of-type" optimization](https://github.com/Autarc/optimal-select/issues/8)
-- consider `:not` - selector to exclude other elements matching,
-(for multiple element matching, consider the :not selector to exclude exceptions)
+- consider `:not` - selector to exclude other elements matching
+(for multiple element matching consider the :not selector to exclude exceptions)
 
 
 ## Development
