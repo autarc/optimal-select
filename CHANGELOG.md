@@ -1,3 +1,9 @@
+## [v3.4.1]
+> November 5, 2016
+
+- fix public API exports
+
+
 ## [v3.4.0]
 > November 4, 2016
 

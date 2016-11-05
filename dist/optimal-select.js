@@ -59,9 +59,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.default = exports.common = exports.optimize = exports.select = undefined;
+	exports.default = exports.common = exports.optimize = exports.getMultiSelector = exports.getSingleSelector = exports.select = undefined;
 
 	var _select2 = __webpack_require__(1);
+
+	Object.defineProperty(exports, 'getSingleSelector', {
+	  enumerable: true,
+	  get: function get() {
+	    return _select2.getSingleSelector;
+	  }
+	});
+	Object.defineProperty(exports, 'getMultiSelector', {
+	  enumerable: true,
+	  get: function get() {
+	    return _select2.getMultiSelector;
+	  }
+	});
 
 	var _select3 = _interopRequireDefault(_select2);
 
