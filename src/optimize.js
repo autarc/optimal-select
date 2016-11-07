@@ -6,6 +6,7 @@
  */
 
 import adapt from './adapt'
+import { convertNodeList } from './utilities'
 
 /**
  * Apply different optimization techniques
@@ -19,7 +20,7 @@ export default function optimize (selector, elements, options = {}) {
 
   // convert single entry and NodeList
   if (!Array.isArray(elements)) {
-    elements = !elements.length ? [elements] : [...elements]
+    elements = !elements.length ? [elements] : convertNodeList(elements)
   }
 
   if (!elements.length || elements.some((element) => element.nodeType !== 1)) {

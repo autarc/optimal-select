@@ -8,6 +8,7 @@
 import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
+import { convertNodeList } from './utilities'
 import { getCommonAncestor, getCommonProperties } from './common'
 
 /**
@@ -68,7 +69,7 @@ export function getSingleSelector (element, options = {}) {
 export function getMultiSelector (elements, options = {}) {
 
   if (!Array.isArray(elements)) {
-    elements = [...elements]
+    elements = convertNodeList(elements)
   }
 
   if (elements.some((element) => element.nodeType !== 1)) {
@@ -85,7 +86,7 @@ export function getMultiSelector (elements, options = {}) {
   const descendantSelector = commonSelectors[0]
 
   const selector = optimize(`${ancestorSelector} ${descendantSelector}`, elements, options)
-  const selectorMatches = [...document.querySelectorAll(selector)]
+  const selectorMatches = convertNodeList(document.querySelectorAll(selector))
 
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
     // TODO: cluster matches to split into similar groups for sub selections
