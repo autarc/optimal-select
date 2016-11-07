@@ -1,3 +1,9 @@
+# [v3.4.2]
+> November 7, 2016
+
+- improve browser compatibility
+
+
 ## [v3.4.1]
 > November 5, 2016
 

@@ -82,7 +82,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _optimize3 = _interopRequireDefault(_optimize2);
 
-	var _common2 = __webpack_require__(5);
+	var _common2 = __webpack_require__(6);
 
 	var _common = _interopRequireWildcard(_common2);
 
@@ -128,11 +128,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _optimize2 = _interopRequireDefault(_optimize);
 
-	var _common = __webpack_require__(5);
+	var _utilities = __webpack_require__(5);
+
+	var _common = __webpack_require__(6);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 	/**
 	 * Choose action depending on the input (single/multi)
@@ -198,7 +198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	  if (!Array.isArray(elements)) {
-	    elements = [].concat(_toConsumableArray(elements));
+	    elements = (0, _utilities.convertNodeList)(elements);
 	  }
 
 	  if (elements.some(function (element) {
@@ -217,7 +217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var descendantSelector = commonSelectors[0];
 
 	  var selector = (0, _optimize2.default)(ancestorSelector + ' ' + descendantSelector, elements, options);
-	  var selectorMatches = [].concat(_toConsumableArray(document.querySelectorAll(selector)));
+	  var selectorMatches = (0, _utilities.convertNodeList)(document.querySelectorAll(selector));
 
 	  if (!elements.every(function (element) {
 	    return selectorMatches.some(function (entry) {
@@ -293,11 +293,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 	exports.default = adapt;
-
-	function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
-
 	/**
-	 * # Universal
+	 * # Adapt
 	 *
 	 * Check and extend the environment for universal usage
 	 */
@@ -418,20 +415,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	      selectors = selectors.replace(/(>)(\S)/g, '$1 $2').trim(); // add space for '>' selector
 
 	      // using right to left execution => https://github.com/fb55/css-select#how-does-it-work
+	      var instructions = getInstructions(selectors);
+	      var discover = instructions.shift();
 
-	      var _getInstructions = getInstructions(selectors);
-
-	      var _getInstructions2 = _toArray(_getInstructions);
-
-	      var discover = _getInstructions2[0];
-
-	      var ascendings = _getInstructions2.slice(1);
-
-	      var total = ascendings.length;
+	      var total = instructions.length;
 	      return discover(this).filter(function (node) {
 	        var step = 0;
 	        while (step < total) {
-	          node = ascendings[step](node, _this);
+	          node = instructions[step](node, _this);
 	          if (!node) {
 	            // hierarchy doesn't match
 	            return false;
@@ -1103,14 +1094,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _adapt2 = _interopRequireDefault(_adapt);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	var _utilities = __webpack_require__(5);
 
-	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } } /**
-	                                                                                                                                                                                                     * # Optimize
-	                                                                                                                                                                                                     *
-	                                                                                                                                                                                                     * 1.) Improve efficiency through shorter selectors by removing redundancy
-	                                                                                                                                                                                                     * 2.) Improve robustness through selector transformation
-	                                                                                                                                                                                                     */
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	/**
 	 * Apply different optimization techniques
@@ -1120,13 +1106,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Object}                          options  - [description]
 	 * @return {string}                                   - [description]
 	 */
+	/**
+	 * # Optimize
+	 *
+	 * 1.) Improve efficiency through shorter selectors by removing redundancy
+	 * 2.) Improve robustness through selector transformation
+	 */
+
 	function optimize(selector, elements) {
 	  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
 
 	  // convert single entry and NodeList
 	  if (!Array.isArray(elements)) {
-	    elements = !elements.length ? [elements] : [].concat(_toConsumableArray(elements));
+	    elements = !elements.length ? [elements] : (0, _utilities.convertNodeList)(elements);
 	  }
 
 	  if (!elements.length || elements.some(function (element) {
@@ -1320,6 +1313,38 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 5 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.convertNodeList = convertNodeList;
+	/**
+	 * # Utilities
+	 *
+	 * Convenience helpers
+	 */
+
+	/**
+	 * Create an array with the DOM nodes of the list
+	 *
+	 * @param  {NodeList}             nodes - [description]
+	 * @return {Array.<HTMLElement>}        - [description]
+	 */
+	function convertNodeList(nodes) {
+	  var length = nodes.length;
+
+	  var arr = new Array(length);
+	  for (var i = 0; i < length; i++) {
+	    arr[i] = nodes[i];
+	  }
+	  return arr;
+	}
+
+/***/ },
+/* 6 */
 /***/ function(module, exports) {
 
 	'use strict';
