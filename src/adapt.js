@@ -1,5 +1,5 @@
 /**
- * # Universal
+ * # Adapt
  *
  * Check and extend the environment for universal usage
  */
@@ -114,12 +114,14 @@ export default function adapt (element, options) {
       selectors = selectors.replace(/(>)(\S)/g, '$1 $2').trim() // add space for '>' selector
 
       // using right to left execution => https://github.com/fb55/css-select#how-does-it-work
-      const [discover, ...ascendings] = getInstructions(selectors)
-      const total = ascendings.length
+      const instructions = getInstructions(selectors)
+      const discover = instructions.shift()
+
+      const total = instructions.length
       return discover(this).filter((node) => {
         var step = 0
         while (step < total) {
-          node = ascendings[step](node, this)
+          node = instructions[step](node, this)
           if (!node) { // hierarchy doesn't match
             return false
           }
