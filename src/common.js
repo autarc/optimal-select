@@ -101,7 +101,9 @@ export function getCommonProperties (elements) {
       const attributes = Object.keys(elementAttributes).reduce((attributes, key) => {
         const attribute = elementAttributes[key]
         const attributeName = attribute.name
-        if (attributeName !== 'class') {
+        // NOTE: workaround detection for non-standard phantomjs NamedNodeMap behaviour
+        // (issue: https://github.com/ariya/phantomjs/issues/14634)
+        if (attribute && attributeName !== 'class') {
           attributes[attributeName] = attribute.value
         }
         return attributes
