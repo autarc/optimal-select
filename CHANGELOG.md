@@ -1,7 +1,8 @@
-# [v3.4.2]
-> November 7, 2016
+# [v3.4.3]
+> November 8, 2016
 
 - improve browser compatibility
+- add workaround for [non-standard NamedNodeMap behaviour](https://github.com/ariya/phantomjs/issues/14634)
 
 
 ## [v3.4.1]
