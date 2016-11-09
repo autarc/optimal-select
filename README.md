@@ -56,6 +56,9 @@ var selector = select(element, {
     return traverseNode === element.parentNode
   },
 
+  // define order of relevance
+  priority: ['id', 'class', 'href', 'src'],
+
   ignore: {
     class (className) {
       // disregard short classnames
@@ -123,6 +126,7 @@ In contrast to the browser does server environments not have a global context wh
 
 - extend documentation
 - add automatic tests (e.g. [using jsdom](https://github.com/jbwyme/optimal-select/blob/master/tests/select.js))
+- refactor the process of matching to enable priority for `id` and `class`
 - improve child-relation and grouping of `getMultiSelector`
 - define `strict` option for optimizations of multiple elements
 - check attributes for complex classnames

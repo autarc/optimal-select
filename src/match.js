@@ -28,6 +28,8 @@ export default function match (node, options) {
   const {
     root = document,
     skip = null,
+    // TODO: refactor the detection to customize the execution order based on the attribute names
+    priority = ['id', 'class', 'href', 'src'],
     ignore = {}
   } = options
 
@@ -77,7 +79,7 @@ export default function match (node, options) {
       // global
       if (checkId(element, path, ignore)) break
       if (checkClassGlobal(element, path, ignore, root)) break
-      if (checkAttributeGlobal(element, path, ignore, root)) break
+      if (checkAttributeGlobal(element, path, ignore, root, priority)) break
       if (checkTagGlobal(element, path, ignore, root)) break
 
       // local
@@ -85,7 +87,7 @@ export default function match (node, options) {
 
       // define only one selector each iteration
       if (path.length === length) {
-        checkAttributeLocal(element, path, ignore)
+        checkAttributeLocal(element, path, ignore, priority)
       }
       if (path.length === length) {
         checkTagLocal(element, path, ignore)
@@ -95,7 +97,7 @@ export default function match (node, options) {
         checkClassChild(element, path, ignore)
       }
       if (path.length === length) {
-        checkAttributeChild(element, path, ignore)
+        checkAttributeChild(element, path, ignore, priority)
       }
       if (path.length === length) {
         checkTagChild(element, path, ignore)
@@ -162,8 +164,8 @@ function checkClassChild (element, path, ignore) {
  * @param  {Object}         ignore  - [description]
  * @return {boolean}                - [description]
  */
-function checkAttributeGlobal (element, path, ignore, root) {
-  return checkAttribute(element, path, ignore, root)
+function checkAttributeGlobal (element, path, ignore, root, priority) {
+  return checkAttribute(element, path, ignore, root, priority)
 }
 
 /**
@@ -174,8 +176,8 @@ function checkAttributeGlobal (element, path, ignore, root) {
  * @param  {Object}         ignore  - [description]
  * @return {boolean}                - [description]
  */
-function checkAttributeLocal (element, path, ignore) {
-  return checkAttribute(element, path, ignore, element.parentNode)
+function checkAttributeLocal (element, path, ignore, priority) {
+  return checkAttribute(element, path, ignore, element.parentNode, priority)
 }
 
 /**
@@ -186,9 +188,9 @@ function checkAttributeLocal (element, path, ignore) {
  * @param  {Object}         ignore  - [description]
  * @return {boolean}                - [description]
  */
-function checkAttributeChild (element, path, ignore) {
+function checkAttributeChild (element, path, ignore, priority) {
   const attributes = element.attributes
-  return Object.keys(attributes).some((key) => {
+  return Object.keys(attributes).sort(orderByPriority(attributes, priority)).some((key) => {
     const attribute = attributes[key]
     const attributeName = attribute.name
     const attributeValue = escapeValue(attribute.value)
@@ -288,9 +290,9 @@ function checkClass (element, path, ignore, parent) {
  * @param  {HTMLElement}    parent  - [description]
  * @return {boolean}                - [description]
  */
-function checkAttribute (element, path, ignore, parent) {
+function checkAttribute (element, path, ignore, parent, priority) {
   const attributes = element.attributes
-  return Object.keys(attributes).some((key) => {
+  return Object.keys(attributes).sort(orderByPriority(attributes, priority)).some((key) => {
     const attribute = attributes[key]
     const attributeName = attribute.name
     const attributeValue = escapeValue(attribute.value)
@@ -368,4 +370,17 @@ function checkIgnore (predicate, name, value, defaultPredicate) {
     return false
   }
   return check(name, value || name, defaultPredicate)
+}
+
+/**
+ * Rank the attribute names by their general relevance for a website
+ *
+ * @param  {Object}   attributes - [description]
+ * @param  {Array}    priority   - [description]
+ * @return {Function}            - [description]
+ */
+function orderByPriority (attributes, priority) {
+  return (curr, next) => {
+    return priority.indexOf(attributes[curr].name) - priority.indexOf(attributes[next].name)
+  }
 }
