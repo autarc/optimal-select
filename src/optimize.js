@@ -32,7 +32,7 @@ export default function optimize (selector, elements, options = {}) {
   // chunk parts outside of quotes (http://stackoverflow.com/a/25663729)
   var path = selector.replace(/> /g, '>').split(/\s+(?=(?:(?:[^"]*"){2})*[^"]*$)/)
 
-  if (path.length < 3) {
+  if (path.length < 2) {
     return optimizePart('', selector, '', elements)
   }
 
@@ -127,8 +127,8 @@ function optimizePart (prePart, current, postPart, elements) {
                                 .sort((curr, next) => curr.length - next.length)
     while (names.length) {
       var partial = current.replace(names.shift(), '').trim()
-      var pattern = `${prePart}${partial}${postPart}`
-      if (!pattern || partial === '>') {
+      var pattern = `${prePart}${partial}${postPart}`.trim()
+      if (!pattern.length || pattern.charAt(0) === '>') {
         break
       }
       var matches = document.querySelectorAll(pattern)
