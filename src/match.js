@@ -4,6 +4,8 @@
  * Retrieves selector
  */
 
+import { escapeValue } from './utilities'
+
 const defaultIgnore = {
   attribute (attributeName) {
     return [
@@ -56,7 +58,7 @@ export default function match (node, options) {
       predicate = predicate.toString()
     }
     if (typeof predicate === 'string') {
-      predicate = new RegExp(predicate)
+      predicate = new RegExp(escapeValue(predicate).replace(/\\/g, '\\\\'))
     }
     // check class-/attributename for regex
     ignore[type] = predicate.test.bind(predicate)
@@ -145,7 +147,7 @@ function checkClassLocal (element, path, ignore) {
  * @return {boolean}                - [description]
  */
 function checkClassChild (element, path, ignore) {
-  const className = element.getAttribute('class')
+  const className = escapeValue(element.getAttribute('class'))
   if (checkIgnore(ignore.class, className)) {
     return false
   }
@@ -189,7 +191,7 @@ function checkAttributeChild (element, path, ignore) {
   return Object.keys(attributes).some((key) => {
     const attribute = attributes[key]
     const attributeName = attribute.name
-    const attributeValue = attribute.value
+    const attributeValue = escapeValue(attribute.value)
     if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
       return false
     }
@@ -247,7 +249,7 @@ function checkTagChild (element, path, ignore) {
  * @return {boolean}                - [description]
  */
 function checkId (element, path, ignore) {
-  const id = element.getAttribute('id')
+  const id = escapeValue(element.getAttribute('id'))
   if (checkIgnore(ignore.id, id)) {
     return false
   }
@@ -265,7 +267,7 @@ function checkId (element, path, ignore) {
  * @return {boolean}                - [description]
  */
 function checkClass (element, path, ignore, parent) {
-  const className = element.getAttribute('class')
+  const className = escapeValue(element.getAttribute('class'))
   if (checkIgnore(ignore.class, className)) {
     return false
   }
@@ -291,7 +293,7 @@ function checkAttribute (element, path, ignore, parent) {
   return Object.keys(attributes).some((key) => {
     const attribute = attributes[key]
     const attributeName = attribute.name
-    const attributeValue = attribute.value
+    const attributeValue = escapeValue(attribute.value)
     if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
       return false
     }
