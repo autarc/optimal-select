@@ -12,7 +12,7 @@ A library which creates efficient and robust CSS selectors for HTML elements.
 - provide UMD integration (usage with Browser + Node)
 - supports the browser environment and the [htmlparser2](https://github.com/fb55/htmlparser2) DOM
 - allow single and multiple element inputs
-- configurations allow to define custom ignore patterns
+- configurations allow to define custom patterns for priority + ignore
 - micro library (~ 14kb + no external dependency)
 - shortest path and fastest selection in [comparison](https://github.com/fczbkk/css-selector-generator-benchmark)
 

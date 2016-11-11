@@ -78,7 +78,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _select3 = _interopRequireDefault(_select2);
 
-	var _optimize2 = __webpack_require__(4);
+	var _optimize2 = __webpack_require__(5);
 
 	var _optimize3 = _interopRequireDefault(_optimize2);
 
@@ -124,11 +124,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _match2 = _interopRequireDefault(_match);
 
-	var _optimize = __webpack_require__(4);
+	var _optimize = __webpack_require__(5);
 
 	var _optimize2 = _interopRequireDefault(_optimize);
 
-	var _utilities = __webpack_require__(5);
+	var _utilities = __webpack_require__(4);
 
 	var _common = __webpack_require__(6);
 
@@ -698,7 +698,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -706,11 +706,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	exports.default = match;
-	/**
-	 * # Match
-	 *
-	 * Retrieves selector
-	 */
+
+	var _utilities = __webpack_require__(4);
 
 	var defaultIgnore = {
 	  attribute: function attribute(attributeName) {
@@ -725,11 +722,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Object}      options - [description]
 	 * @return {string}              - [description]
 	 */
+	/**
+	 * # Match
+	 *
+	 * Retrieves selector
+	 */
+
 	function match(node, options) {
 	  var _options$root = options.root;
 	  var root = _options$root === undefined ? document : _options$root;
 	  var _options$skip = options.skip;
 	  var skip = _options$skip === undefined ? null : _options$skip;
+	  var _options$priority = options.priority;
+	  var
+	  // TODO: refactor the detection to customize the execution order based on the attribute names
+	  priority = _options$priority === undefined ? ['id', 'class', 'href', 'src'] : _options$priority;
 	  var _options$ignore = options.ignore;
 	  var ignore = _options$ignore === undefined ? {} : _options$ignore;
 
@@ -765,7 +772,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      predicate = predicate.toString();
 	    }
 	    if (typeof predicate === 'string') {
-	      predicate = new RegExp(predicate);
+	      predicate = new RegExp((0, _utilities.escapeValue)(predicate).replace(/\\/g, '\\\\'));
 	    }
 	    // check class-/attributename for regex
 	    ignore[type] = predicate.test.bind(predicate);
@@ -786,7 +793,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // global
 	      if (checkId(element, path, ignore)) break;
 	      if (checkClassGlobal(element, path, ignore, root)) break;
-	      if (checkAttributeGlobal(element, path, ignore, root)) break;
+	      if (checkAttributeGlobal(element, path, ignore, root, priority)) break;
 	      if (checkTagGlobal(element, path, ignore, root)) break;
 
 	      // local
@@ -794,7 +801,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      // define only one selector each iteration
 	      if (path.length === length) {
-	        checkAttributeLocal(element, path, ignore);
+	        checkAttributeLocal(element, path, ignore, priority);
 	      }
 	      if (path.length === length) {
 	        checkTagLocal(element, path, ignore);
@@ -804,7 +811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        checkClassChild(element, path, ignore);
 	      }
 	      if (path.length === length) {
-	        checkAttributeChild(element, path, ignore);
+	        checkAttributeChild(element, path, ignore, priority);
 	      }
 	      if (path.length === length) {
 	        checkTagChild(element, path, ignore);
@@ -855,7 +862,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {boolean}                - [description]
 	 */
 	function checkClassChild(element, path, ignore) {
-	  var className = element.getAttribute('class');
+	  var className = (0, _utilities.escapeValue)(element.getAttribute('class'));
 	  if (checkIgnore(ignore.class, className)) {
 	    return false;
 	  }
@@ -870,8 +877,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Object}         ignore  - [description]
 	 * @return {boolean}                - [description]
 	 */
-	function checkAttributeGlobal(element, path, ignore, root) {
-	  return checkAttribute(element, path, ignore, root);
+	function checkAttributeGlobal(element, path, ignore, root, priority) {
+	  return checkAttribute(element, path, ignore, root, priority);
 	}
 
 	/**
@@ -882,8 +889,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Object}         ignore  - [description]
 	 * @return {boolean}                - [description]
 	 */
-	function checkAttributeLocal(element, path, ignore) {
-	  return checkAttribute(element, path, ignore, element.parentNode);
+	function checkAttributeLocal(element, path, ignore, priority) {
+	  return checkAttribute(element, path, ignore, element.parentNode, priority);
 	}
 
 	/**
@@ -894,12 +901,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {Object}         ignore  - [description]
 	 * @return {boolean}                - [description]
 	 */
-	function checkAttributeChild(element, path, ignore) {
+	function checkAttributeChild(element, path, ignore, priority) {
 	  var attributes = element.attributes;
-	  return Object.keys(attributes).some(function (key) {
+	  return Object.keys(attributes).sort(orderByPriority(attributes, priority)).some(function (key) {
 	    var attribute = attributes[key];
 	    var attributeName = attribute.name;
-	    var attributeValue = attribute.value;
+	    var attributeValue = (0, _utilities.escapeValue)(attribute.value);
 	    if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
 	      return false;
 	    }
@@ -957,7 +964,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {boolean}                - [description]
 	 */
 	function checkId(element, path, ignore) {
-	  var id = element.getAttribute('id');
+	  var id = (0, _utilities.escapeValue)(element.getAttribute('id'));
 	  if (checkIgnore(ignore.id, id)) {
 	    return false;
 	  }
@@ -975,7 +982,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {boolean}                - [description]
 	 */
 	function checkClass(element, path, ignore, parent) {
-	  var className = element.getAttribute('class');
+	  var className = (0, _utilities.escapeValue)(element.getAttribute('class'));
 	  if (checkIgnore(ignore.class, className)) {
 	    return false;
 	  }
@@ -996,12 +1003,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param  {HTMLElement}    parent  - [description]
 	 * @return {boolean}                - [description]
 	 */
-	function checkAttribute(element, path, ignore, parent) {
+	function checkAttribute(element, path, ignore, parent, priority) {
 	  var attributes = element.attributes;
-	  return Object.keys(attributes).some(function (key) {
+	  return Object.keys(attributes).sort(orderByPriority(attributes, priority)).some(function (key) {
 	    var attribute = attributes[key];
 	    var attributeName = attribute.name;
-	    var attributeValue = attribute.value;
+	    var attributeValue = (0, _utilities.escapeValue)(attribute.value);
 	    if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
 	      return false;
 	    }
@@ -1077,10 +1084,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return check(name, value || name, defaultPredicate);
 	}
+
+	/**
+	 * Rank the attribute names by their general relevance for a website
+	 *
+	 * @param  {Object}   attributes - [description]
+	 * @param  {Array}    priority   - [description]
+	 * @return {Function}            - [description]
+	 */
+	function orderByPriority(attributes, priority) {
+	  return function (curr, next) {
+	    return priority.indexOf(attributes[curr].name) - priority.indexOf(attributes[next].name);
+	  };
+	}
 	module.exports = exports['default'];
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.convertNodeList = convertNodeList;
+	exports.escapeValue = escapeValue;
+	/**
+	 * # Utilities
+	 *
+	 * Convenience helpers
+	 */
+
+	/**
+	 * Create an array with the DOM nodes of the list
+	 *
+	 * @param  {NodeList}             nodes - [description]
+	 * @return {Array.<HTMLElement>}        - [description]
+	 */
+	function convertNodeList(nodes) {
+	  var length = nodes.length;
+
+	  var arr = new Array(length);
+	  for (var i = 0; i < length; i++) {
+	    arr[i] = nodes[i];
+	  }
+	  return arr;
+	}
+
+	/**
+	 * Escape special characters like quotes and backslashes
+	 *
+	 * Description of valid characters: https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#Notes
+	 *
+	 * @param  {String?} value - [description]
+	 * @return {String}        - [description]
+	 */
+	function escapeValue(value) {
+	  return value && value.replace(/['"`\\/:\?&!#$%^()[\]{|}*+;,.<=>@~]/g, '\\$&');
+	}
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
@@ -1094,7 +1159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _adapt2 = _interopRequireDefault(_adapt);
 
-	var _utilities = __webpack_require__(5);
+	var _utilities = __webpack_require__(4);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1133,7 +1198,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // chunk parts outside of quotes (http://stackoverflow.com/a/25663729)
 	  var path = selector.replace(/> /g, '>').split(/\s+(?=(?:(?:[^"]*"){2})*[^"]*$)/);
 
-	  if (path.length < 3) {
+	  if (path.length < 2) {
 	    return optimizePart('', selector, '', elements);
 	  }
 
@@ -1244,8 +1309,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    while (names.length) {
 	      var partial = current.replace(names.shift(), '').trim();
-	      var pattern = '' + prePart + partial + postPart;
-	      if (!pattern || partial === '>') {
+	      var pattern = ('' + prePart + partial + postPart).trim();
+	      if (!pattern.length || pattern.charAt(0) === '>') {
 	        break;
 	      }
 	      var matches = document.querySelectorAll(pattern);
@@ -1310,38 +1375,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	module.exports = exports['default'];
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.convertNodeList = convertNodeList;
-	/**
-	 * # Utilities
-	 *
-	 * Convenience helpers
-	 */
-
-	/**
-	 * Create an array with the DOM nodes of the list
-	 *
-	 * @param  {NodeList}             nodes - [description]
-	 * @return {Array.<HTMLElement>}        - [description]
-	 */
-	function convertNodeList(nodes) {
-	  var length = nodes.length;
-
-	  var arr = new Array(length);
-	  for (var i = 0; i < length; i++) {
-	    arr[i] = nodes[i];
-	  }
-	  return arr;
-	}
 
 /***/ },
 /* 6 */

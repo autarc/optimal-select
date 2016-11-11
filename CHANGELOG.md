@@ -1,3 +1,11 @@
+# [v3.5.0]
+> November 11, 2016
+
+- fix escape of selector values
+- allow defining the order to process attributes
+- optimize chunks of short selectors
+
+
 # [v3.4.3]
 > November 8, 2016
 
