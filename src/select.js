@@ -19,7 +19,7 @@ import { getCommonAncestor, getCommonProperties } from './common'
  * @return {string}                                  - [description]
  */
 export default function getQuerySelector (input, options = {}) {
-  if (!input.length) {
+  if (input.constructor !== Array) {
     return getSingleSelector(input, options)
   }
   return getMultiSelector(input, options)
