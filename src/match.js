@@ -60,6 +60,9 @@ export default function match (node, options) {
     if (typeof predicate === 'string') {
       predicate = new RegExp(escapeValue(predicate).replace(/\\/g, '\\\\'))
     }
+    if (typeof predicate === 'boolean') {
+      predicate = predicate ? /(?:)/ : /.^/
+    }
     // check class-/attributename for regex
     ignore[type] = (name, value) => predicate.test(value)
   })
