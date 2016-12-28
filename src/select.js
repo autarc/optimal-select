@@ -1,8 +1,8 @@
 /**
  * # Select
  *
- * Construct a unique CSS queryselector to access the selected DOM element(s).
- * Applies different matching and optimization strategies for efficiency.
+ * Construct a unique CSS query selector to access the selected DOM element(s).
+ * For longevity it applies different matching and optimization strategies.
  */
 
 import adapt from './adapt'
@@ -10,20 +10,6 @@ import match from './match'
 import optimize from './optimize'
 import { convertNodeList } from './utilities'
 import { getCommonAncestor, getCommonProperties } from './common'
-
-/**
- * Choose action depending on the input (single/multi)
- *
- * @param  {HTMLElement|Array.<HTMLElement>} input   - [description]
- * @param  {Object}                          options - [description]
- * @return {string}                                  - [description]
- */
-export default function getQuerySelector (input, options = {}) {
-  if (input.constructor !== Array) {
-    return getSingleSelector(input, options)
-  }
-  return getMultiSelector(input, options)
-}
 
 /**
  * Get a selector for the provided element
@@ -37,6 +23,7 @@ export function getSingleSelector (element, options = {}) {
   if (element.nodeType === 3) {
     element = element.parentNode
   }
+
   if (element.nodeType !== 1) {
     throw new Error(`Invalid input - only HTMLElements or representations of them are supported! (not "${typeof element}")`)
   }
@@ -62,9 +49,9 @@ export function getSingleSelector (element, options = {}) {
 /**
  * Get a selector to match multiple descendants from an ancestor
  *
- * @param  {Array.<HTMLElement>} elements - [description]
- * @param  {Object}              options  - [description]
- * @return {string}                       - [description]
+ * @param  {Array.<HTMLElement>|NodeList} elements - [description]
+ * @param  {Object}                       options  - [description]
+ * @return {string}                                - [description]
  */
 export function getMultiSelector (elements, options = {}) {
 
@@ -139,4 +126,20 @@ function getCommonSelectors (elements) {
   return [
     selectorPath.join('')
   ]
+}
+
+/**
+ * Choose action depending on the input (multiple/single)
+ *
+ * NOTE: extended detection is used for special cases like the <select> element with <options>
+ *
+ * @param  {HTMLElement|NodeList|Array.<HTMLElement>} input   - [description]
+ * @param  {Object}                                   options - [description]
+ * @return {string}                                           - [description]
+ */
+export default function getQuerySelector (input, options = {}) {
+  if (input.length && !input.name) {
+    return getMultiSelector(input, options)
+  }
+  return getSingleSelector(input, options)
 }
