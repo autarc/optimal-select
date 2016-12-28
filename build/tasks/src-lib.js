@@ -1,7 +1,7 @@
 /**
  * # Task: Source - Library
  *
- *
+ * Configuration to prepare source files.
  */
 
 import { emptyDirSync } from 'fs-extra'

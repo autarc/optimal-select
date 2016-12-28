@@ -1,7 +1,7 @@
 /**
  * # Build
  *
- * Handles the scripts defined in 'package.json'
+ * Handles the scripts defined in 'package.json'.
  */
 
 require('babel-register')

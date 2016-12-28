@@ -1,7 +1,7 @@
 /**
  * # Common
  *
- * Group similars
+ * Process collections for similarities.
  */
 
 /**
@@ -13,9 +13,7 @@
 export function getCommonAncestor (elements, options = {}) {
 
   const {
-    root = document,
-    skip = null,
-    ignore = {}
+    root = document
   } = options
 
   const ancestors = []

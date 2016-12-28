@@ -15,9 +15,10 @@ var indexHTML = fs.readFileSync(__dirname + '/index.html').toString()
 var $ = cheerio.load(indexHTML)
 
 
-// #1 - works
+// #1 -
 // browser: OptimalSelect.select(document.body)
-//          "[onload="runTests()"]"
+//          "[onload]"
+// node:    "body"
 
 var node = $('body').get(0)
 
@@ -29,7 +30,7 @@ console.timeEnd('A')
 // #2 -
 // browser: OptimalSelect.select(document.querySelectorAll('.divider')[0])
 //          ".dropdown-menu > .divider:nth-child(2)"
-//
+// node:    ".dropdown-menu   .divider:nth-child(2)"
 
 node = $('.divider').get(0)
 
