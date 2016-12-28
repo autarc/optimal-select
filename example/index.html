@@ -17,7 +17,18 @@
   <script>
     addLibrary('autarc/optimal-select', function (element) {
       return OptimalSelect.select(element)
-    });
+    })
+
+    window.onload = function(){
+      // var element = document.getElementById('case')
+      // var selector = OptimalSelect.select(element, {
+      //   ignore: {
+      //     id: true
+      //   }
+      // })
+      // console.log('selector: ', selector)
+      // console.log(document.querySelectorAll(selector))
+    }
   </script>
 
 </head>
@@ -30,7 +41,13 @@
 
   <h2>Results</h2>
 
-  <table>
+  <select name="select">
+    <option value="value1">Value 1</option>
+    <option value="value2" selected>Value 2</option>
+    <option value="value3">Value 3</option>
+  </select>
+
+  <table id='case' data="'test'">
     <thead>
       <tr>
         <th>Library</th>
@@ -46,6 +63,32 @@
     <tbody id="results"></tbody>
   </table>
 
+  <!-- test case: special characters  -->
+  <div class="B&W?"></div>
+
+  <!-- test case: HTML5 selector starting with a number  -->
+  <div class="404-error"></div>
+  <div class="test 200px"></div>
+
+  <div id="container" data="test">
+      <div class="favfeed_item child">
+          <span class="class1 class2 child"></span>
+          <div>
+              <a class="class1 class2"></a>
+          </div>
+      </div>
+  </div>
+
+  <!-- test case: long classname with line break | http://snapsvg.io/ -->
+  <svg>
+    <g>
+      <path id="upper-teeth" fill="#E0CAB1" d="M151.174,129.382l14.913,6.086l-6.602-14.691L151.174,129.382z M138.707,142.292
+      l14.914,6.086l-6.603-14.692L138.707,142.292z M126.241,155.201l14.913,6.086l-6.602-14.692L126.241,155.201z M163.64,116.474
+      l14.913,6.085l-6.603-14.692L163.64,116.474z M176.106,103.564l14.913,6.086l-6.602-14.692L176.106,103.564z M188.572,90.655
+      l14.914,6.085l-6.602-14.691L188.572,90.655z M201.039,77.746l14.913,6.085L209.35,69.14L201.039,77.746z M221.816,56.23
+      l-8.311,8.607l14.913,6.085L221.816,56.23z"></path>
+    </g>
+  </svg>
 
   <div style="display: none;">
     <h2>Testing HTML code</h2>
