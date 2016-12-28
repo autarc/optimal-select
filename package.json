@@ -14,7 +14,7 @@
     "babel-register": "^6.16.3",
     "cheerio": "^0.22.0",
     "deep-merge": "^1.0.0",
-    "fs-extra": "^0.30.0",
+    "fs-extra": "^1.0.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-load-plugins": "^1.3.0",
@@ -24,25 +24,27 @@
     "gulp-watch": "^4.3.10",
     "http-server": "^0.9.0",
     "open-url": "^2.0.2",
-    "webpack": "^1.13.2"
+    "webpack": "^2.2.0-rc.2"
   },
   "homepage": "https://github.com/Autarc/optimal-select",
   "keywords": [
     "css",
     "path",
-    "selector"
+    "selector",
+    "element"
   ],
   "license": "MIT",
   "main": "lib/index.js",
+  "module": "src/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Autarc/optimal-select.git"
   },
   "scripts": {
     "prepublish": "npm run build",
-    "build": "NODE_ENV=production node build",
     "check": "npm outdated -depth 0",
-    "example": "open-url 'http:/localhost:8080/example' && http-server",
-    "dev": "NODE_ENV=Development node build"
+    "build": "NODE_ENV=production node build",
+    "dev": "NODE_ENV=development node build",
+    "example": "open-url 'http:/localhost:8080/example' && http-server"
   }
 }

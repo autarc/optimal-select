@@ -1,7 +1,7 @@
 /**
  * # Adapt
  *
- * Check and extend the environment for universal usage
+ * Check and extend the environment for universal usage.
  */
 
 /**
@@ -16,17 +16,15 @@ export default function adapt (element, options) {
   // detect environment setup
   if (global.document) {
     return false
+  } else {
+    global.document = options.context || (() => {
+      var root = element
+      while (root.parent) {
+        root = root.parent
+      }
+      return root
+    })()
   }
-
-  const { context } = options
-
-  global.document = context || (() => {
-    var root = element
-    while (root.parent) {
-      root = root.parent
-    }
-    return root
-  })()
 
   // https://github.com/fb55/domhandler/blob/master/index.js#L75
   const ElementPrototype = Object.getPrototypeOf(global.document)

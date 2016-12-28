@@ -10,7 +10,7 @@ const merge = require('deep-merge')((target, source) => {
   if (target instanceof Array) {
     return [].concat(target, source)
   }
-  return source
+  return target
 })
 
 /**
@@ -22,37 +22,51 @@ export default (env) => {
   emptyDirSync(env.DIST)
   return new Promise((resolve, reject) => {
 
-    var config = {
-      target: 'web',
+    const CommonConfig = {
       entry: `${env.SRC}/index.js`,
-      resolve: {
-        extensions: ['', '.js']
-      },
       output: {
         path: env.DIST,
         filename: 'optimal-select.js',
         library: 'OptimalSelect',
         libraryTarget: 'umd'
       },
+      plugins: [
+        new webpack.DefinePlugin({
+          'global.document': JSON.stringify(true)
+        })
+      ],
       module: {
-        loaders: [
+        rules: [
           {
             test: /\.js$/,
-            exclude: /node_modules/,
-            loader: 'babel'
+            use: [
+              {
+                loader: 'babel-loader'
+              }
+            ]
           }
         ]
       }
     }
 
     // = development
+    const DevelopmentConfig = merge({
+      devtool: 'inline-source-map',
+      plugins: [
+        new webpack.DefinePlugin({
+          'process.env': JSON.stringify({
+            NODE_ENV: 'development'
+          })
+        }),
+        new webpack.LoaderOptionsPlugin({
+          debug: true
+        })
+      ]
+    }, CommonConfig)
+
     if (__DEVELOPMENT__) {
-      const DevConfig = merge(config, {
-        debug: true,
-        devtool: 'inline-source-map'
-      })
       var ready = false
-      return webpack(DevConfig).watch(100, (error, stats) => {
+      return webpack(DevelopmentConfig).watch(100, (error, stats) => {
         if (ready) {
           if (error) {
             return console.error(error)
@@ -65,52 +79,49 @@ export default (env) => {
     }
 
     // = production:debug
-    const ProductionDebugConfig = merge(config, {
-      debug: true,
-      plugins: [
-        new webpack.DefinePlugin({
-          'process.env': {
-            'NODE_ENV': JSON.stringify('development')
-          }
-        })
-      ]
-    })
+    const ProductionDebugConfig = {...DevelopmentConfig}
 
-    // = production:min
-    const ProductionMinConfig = merge(config, {
+    // = production:minified
+    const ProductionMinifiedConfig = merge({
       devtool: 'sourcemap',
       output: {
-        filename: config.output.filename.replace('.js', '.min.js')
+        filename: CommonConfig.output.filename.replace('.js', '.min.js')
       },
       plugins: [
         new webpack.DefinePlugin({
-          'process.env': {
-            'NODE_ENV': JSON.stringify('production')
-          }
+          'process.env': JSON.stringify({
+            NODE_ENV: 'production'
+          })
         }),
-        new webpack.optimize.OccurenceOrderPlugin(),
+        new webpack.LoaderOptionsPlugin({
+          minimize: true
+        }),
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.UglifyJsPlugin({
           sourceMap: true,
           compress: {
+            unused: true,
+            dead_code: true,
             warnings: false,
             screw_ie8: true
+          },
+          output: {
+            comments: false
           }
         })
       ]
-    })
+    }, CommonConfig)
 
     return webpack(ProductionDebugConfig).run((error, stats) => {
       if (error) {
         return rejec(error)
       }
-      return webpack(ProductionMinConfig).run((error, stats) => {
+      return webpack(ProductionMinifiedConfig).run((error, stats) => {
         if (error) {
           return reject(error)
         }
         return resolve()
       })
     })
-
   })
 }
