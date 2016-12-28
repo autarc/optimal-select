@@ -1,7 +1,7 @@
 /**
  * # Utilities
  *
- * Convenience helpers
+ * Convenience helpers.
  */
 
 /**
@@ -20,13 +20,14 @@ export function convertNodeList (nodes) {
 }
 
 /**
- * Escape special characters like quotes and backslashes
+ * Escape special characters and line breaks as a simplified version of 'CSS.escape()'
  *
- * Description of valid characters: https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector#Notes
+ * Description of valid characters: https://mathiasbynens.be/notes/css-escapes
  *
  * @param  {String?} value - [description]
  * @return {String}        - [description]
  */
 export function escapeValue (value) {
   return value && value.replace(/['"`\\/:\?&!#$%^()[\]{|}*+;,.<=>@~]/g, '\\$&')
+                       .replace(/\n/g, '\A')
 }
