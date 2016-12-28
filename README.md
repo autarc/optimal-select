@@ -9,12 +9,12 @@ A library which creates efficient and robust CSS selectors for HTML elements.
 
 ## Features
 
-- provide UMD integration (usage with Browser + Node)
-- supports the browser environment and the [htmlparser2](https://github.com/fb55/htmlparser2) DOM
-- allow single and multiple element inputs
-- configurations allow to define custom patterns for priority + ignore
-- micro library (~ 14kb + no external dependency)
 - shortest path and fastest selection in [comparison](https://github.com/fczbkk/css-selector-generator-benchmark)
+- configurations allow to define custom options for skip, priority and ignore patterns
+- allows single and multiple element as inputs
+- provide UMD integration (usage via script, AMD or CommonJS)
+- in addition to regular browsers it support the [htmlparser2](https://github.com/fb55/htmlparser2) DOM for virtual environments
+- micro library (~ 11kb, no external dependency)
 
 
 ## How To Use
@@ -49,16 +49,18 @@ You can then specify a validation function for the different types (`id`, `class
 ```js
 var selector = select(element, {
 
-  root: document, // default reference
+  // default reference
+  root: document,
 
-  skip: (traverseNode) {
+  skip (traverseNode) {
     // ignore select information of the direct parent
     return traverseNode === element.parentNode
   },
 
-  // define order of relevance
+  // define order of attribute processing
   priority: ['id', 'class', 'href', 'src'],
 
+  // define patterns which should't be included
   ignore: {
     class (className) {
       // disregard short classnames
@@ -70,14 +72,14 @@ var selector = select(element, {
       return (/data-*/).test(name) || defaultPredicate(name, value)
     },
 
-    // define simplified ignore patterns as a string/number/regex
+    // define simplified ignore patterns as a boolean/string/number/regex
     tag: 'div'
   }
 })
 ```
 
 As shown the `root` property allows to define the container element (default: `document`).
-The `skip` value allows to define a `function`, a single `node` or an `array` of nodes which should be ignored as the selector is created (default: `null`). Finally individual filter functions can be defined through `ignore`.
+The `skip` value allows to define a `function`, a single `node` or an `array` of nodes which should be ignored as the selector is created (default: `null`). With the `priority` value can the order of processed attributes be customized. Finally individual filter functions can be defined through `ignore`.
 
 
 ### API
@@ -126,11 +128,9 @@ In contrast to the browser does server environments not have a global context wh
 
 - extend documentation
 - add automatic tests (e.g. [using jsdom](https://github.com/jbwyme/optimal-select/blob/master/tests/select.js))
-- refactor the process of matching to enable priority for `id` and `class`
 - improve child-relation and grouping of `getMultiSelector`
 - define `strict` option for optimizations of multiple elements
 - check attributes for complex classnames
-- fix ["#3 - Match line breaking attribute values"](https://github.com/Autarc/optimal-select/issues/3)
 - fix [#8 - Full coverage for "nth-of-type" optimization](https://github.com/Autarc/optimal-select/issues/8)
 - consider `:not` - selector to exclude other elements matching
 (for multiple element matching consider the :not selector to exclude exceptions)

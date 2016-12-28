@@ -1,3 +1,15 @@
+# [v4.0.0]
+> December 29, 2016
+
+- change default behavior of checking attributes
+- use general selector instead of wildcard fallback
+- allow boolean for ignore pattern definitions
+- upgrade built tools and exclude the adapter in distributed versions
+- fix invalid class and id selectors through regular attributes
+- fix invalid selectors for values which include line breaks
+- fix array checking in `getQuerySelector`(based on [#23](https://github.com/Autarc/optimal-select/pull/23), by [@kasperisager](https://github.com/kasperisager))
+
+
 # [v3.5.0]
 > November 11, 2016
 
