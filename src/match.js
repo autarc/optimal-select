@@ -1,7 +1,7 @@
 /**
  * # Match
  *
- * Retrieves selector
+ * Retrieve selector for a node.
  */
 
 import { escapeValue } from './utilities'
@@ -28,7 +28,6 @@ export default function match (node, options) {
   const {
     root = document,
     skip = null,
-    // TODO: refactor the detection to customize the execution order based on the attribute names
     priority = ['id', 'class', 'href', 'src'],
     ignore = {}
   } = options
@@ -36,6 +35,7 @@ export default function match (node, options) {
   const path = []
   var element = node
   var length = path.length
+  var ignoreClass = false
 
   const skipCompare = skip && (Array.isArray(skip) ? skip : [skip]).map((entry) => {
     if (typeof entry !== 'function') {
@@ -47,8 +47,6 @@ export default function match (node, options) {
   const skipChecks = (element) => {
     return skip && skipCompare.some((compare) => compare(element))
   }
-
-  var ignoreClass = false
 
   Object.keys(ignore).forEach((type) => {
     if (type === 'class') {
@@ -74,33 +72,20 @@ export default function match (node, options) {
   }
 
   while (element !== root) {
-
     if (skipChecks(element) !== true) {
-      // global
-      if (checkId(element, path, ignore)) break
-      if (checkClassGlobal(element, path, ignore, root)) break
-      if (checkAttributeGlobal(element, path, ignore, root, priority)) break
-      if (checkTagGlobal(element, path, ignore, root)) break
+      // ~ global
+      if (checkAttributes(priority, element, ignore, path, root)) break
+      if (checkTag(element, ignore, path, root)) break
 
-      // local
-      checkClassLocal(element, path, ignore)
-
-      // define only one selector each iteration
+      // ~ local
+      checkAttributes(priority, element, ignore, path)
       if (path.length === length) {
-        checkAttributeLocal(element, path, ignore, priority)
-      }
-      if (path.length === length) {
-        checkTagLocal(element, path, ignore)
+        checkTag(element, ignore, path)
       }
 
+      // define only one part each iteration
       if (path.length === length) {
-        checkClassChild(element, path, ignore)
-      }
-      if (path.length === length) {
-        checkAttributeChild(element, path, ignore, priority)
-      }
-      if (path.length === length) {
-        checkTagChild(element, path, ignore)
+        checkChilds(priority, element, ignore, path)
       }
     }
 
@@ -109,174 +94,31 @@ export default function match (node, options) {
   }
 
   if (element === root) {
-    path.unshift('*')
+    const pattern = findPattern(priority, element, ignore)
+    path.unshift(pattern)
   }
 
   return path.join(' ')
 }
 
-
 /**
- * Preset 'checkClass' with global data
+ * Extend path with attribute identifier
  *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
+ * @param  {Array.<string>} priority - [description]
+ * @param  {HTMLElement}    element  - [description]
+ * @param  {Object}         ignore   - [description]
+ * @param  {Array.<string>} path     - [description]
+ * @param  {HTMLElement}    parent   - [description]
+ * @return {boolean}                 - [description]
  */
-function checkClassGlobal (element, path, ignore, root) {
-  return checkClass(element, path, ignore, root)
-}
-
-/**
- * Preset 'checkClass' with local data
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
- */
-function checkClassLocal (element, path, ignore) {
-  return checkClass(element, path, ignore, element.parentNode)
-}
-
-/**
- * Preset 'checkChild' with class data
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
- */
-function checkClassChild (element, path, ignore) {
-  const className = escapeValue(element.getAttribute('class'))
-  if (checkIgnore(ignore.class, className)) {
-    return false
-  }
-  return checkChild(element, path, `.${className.trim().replace(/\s+/g, '.')}`)
-}
-
-/**
- * Preset 'checkAttribute' with global data
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
- */
-function checkAttributeGlobal (element, path, ignore, root, priority) {
-  return checkAttribute(element, path, ignore, root, priority)
-}
-
-/**
- * Preset 'checkAttribute' with local data
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
- */
-function checkAttributeLocal (element, path, ignore, priority) {
-  return checkAttribute(element, path, ignore, element.parentNode, priority)
-}
-
-/**
- * Preset 'checkChild' with attribute data
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
- */
-function checkAttributeChild (element, path, ignore, priority) {
-  const attributes = element.attributes
-  return Object.keys(attributes).sort(orderByPriority(attributes, priority)).some((key) => {
-    const attribute = attributes[key]
-    const attributeName = attribute.name
-    const attributeValue = escapeValue(attribute.value)
-    if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
-      return false
+function checkAttributes (priority, element, ignore, path, parent = element.parentNode) {
+  const pattern = findAttributesPattern(priority, element, ignore)
+  if (pattern) {
+    const matches = parent.querySelectorAll(pattern)
+    if (matches.length === 1) {
+      path.unshift(pattern)
+      return true
     }
-    const pattern = `[${attributeName}="${attributeValue}"]`
-    return checkChild(element, path, pattern)
-  })
-}
-
-/**
- * Preset 'checkTag' with global data
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
- */
-function checkTagGlobal (element, path, ignore, root) {
-  return checkTag(element, path, ignore, root)
-}
-
-/**
- * Preset 'checkTag' with local data
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
- */
-function checkTagLocal (element, path, ignore) {
-  return checkTag(element, path, ignore, element.parentNode)
-}
-
-/**
- * Preset 'checkChild' with tag data
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
- */
-function checkTagChild (element, path, ignore) {
-  const tagName = element.tagName.toLowerCase()
-  if (checkIgnore(ignore.tag, tagName)) {
-    return false
-  }
-  return checkChild(element, path, tagName)
-}
-
-/**
- * Lookup unique identifier
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
- */
-function checkId (element, path, ignore) {
-  const id = escapeValue(element.getAttribute('id'))
-  if (checkIgnore(ignore.id, id)) {
-    return false
-  }
-  path.unshift(`#${id}`)
-  return true
-}
-
-/**
- * Lookup class identifier
- *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @param  {HTMLElement}    parent  - [description]
- * @return {boolean}                - [description]
- */
-function checkClass (element, path, ignore, parent) {
-  const className = escapeValue(element.getAttribute('class'))
-  if (checkIgnore(ignore.class, className)) {
-    return false
-  }
-  const matches = parent.getElementsByClassName(className)
-  if (matches.length === 1) {
-    path.unshift(`.${className.trim().replace(/\s+/g, '.')}`)
-    return true
   }
   return false
 }
@@ -284,72 +126,128 @@ function checkClass (element, path, ignore, parent) {
 /**
  * Lookup attribute identifier
  *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {Object}         ignore  - [description]
- * @param  {HTMLElement}    parent  - [description]
- * @return {boolean}                - [description]
+ * @param  {Array.<string>} priority - [description]
+ * @param  {HTMLElement}    element  - [description]
+ * @param  {Object}         ignore   - [description]
+ * @return {string?}                 - [description]
  */
-function checkAttribute (element, path, ignore, parent, priority) {
+function findAttributesPattern (priority, element, ignore) {
   const attributes = element.attributes
-  return Object.keys(attributes).sort(orderByPriority(attributes, priority)).some((key) => {
+  const sortedKeys = Object.keys(attributes).sort((curr, next) => {
+    return priority.indexOf(attributes[curr].name) - priority.indexOf(attributes[next].name)
+  })
+
+  for (var i = 0, l = sortedKeys.length; i < l; i++) {
+    const key = sortedKeys[i]
     const attribute = attributes[key]
     const attributeName = attribute.name
     const attributeValue = escapeValue(attribute.value)
-    if (checkIgnore(ignore.attribute, attributeName, attributeValue, defaultIgnore.attribute)) {
-      return false
+
+    const currentIgnore = ignore[attributeName] || ignore.attribute
+    const currentDefaultIgnore = defaultIgnore[attributeName] || defaultIgnore.attribute
+    if (checkIgnore(currentIgnore, attributeName, attributeValue, currentDefaultIgnore)) {
+      continue
     }
-    const pattern = `[${attributeName}="${attributeValue}"]`
-    const matches = parent.querySelectorAll(pattern)
+
+    var pattern = `[${attributeName}="${attributeValue}"]`
+
+    if ((/\b\d/).test(attributeValue) === false) {
+      if (attributeName === 'id') {
+        pattern = `#${attributeValue}`
+      }
+
+      if (attributeName === 'class') {
+        const className = attributeValue.trim().replace(/\s+/g, '.')
+        pattern = `.${className}`
+      }
+    }
+
+    return pattern
+  }
+  return null
+}
+
+/**
+ * Extend path with tag identifier
+ *
+ * @param  {HTMLElement}    element - [description]
+ * @param  {Object}         ignore  - [description]
+ * @param  {Array.<string>} path    - [description]
+ * @param  {HTMLElement}    parent  - [description]
+ * @return {boolean}                - [description]
+ */
+function checkTag (element, ignore, path, parent = element.parentNode) {
+  const pattern = findTagPattern(element, ignore)
+  if (pattern) {
+    const matches = parent.getElementsByTagName(pattern)
     if (matches.length === 1) {
       path.unshift(pattern)
       return true
     }
-  })
+  }
+  return false
 }
 
 /**
  * Lookup tag identifier
  *
- * @param  {HTMLElement}    element - [description]
- * @param  {Array.<string>} path    - [description]
- * @param  {HTMLElement}    parent  - [description]
- * @param  {Object}         ignore  - [description]
- * @return {boolean}                - [description]
+ * @param  {HTMLElement} element - [description]
+ * @param  {Object}      ignore  - [description]
+ * @return {boolean}             - [description]
  */
-function checkTag (element, path, ignore, parent) {
+function findTagPattern (element, ignore) {
   const tagName = element.tagName.toLowerCase()
   if (checkIgnore(ignore.tag, tagName)) {
-    return false
+    return null
   }
-  const matches = parent.getElementsByTagName(tagName)
-  if (matches.length === 1) {
-    path.unshift(tagName)
-    return true
+  return tagName
+}
+
+/**
+ * Extend path with specific child identifier
+ *
+ * NOTE: 'childTags' is a custom property to use as a view filter for tags using 'adapter.js'
+ *
+ * @param  {Array.<string>} priority - [description]
+ * @param  {HTMLElement}    element  - [description]
+ * @param  {Object}         ignore   - [description]
+ * @param  {Array.<string>} path     - [description]
+ * @return {boolean}                 - [description]
+ */
+function checkChilds (priority, element, ignore, path) {
+  const parent = element.parentNode
+  const children = parent.childTags || parent.children
+  for (var i = 0, l = children.length; i < l; i++) {
+    const child = children[i]
+    if (child === element) {
+      const childPattern = findPattern(priority, child, ignore)
+      if (!childPattern) {
+        return console.warn(`
+          Element couldn\'t be matched through strict ignore pattern!
+        `, child, ignore, childPattern)
+      }
+      const pattern = `> ${childPattern}:nth-child(${i+1})`
+      path.unshift(pattern)
+      return true
+    }
   }
   return false
 }
 
 /**
- * Lookup child identfier
+ * Lookup identifier
  *
- * Note: childTags is a custom property to use a view filter for tags on for virutal elements
- *
+ * @param  {Array.<string>} priority - [description]
  * @param  {HTMLElement}    element  - [description]
- * @param  {Array.<string>} path     - [description]
- * @param  {String}         selector - [description]
- * @return {boolean}                 - [description]
+ * @param  {Object}         ignore   - [description]
+ * @return {string}                  - [description]
  */
-function checkChild (element, path, selector) {
-  const parent = element.parentNode
-  const children = parent.childTags || parent.children
-  for (var i = 0, l = children.length; i < l; i++) {
-    if (children[i] === element) {
-      path.unshift(`> ${selector}:nth-child(${i+1})`)
-      return true
-    }
+function findPattern (priority, element, ignore) {
+  var pattern = findAttributesPattern(priority, element, ignore)
+  if (!pattern) {
+    pattern = findTagPattern(element, ignore)
   }
-  return false
+  return pattern
 }
 
 /**
@@ -362,25 +260,9 @@ function checkChild (element, path, selector) {
  * @return {boolean}                   - [description]
  */
 function checkIgnore (predicate, name, value, defaultPredicate) {
-  if (!name) {
-    return true
-  }
   const check = predicate || defaultPredicate
   if (!check) {
     return false
   }
   return check(name, value || name, defaultPredicate)
-}
-
-/**
- * Rank the attribute names by their general relevance for a website
- *
- * @param  {Object}   attributes - [description]
- * @param  {Array}    priority   - [description]
- * @return {Function}            - [description]
- */
-function orderByPriority (attributes, priority) {
-  return (curr, next) => {
-    return priority.indexOf(attributes[curr].name) - priority.indexOf(attributes[next].name)
-  }
 }
