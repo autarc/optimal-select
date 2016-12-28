@@ -208,7 +208,7 @@ function checkTag (element, ignore, path, parent = element.parentNode) {
  */
 function findTagPattern (element, ignore) {
   const tagName = element.tagName.toLowerCase()
-  if (checkIgnore(ignore.tag, tagName)) {
+  if (checkIgnore(ignore.tag, null, tagName)) {
     return null
   }
   return tagName
@@ -265,15 +265,18 @@ function findPattern (priority, element, ignore) {
  * Validate with custom and default functions
  *
  * @param  {Function} predicate        - [description]
- * @param  {string}   name             - [description]
+ * @param  {string?}  name             - [description]
  * @param  {string}   value            - [description]
  * @param  {Function} defaultPredicate - [description]
  * @return {boolean}                   - [description]
  */
 function checkIgnore (predicate, name, value, defaultPredicate) {
+  if (!value) {
+    return true
+  }
   const check = predicate || defaultPredicate
   if (!check) {
     return false
   }
-  return check(name, value || name, defaultPredicate)
+  return check(name, value, defaultPredicate)
 }
