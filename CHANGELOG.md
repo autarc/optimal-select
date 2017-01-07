@@ -1,3 +1,10 @@
+# [v4.0.1]
+> January, 07, 2017
+
+- fix invalid selector query in partial classname optimization
+- fix `match` check of regex in complex classname optimization
+
+
 # [v4.0.0]
 > December 29, 2016
 
