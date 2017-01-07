@@ -123,12 +123,13 @@ function optimizePart (prePart, current, postPart, elements) {
 
   // efficiency: combinations of classname (partial permutations)
   if (/\.\S+\.\S+/.test(current)) {
-    const names = current.trim().split('.').slice(1).map((name) => `.${name}`)
-                                .sort((curr, next) => curr.length - next.length)
+    var names = current.trim().split('.').slice(1)
+                                         .map((name) => `.${name}`)
+                                         .sort((curr, next) => curr.length - next.length)
     while (names.length) {
-      var partial = current.replace(names.shift(), '').trim()
+      const partial = current.replace(names.shift(), '').trim()
       var pattern = `${prePart}${partial}${postPart}`.trim()
-      if (!pattern.length || pattern.charAt(0) === '>') {
+      if (!pattern.length || pattern.charAt(0) === '>' || pattern.charAt(pattern.length-1) === '>') {
         break
       }
       var matches = document.querySelectorAll(pattern)
@@ -136,8 +137,10 @@ function optimizePart (prePart, current, postPart, elements) {
         current = partial
       }
     }
+
     // robustness: degrade complex classname (heuristic)
-    if (current && current.match(/\./g).length > 2) {
+    names = current && current.match(/\./g)
+    if (names && names.length > 2) {
       const references = document.querySelectorAll(`${prePart}${current}`)
       for (var i = 0, l = references.length; i < l; i++) {
         const reference = references[i]
