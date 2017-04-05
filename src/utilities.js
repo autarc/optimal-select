@@ -10,7 +10,7 @@
  * @param  {NodeList}             nodes - [description]
  * @return {Array.<HTMLElement>}        - [description]
  */
-export function convertNodeList (nodes) {
+export function convertNodeList(nodes) {
   const { length } = nodes
   const arr = new Array(length)
   for (var i = 0; i < length; i++) {
@@ -27,7 +27,12 @@ export function convertNodeList (nodes) {
  * @param  {String?} value - [description]
  * @return {String}        - [description]
  */
-export function escapeValue (value) {
+export function escapeValue(value) {
+
+  if (CSS.escape) {
+    return value && CSS.escape(value);
+  }
+
   return value && value.replace(/['"`\\/:\?&!#$%^()[\]{|}*+;,.<=>@~]/g, '\\$&')
-                       .replace(/\n/g, '\A')
+    .replace(/\n/g, '\A')
 }
