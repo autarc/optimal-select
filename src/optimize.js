@@ -128,6 +128,9 @@ function optimizePart (prePart, current, postPart, elements) {
                                          .sort((curr, next) => curr.length - next.length)
     while (names.length) {
       const partial = current.replace(names.shift(), '').trim()
+      if(partial.charAt(0) === '>' || partial.charAt(partial.length-1) === '>') {
+        break
+      }
       var pattern = `${prePart}${partial}${postPart}`.trim()
       if (!pattern.length || pattern.charAt(0) === '>' || pattern.charAt(pattern.length-1) === '>') {
         break
