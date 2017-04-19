@@ -151,7 +151,7 @@ function findAttributesPattern (priority, element, ignore) {
     return currPos - nextPos
   })
 
-  for (var i = 0, l = sortedKeys.length; i < l; i++) {    
+  for (var i = 0, l = sortedKeys.length; i < l; i++) {
     const key = sortedKeys[i]
     const attribute = attributes[key]
     if (!attribute) {
