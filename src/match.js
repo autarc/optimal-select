@@ -137,6 +137,9 @@ function checkAttributes (priority, element, ignore, path, parent = element.pare
 function findAttributesPattern (priority, element, ignore) {
   const attributes = element.attributes
   const sortedKeys = Object.keys(attributes).sort((curr, next) => {
+    if (!attributes[curr] || !attributes[next]) {
+      return 0
+    }
     const currPos = priority.indexOf(attributes[curr].name)
     const nextPos = priority.indexOf(attributes[next].name)
     if (nextPos === -1) {
@@ -151,6 +154,9 @@ function findAttributesPattern (priority, element, ignore) {
   for (var i = 0, l = sortedKeys.length; i < l; i++) {
     const key = sortedKeys[i]
     const attribute = attributes[key]
+    if (!attribute) {
+      continue
+    }
     const attributeName = attribute.name
     const attributeValue = escapeValue(attribute.value)
 
