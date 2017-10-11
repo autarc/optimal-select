@@ -19,11 +19,12 @@ import { getCommonAncestor, getCommonProperties } from './common'
  * @return {string}              - [description]
  */
 export function getSingleSelector (element, options = {}) {
-
+  // 3 refers to - Node.TEXT_NODE type
   if (element.nodeType === 3) {
     element = element.parentNode
   }
 
+  // 1 refers to - Node.ELEMENT_NODE type
   if (element.nodeType !== 1) {
     throw new Error(`Invalid input - only HTMLElements or representations of them are supported! (not "${typeof element}")`)
   }
@@ -39,11 +40,20 @@ export function getSingleSelector (element, options = {}) {
   //   optimized: ${optimized}
   // `)
 
+  let selectorTarget = global.document.querySelector(selector);
+  let optimizedSelectorTarget = global.document.querySelector(optimized);
+
   if (globalModified) {
     delete global.document
   }
 
-  return optimized
+  if (selectorTarget != optimizedSelectorTarget) {
+    console.log('Error at selector optimization. Returning the raw selector.');
+
+    return selector;
+  }
+
+  return optimized;
 }
 
 /**
