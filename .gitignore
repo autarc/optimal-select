@@ -15,7 +15,7 @@ node_modules/
 
 # build
 # dist/
-lib/
+# lib/
 
 # debug
 npm-debug.log

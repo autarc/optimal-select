@@ -35,16 +35,17 @@
   ],
   "license": "MIT",
   "main": "lib/index.js",
-  "module": "src/index.js",
+  "module": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Autarc/optimal-select.git"
   },
   "scripts": {
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "check": "npm outdated -depth 0",
     "build": "NODE_ENV=production node build",
     "dev": "NODE_ENV=development node build",
     "example": "open-url 'http:/localhost:8080/example' && http-server"
-  }
+  },
+  "dependencies": {}
 }
