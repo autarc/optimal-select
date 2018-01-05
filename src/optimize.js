@@ -122,7 +122,7 @@ function optimizePart (prePart, current, postPart, elements) {
   }
 
   // efficiency: combinations of classname (partial permutations)
-  if (/\.\S+\.\S+/.test(current)) {
+  if (/\.\S+\.\S+/.test(current) && /\\\./.test(current) === false) {
     var names = current.trim().split('.').slice(1)
                                          .map((name) => `.${name}`)
                                          .sort((curr, next) => curr.length - next.length)
