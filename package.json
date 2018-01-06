@@ -1,10 +1,13 @@
 {
-  "name": "optimal-select",
+  "name": "@letznav/optimal-select",
   "description": "Get efficient & robust CSS selectors for HTML elements",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "author": "Stefan Dühring | Autarc <autarc@gmail.com>",
+  "contributors": [
+    "LetzNav | LetzNav <info@letznav.com>"
+  ],
   "bugs": {
-    "url": "https://github.com/Autarc/optimal-select/issues"
+    "url": "https://github.com/sriniraju-letznav/optimal-select/issues"
   },
   "devDependencies": {
     "babel-loader": "^6.2.5",
@@ -26,7 +29,7 @@
     "open-url": "^2.0.2",
     "webpack": "^2.2.0-rc.2"
   },
-  "homepage": "https://github.com/Autarc/optimal-select",
+  "homepage": "https://github.com/sriniraju-letznav/optimal-select",
   "keywords": [
     "css",
     "path",
@@ -38,7 +41,7 @@
   "module": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Autarc/optimal-select.git"
+    "url": "https://github.com/sriniraju-letznav/optimal-select.git"
   },
   "scripts": {
     "prepublish": "npm run build",
