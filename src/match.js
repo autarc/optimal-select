@@ -162,6 +162,9 @@ function findAttributesPattern (priority, element, ignore) {
       if (classIgnore) {
         classNames = classNames.filter(className => !classIgnore(className))
       }
+      if (classNames.length === 0) {
+        continue
+      }
       pattern = `.${classNames.join('.')}`
     }
 
