@@ -35,7 +35,6 @@ export default function match (node, options) {
   const path = []
   var element = node
   var length = path.length
-  var ignoreClass = false
 
   const skipCompare = skip && (Array.isArray(skip) ? skip : [skip]).map((entry) => {
     if (typeof entry !== 'function') {
@@ -49,9 +48,6 @@ export default function match (node, options) {
   }
 
   Object.keys(ignore).forEach((type) => {
-    if (type === 'class') {
-      ignoreClass = true
-    }
     var predicate = ignore[type]
     if (typeof predicate === 'function') return
     if (typeof predicate === 'number') {
@@ -67,12 +63,10 @@ export default function match (node, options) {
     ignore[type] = (name, value) => predicate.test(value)
   })
 
-  if (ignoreClass) {
-    const ignoreAttribute = ignore.attribute
-    ignore.attribute = (name, value, defaultPredicate) => {
-      return ignore.class(value) || ignoreAttribute && ignoreAttribute(name, value, defaultPredicate)
-    }
-  }
+  var ignoreAttribute = ignore.attribute;
+  ignore.attribute = function (name, value, defaultPredicate) {
+    return ignoreAttribute && ignoreAttribute(name, value, defaultPredicate);
+  };
 
   while (element !== root) {
     if (skipChecks(element) !== true) {
