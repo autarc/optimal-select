@@ -44,8 +44,9 @@ export default function optimize (selector, elements, options = {}) {
 
     const pattern = `${prePart} ${postPart}`
     const matches = document.querySelectorAll(pattern)
-    if (matches.length !== elements.length || matches !== elements) {
-      shortened.unshift(optimizePart(prePart, current, postPart, elements))
+    const hasSameResult = matches.length === elements.length && elements.every((element, index) => element[index] === matches[index]);
+    if (!hasSameResult) {
+    shortened.unshift(optimizePart(prePart, current, postPart, elements))
     }
   }
   shortened.unshift(path[0])
