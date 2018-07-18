@@ -233,9 +233,7 @@ function checkChilds (priority, element, ignore, path) {
     if (child === element) {
       const childPattern = findPattern(priority, child, ignore)
       if (!childPattern) {
-        return console.warn(`
-          Element couldn\'t be matched through strict ignore pattern!
-        `, child, ignore, childPattern)
+        return false
       }
       const pattern = `> ${childPattern}:nth-child(${i+1})`
       path.unshift(pattern)
