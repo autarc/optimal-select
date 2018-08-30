@@ -35,7 +35,6 @@ export default function match (node, options) {
   const path = []
   var element = node
   var length = path.length
-  var ignoreClass = false
 
   const skipCompare = skip && (Array.isArray(skip) ? skip : [skip]).map((entry) => {
     if (typeof entry !== 'function') {
@@ -49,9 +48,6 @@ export default function match (node, options) {
   }
 
   Object.keys(ignore).forEach((type) => {
-    if (type === 'class') {
-      ignoreClass = true
-    }
     var predicate = ignore[type]
     if (typeof predicate === 'function') return
     if (typeof predicate === 'number') {
@@ -66,13 +62,6 @@ export default function match (node, options) {
     // check class-/attributename for regex
     ignore[type] = (name, value) => predicate.test(value)
   })
-
-  if (ignoreClass) {
-    const ignoreAttribute = ignore.attribute
-    ignore.attribute = (name, value, defaultPredicate) => {
-      return ignore.class(value) || ignoreAttribute && ignoreAttribute(name, value, defaultPredicate)
-    }
-  }
 
   while (element !== root) {
     if (skipChecks(element) !== true) {
@@ -153,24 +142,30 @@ function findAttributesPattern (priority, element, ignore) {
     const attribute = attributes[key]
     const attributeName = attribute.name
     const attributeValue = escapeValue(attribute.value)
+    const useNamedIgnore = attributeName !== 'class'
 
-    const currentIgnore = ignore[attributeName] || ignore.attribute
-    const currentDefaultIgnore = defaultIgnore[attributeName] || defaultIgnore.attribute
+    const currentIgnore = (useNamedIgnore && ignore[attributeName]) || ignore.attribute
+    const currentDefaultIgnore = (useNamedIgnore && defaultIgnore[attributeName]) || defaultIgnore.attribute
     if (checkIgnore(currentIgnore, attributeName, attributeValue, currentDefaultIgnore)) {
       continue
     }
 
     var pattern = `[${attributeName}="${attributeValue}"]`
 
-    if ((/\b\d/).test(attributeValue) === false) {
-      if (attributeName === 'id') {
-        pattern = `#${attributeValue}`
-      }
+    if (attributeName === 'id') {
+      pattern = `#${attributeValue}`
+    }
 
-      if (attributeName === 'class') {
-        const className = attributeValue.trim().replace(/\s+/g, '.')
-        pattern = `.${className}`
+    if (attributeName === 'class') {
+      let classNames = attributeValue.trim().split(/\s+/g)
+      const classIgnore = ignore.class || defaultIgnore.class
+      if (classIgnore) {
+        classNames = classNames.filter(className => !classIgnore(className))
       }
+      if (classNames.length === 0) {
+        continue
+      }
+      pattern = `.${classNames.join('.')}`
     }
 
     return pattern

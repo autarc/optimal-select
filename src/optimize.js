@@ -44,7 +44,8 @@ export default function optimize (selector, elements, options = {}) {
 
     const pattern = `${prePart} ${postPart}`
     const matches = document.querySelectorAll(pattern)
-    if (matches.length !== elements.length) {
+    const hasSameResult = matches.length === elements.length && elements.every((element, i) => element === matches[i]);
+    if (!hasSameResult) {
       shortened.unshift(optimizePart(prePart, current, postPart, elements))
     }
   }
@@ -122,10 +123,13 @@ function optimizePart (prePart, current, postPart, elements) {
   }
 
   // efficiency: combinations of classname (partial permutations)
-  if (/\.\S+\.\S+/.test(current)) {
-    var names = current.trim().split('.').slice(1)
-                                         .map((name) => `.${name}`)
-                                         .sort((curr, next) => curr.length - next.length)
+  if (/^\.\S*[^\s\\]\.\S+/.test(current)) {
+    var names = current.trim()
+                       .replace(/(^|[^\\])\./g, '$1#.') // escape actual dots
+                       .split('#.') // split only on actual dots
+                       .slice(1)
+                       .map((name) => `.${name}`)
+                       .sort((curr, next) => curr.length - next.length)
     while (names.length) {
       const partial = current.replace(names.shift(), '').trim()
       var pattern = `${prePart}${partial}${postPart}`.trim()
