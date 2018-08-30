@@ -1306,6 +1306,10 @@ function findAttributesPattern(priority, element, ignore) {
 
     var pattern = '[' + attributeName + '="' + attributeValue + '"]';
 
+    if (!attributeValue.trim()) {
+      return null;
+    }
+
     if (attributeName === 'id') {
       pattern = '#' + attributeValue;
     }
