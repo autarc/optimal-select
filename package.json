@@ -1,7 +1,7 @@
 {
   "name": "@letznav/optimal-select",
   "description": "Get efficient & robust CSS selectors for HTML elements",
-  "version": "4.0.5",
+  "version": "4.0.7",
   "author": "Stefan Dühring | Autarc <autarc@gmail.com>",
   "contributors": [
     "LetzNav | LetzNav <info@letznav.com>"
@@ -46,8 +46,8 @@
   "scripts": {
     "prepublish": "npm run build",
     "check": "npm outdated -depth 0",
-    "build": "NODE_ENV=production node build",
-    "dev": "NODE_ENV=development node build",
+    "build": "SET NODE_ENV=production node build",
+    "dev": "SET NODE_ENV=development node build",
     "example": "open-url 'http:/localhost:8080/example' && http-server"
   }
 }
