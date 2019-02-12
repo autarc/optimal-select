@@ -145,7 +145,10 @@ function findAttributesPattern (priority, element, ignore) {
       }
       return -1
     }
-    return currPos - nextPos
+    if (currPos === -1) {
+      return 1
+    }
+    return currPos - nextPos;
   })
 
   for (var i = 0, l = sortedKeys.length; i < l; i++) {
