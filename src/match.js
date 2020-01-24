@@ -190,7 +190,10 @@ function findAttributesPattern (priority, element, ignore) {
 function checkTag (element, ignore, path, parent = element.parentNode) {
   const pattern = findTagPattern(element, ignore)
   if (pattern) {
-    const matches = parent.getElementsByTagName(pattern)
+    const matches = parent.getElementsByTagName
+      ? parent.getElementsByTagName(pattern)
+      : parent.querySelectorAll(pattern);
+    
     if (matches.length === 1) {
       path.unshift(pattern)
       return true
