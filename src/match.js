@@ -125,25 +125,15 @@ function checkAttributes (priority, element, ignore, path, parent = element.pare
  */
 function findAttributesPattern (priority, element, ignore) {
   const attributes = element.attributes
-  const sortedKeys = Object.keys(attributes).sort((curr, next) => {
-     if (!attributes[curr] || !attributes[next]) {
-	      return -1;
-     }
-    const currPos = priority.indexOf(attributes[curr].name)
-    const nextPos = priority.indexOf(attributes[next].name)
-    if (nextPos === -1) {
-      if (currPos === -1) {
-        return 0
-      }
-      return -1
-    }
-    return currPos - nextPos
-  })
+  var attributeNames = Object.keys(attributes).map((val) => attributes[val].name)
+    .filter((a) => priority.indexOf(a) < 0);
+
+  var sortedKeys = [ ...priority, ...attributeNames ];
 
   for (var i = 0, l = sortedKeys.length; i < l; i++) {
     const key = sortedKeys[i]
     const attribute = attributes[key]
-    const attributeName = attribute && attribute.name
+    const attributeName = escapeValue(attribute && attribute.name)
     const attributeValue = escapeValue(attribute && attribute.value)
     const useNamedIgnore = attributeName !== 'class'
 
