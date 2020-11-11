@@ -104,7 +104,7 @@ export default function match (node, options) {
  * @return {boolean}                 - [description]
  */
 function checkAttributes (priority, element, ignore, path, parent = element.parentNode) {
-  const pattern = findAttributesPattern(priority, element, ignore)
+  const pattern = findAttributesPattern(priority, element, ignore, parent)
   if (pattern) {
     const matches = parent.querySelectorAll(pattern)
     if (matches.length === 1) {
@@ -116,6 +116,37 @@ function checkAttributes (priority, element, ignore, path, parent = element.pare
 }
 
 /**
+ * Get class selector
+ *
+ * @param  {Array.<string>} classes - [description]
+ * @param  {HTMLElement}    parent  - [description]
+ * @return {string?}                 - [description]
+ */
+function getClassSelector(classes = [], parent) {
+  let result = [[]];
+
+  classes.forEach(function(c) {
+    result.forEach(function(r) {
+      result.push(r.concat('.' + c));
+    });
+  });
+
+  result.shift();
+
+  result = result.sort(function(a,b) { return a.length - b.length; });
+
+  for(let i = 0; i < result.length; i++) {
+    let r = result[i].join('');
+    const matches = parent.querySelectorAll(r);
+    if (matches.length === 1) {
+      return r;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Lookup attribute identifier
  *
  * @param  {Array.<string>} priority - [description]
@@ -123,12 +154,14 @@ function checkAttributes (priority, element, ignore, path, parent = element.pare
  * @param  {Object}         ignore   - [description]
  * @return {string?}                 - [description]
  */
-function findAttributesPattern (priority, element, ignore) {
+function findAttributesPattern (priority, element, ignore, parent = element.parentNode) {
   const attributes = element.attributes
   var attributeNames = Object.keys(attributes).map((val) => attributes[val].name)
     .filter((a) => priority.indexOf(a) < 0);
 
   var sortedKeys = [ ...priority, ...attributeNames ];
+
+  var tagName = element.tagName.toLowerCase();
 
   for (var i = 0, l = sortedKeys.length; i < l; i++) {
     const key = sortedKeys[i]
@@ -161,10 +194,14 @@ function findAttributesPattern (priority, element, ignore) {
       if (classNames.length === 0) {
         continue
       }
-      pattern = `.${classNames.join('.')}`
+      pattern = getClassSelector(classNames, parent)
+
+      if (!pattern) {
+        continue
+      }
     }
 
-    return pattern
+    return tagName + pattern
   }
   return null
 }
@@ -184,6 +221,9 @@ function checkTag (element, ignore, path, parent = element.parentNode) {
     const matches = parent.getElementsByTagName(pattern)
     if (matches.length === 1) {
       path.unshift(pattern)
+      if (pattern === 'iframe') {
+        return false
+      }
       return true
     }
   }
