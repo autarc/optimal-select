@@ -63,7 +63,7 @@ export default function match (node, options) {
     ignore[type] = (name, value) => predicate.test(value)
   })
 
-  while (element !== root) {
+  while (element !== root && element.nodeType !== 11) {
     if (skipChecks(element) !== true) {
       // ~ global
       if (checkAttributes(priority, element, ignore, path, root)) break
@@ -218,7 +218,8 @@ function findAttributesPattern (priority, element, ignore, parent = element.pare
 function checkTag (element, ignore, path, parent = element.parentNode) {
   const pattern = findTagPattern(element, ignore)
   if (pattern) {
-    const matches = parent.getElementsByTagName(pattern)
+    let matches = [];
+    matches = parent.querySelectorAll(pattern)
     if (matches.length === 1) {
       path.unshift(pattern)
       if (pattern === 'iframe') {

@@ -18,6 +18,10 @@ import { convertNodeList } from './utilities'
  */
 export default function optimize (selector, elements, options = {}) {
 
+  if (selector.startsWith('> ')) {
+    selector = selector.replace('> ', '');
+  }
+
   // convert single entry and NodeList
   if (!Array.isArray(elements)) {
     elements = !elements.length ? [elements] : convertNodeList(elements)
