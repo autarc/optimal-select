@@ -1,7 +1,7 @@
 {
   "name": "@letznav/optimal-select",
   "description": "Get efficient & robust CSS selectors for HTML elements",
-  "version": "4.0.14",
+  "version": "4.1.0",
   "author": "Stefan Dühring | Autarc <autarc@gmail.com>",
   "contributors": [
     "LetzNav | LetzNav <info@letznav.com>"
@@ -16,6 +16,7 @@
     "babel-preset-stage-0": "^6.16.0",
     "babel-register": "^6.16.3",
     "cheerio": "^0.22.0",
+    "css2xpath": "0.0.3",
     "deep-merge": "^1.0.0",
     "fs-extra": "^1.0.0",
     "gulp": "^3.9.1",
@@ -27,6 +28,7 @@
     "gulp-watch": "^4.3.10",
     "http-server": "^0.9.0",
     "open-url": "^2.0.2",
+    "patch-package": "^6.4.7",
     "webpack": "^2.2.0-rc.2"
   },
   "homepage": "https://github.com/sriniraju-letznav/optimal-select",
@@ -44,10 +46,13 @@
     "url": "https://github.com/sriniraju-letznav/optimal-select.git"
   },
   "scripts": {
+    "postinstall": "patch-package",
     "prepublish": "npm run build",
     "check": "npm outdated -depth 0",
     "build": "SET NODE_ENV=production node build",
     "dev": "SET NODE_ENV=development node build",
+    "build:linux": "NODE_ENV=production node build",
+    "dev:linux": "NODE_ENV=development node build",
     "example": "open-url 'http:/localhost:8080/example' && http-server"
   }
 }

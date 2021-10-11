@@ -1,8 +1,8 @@
 var libraries = {}
 
 
-function addLibrary(name, callback) {
-  libraries[name] = callback;
+function addLibrary(name, settings) {
+  libraries[name] = settings;
 }
 
 
@@ -11,8 +11,8 @@ function runTests() {
   results = {};
 
   for (key in libraries) {
-    var testFunction = libraries[key];
-    results[key] = getResults(testFunction);
+    var settings = libraries[key];
+    results[key] = getResults(settings);
   }
 
   drawResults(results);
@@ -64,7 +64,7 @@ function addCell(row, content) {
 }
 
 
-function getResults(testFunction) {
+function getResults(settings) {
 
   var elements = document.querySelector('#wrap').querySelectorAll('*');
 
@@ -75,7 +75,8 @@ function getResults(testFunction) {
     nonUniqueSelectors: [],
     nonMatchingSelectors: [],
     notFoundSelectors: 0,
-    longestSelector: ''
+    longestSelector: '',
+    outputs: [],
   };
   var outputs = [];
 
@@ -83,7 +84,7 @@ function getResults(testFunction) {
 
   for (var i = 0, j = elements.length; i < j; i++) {
     var element = elements[i];
-    var selector = testFunction(element);
+    var selector = settings.generate(element);
     outputs.push({
       element: element,
       selector: selector
@@ -94,27 +95,31 @@ function getResults(testFunction) {
   result.duration = timeEnd - timeStart
 
   for (i = 0, j = outputs.length; i < j; i++) {
-    var selector = outputs[i].selector;
-    var element = outputs[i].element;
+    var output = outputs[i];
+    var selector = output.selector;
+    var element = output.element;
 
     if (selector) {
 
       var foundElements = []
 
       try {
-        foundElements = document.querySelectorAll(selector);
+        foundElements = settings.check(selector);
       } catch (e) {
         result.invalidSelectors.push(selector);
+        output.invalidSelector = true;
       }
-
 
       if (foundElements.length > 1) {
         result.nonUniqueSelectors.push(selector);
+        output.nonUniqueSelector = true;
       } else {
         if (foundElements[0] === element) {
           result.validSelectors.push(selector);
+          output.validSelector = true;
         } else {
           result.nonMatchingSelectors.push(selector);
+          output.nonMatchingSelector = true;
         }
       }
 
@@ -124,9 +129,12 @@ function getResults(testFunction) {
 
     } else {
       result.notFoundSelectors++;
+      output.notFoundSelector = true;
     }
 
   }
+
+  result.outputs = outputs;
 
   return result;
 }

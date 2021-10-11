@@ -4,6 +4,7 @@
  * Construct a unique CSS query selector to access the selected DOM element(s).
  * For longevity it applies different matching and optimization strategies.
  */
+import css2xpath from 'css2xpath';
 
 import adapt from './adapt'
 import match from './match'
@@ -141,5 +142,11 @@ export default function getQuerySelector (input, options = {}) {
   if (input.length && !input.name) {
     return getMultiSelector(input, options)
   }
-  return getSingleSelector(input, options)
+  const result = getSingleSelector(input, options)
+
+  if (!options || !options.format) {
+    return result
+  }
+
+  return css2xpath(result)
 }

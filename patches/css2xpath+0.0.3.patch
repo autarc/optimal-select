@@ -1,0 +1,26 @@
+diff --git a/node_modules/css2xpath/index.js b/node_modules/css2xpath/index.js
+index 8762686..83d1456 100644
+--- a/node_modules/css2xpath/index.js
++++ b/node_modules/css2xpath/index.js
+@@ -453,6 +453,12 @@
+     return result;
+   }
+ 
++  function convertEscaping (value) {
++    return value && value.replace(/\\([`\\/:\?&!#$%^()[\]{|}*+;,.<=>@~])/g, '$1')
++      .replace(/\\(['"])/g, '$1$1')
++      .replace(/\\A /g, '\n')
++  }
++
+   function css2xpath(s, nested) {
+     // s = s.trim();
+ 
+@@ -483,7 +489,7 @@
+         a = a.substr(1, a.length - 2);
+       }
+ 
+-      return repeat(escape_literal, literals.push(a));
++      return repeat(escape_literal, literals.push(convertEscaping(a)));
+     });
+ 
+     // Replace CSS combinators (" ", "+", ">", "~", ",") and reverse combinators ("!", "!+", "!>", "!~")

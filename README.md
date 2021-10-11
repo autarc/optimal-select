@@ -74,7 +74,10 @@ var selector = select(element, {
 
     // define simplified ignore patterns as a boolean/string/number/regex
     tag: 'div'
-  }
+  },
+
+  // output format: 0 - CSS, 1 - XPath (default is CSS)
+  format: 1
 })
 ```
 
