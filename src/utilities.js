@@ -29,5 +29,5 @@ export function convertNodeList (nodes) {
  */
 export function escapeValue (value) {
   return value && value.replace(/['"`\\/:\?&!#$%^()[\]{|}*+;,.<=>@~]/g, '\\$&')
-                       .replace(/\n/g, '\A')
+                       .replace(/\n/g, '\A ')
 }
