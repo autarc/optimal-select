@@ -19,7 +19,7 @@ import { convertNodeList } from './utilities'
 export default function optimize (selector, elements, options = {}) {
 
   if (selector.startsWith('> ')) {
-    selector = selector.replace('> ', '');
+    selector = selector.replace('> ', '')
   }
 
   // convert single entry and NodeList
@@ -28,7 +28,7 @@ export default function optimize (selector, elements, options = {}) {
   }
 
   if (!elements.length || elements.some((element) => element.nodeType !== 1)) {
-    throw new Error(`Invalid input - to compare HTMLElements its necessary to provide a reference of the selected node(s)! (missing "elements")`)
+    throw new Error('Invalid input - to compare HTMLElements its necessary to provide a reference of the selected node(s)! (missing "elements")')
   }
 
   const globalModified = adapt(elements[0], options)
@@ -48,7 +48,7 @@ export default function optimize (selector, elements, options = {}) {
 
     const pattern = `${prePart} ${postPart}`
     const matches = document.querySelectorAll(pattern)
-    const hasSameResult = matches.length === elements.length && elements.every((element, i) => element === matches[i]);
+    const hasSameResult = matches.length === elements.length && elements.every((element, i) => element === matches[i])
     if (!hasSameResult) {
       shortened.unshift(optimizePart(prePart, current, postPart, elements))
     }
@@ -94,9 +94,9 @@ function optimizePart (prePart, current, postPart, elements) {
         const reference = references[i]
         if (elements.some((element) => reference.contains(element))) {
           const description = reference.tagName.toLowerCase()
-          var pattern = `${prePart}${description}${postPart}`
-          var matches = document.querySelectorAll(pattern)
-          if (compareResults(matches, elements)) {
+          var pattern2 = `${prePart}${description}${postPart}`
+          var matches2 = document.querySelectorAll(pattern2)
+          if (compareResults(matches2, elements)) {
             current = description
           }
           break
@@ -108,9 +108,9 @@ function optimizePart (prePart, current, postPart, elements) {
   // robustness: descendant instead child (heuristic)
   if (/>/.test(current)) {
     const descendant = current.replace(/>/, '')
-    var pattern = `${prePart}${descendant}${postPart}`
-    var matches = document.querySelectorAll(pattern)
-    if (compareResults(matches, elements)) {
+    var pattern3 = `${prePart}${descendant}${postPart}`
+    var matches3 = document.querySelectorAll(pattern3)
+    if (compareResults(matches3, elements)) {
       current = descendant
     }
   }
@@ -119,9 +119,9 @@ function optimizePart (prePart, current, postPart, elements) {
   if (/:nth-child/.test(current)) {
     // TODO: consider complete coverage of 'nth-of-type' replacement
     const type = current.replace(/nth-child/g, 'nth-of-type')
-    var pattern = `${prePart}${type}${postPart}`
-    var matches = document.querySelectorAll(pattern)
-    if (compareResults(matches, elements)) {
+    var pattern4 = `${prePart}${type}${postPart}`
+    var matches4 = document.querySelectorAll(pattern4)
+    if (compareResults(matches4, elements)) {
       current = type
     }
   }
@@ -129,19 +129,19 @@ function optimizePart (prePart, current, postPart, elements) {
   // efficiency: combinations of classname (partial permutations)
   if (/^\.\S*[^\s\\]\.\S+/.test(current)) {
     var names = current.trim()
-                       .replace(/(^|[^\\])\./g, '$1#.') // escape actual dots
-                       .split('#.') // split only on actual dots
-                       .slice(1)
-                       .map((name) => `.${name}`)
-                       .sort((curr, next) => curr.length - next.length)
+      .replace(/(^|[^\\])\./g, '$1#.') // escape actual dots
+      .split('#.') // split only on actual dots
+      .slice(1)
+      .map((name) => `.${name}`)
+      .sort((curr, next) => curr.length - next.length)
     while (names.length) {
       const partial = current.replace(names.shift(), '').trim()
-      var pattern = `${prePart}${partial}${postPart}`.trim()
-      if (!pattern.length || pattern.charAt(0) === '>' || pattern.charAt(pattern.length-1) === '>') {
+      var pattern5 = `${prePart}${partial}${postPart}`.trim()
+      if (!pattern5.length || pattern5.charAt(0) === '>' || pattern5.charAt(pattern5.length-1) === '>') {
         break
       }
-      var matches = document.querySelectorAll(pattern)
-      if (compareResults(matches, elements)) {
+      var matches5 = document.querySelectorAll(pattern5)
+      if (compareResults(matches5, elements)) {
         current = partial
       }
     }
@@ -150,15 +150,15 @@ function optimizePart (prePart, current, postPart, elements) {
     names = current && current.match(/\./g)
     if (names && names.length > 2) {
       const references = document.querySelectorAll(`${prePart}${current}`)
-      for (var i = 0, l = references.length; i < l; i++) {
-        const reference = references[i]
+      for (var i2 = 0, l2 = references.length; i2 < l2; i2++) {
+        const reference = references[i2]
         if (elements.some((element) => reference.contains(element) )) {
           // TODO:
           // - check using attributes + regard excludes
           const description = reference.tagName.toLowerCase()
-          var pattern = `${prePart}${description}${postPart}`
-          var matches = document.querySelectorAll(pattern)
-          if (compareResults(matches, elements)) {
+          var pattern6 = `${prePart}${description}${postPart}`
+          var matches6 = document.querySelectorAll(pattern6)
+          if (compareResults(matches6, elements)) {
             current = description
           }
           break

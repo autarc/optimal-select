@@ -123,27 +123,27 @@ function checkAttributes (priority, element, ignore, path, parent = element.pare
  * @return {string?}                 - [description]
  */
 function getClassSelector(classes = [], parent) {
-  let result = [[]];
+  let result = [[]]
 
   classes.forEach(function(c) {
     result.forEach(function(r) {
-      result.push(r.concat('.' + c));
-    });
-  });
+      result.push(r.concat('.' + c))
+    })
+  })
 
-  result.shift();
+  result.shift()
 
-  result = result.sort(function(a,b) { return a.length - b.length; });
+  result = result.sort(function(a,b) { return a.length - b.length })
 
   for(let i = 0; i < result.length; i++) {
-    let r = result[i].join('');
-    const matches = parent.querySelectorAll(r);
+    let r = result[i].join('')
+    const matches = parent.querySelectorAll(r)
     if (matches.length === 1) {
-      return r;
+      return r
     }
   }
 
-  return null;
+  return null
 }
 
 /**
@@ -157,11 +157,11 @@ function getClassSelector(classes = [], parent) {
 function findAttributesPattern (priority, element, ignore, parent = element.parentNode) {
   const attributes = element.attributes
   var attributeNames = Object.keys(attributes).map((val) => attributes[val].name)
-    .filter((a) => priority.indexOf(a) < 0);
+    .filter((a) => priority.indexOf(a) < 0)
 
-  var sortedKeys = [ ...priority, ...attributeNames ];
+  var sortedKeys = [ ...priority, ...attributeNames ]
 
-  var tagName = element.tagName.toLowerCase();
+  var tagName = element.tagName.toLowerCase()
 
   for (var i = 0, l = sortedKeys.length; i < l; i++) {
     const key = sortedKeys[i]
@@ -178,7 +178,7 @@ function findAttributesPattern (priority, element, ignore, parent = element.pare
 
     var pattern = `[${attributeName}="${attributeValue}"]`
     if(!attributeValue.trim()) {
-      return null;
+      return null
     }
 
     if (attributeName === 'id') {
@@ -218,7 +218,7 @@ function findAttributesPattern (priority, element, ignore, parent = element.pare
 function checkTag (element, ignore, path, parent = element.parentNode) {
   const pattern = findTagPattern(element, ignore)
   if (pattern) {
-    let matches = [];
+    let matches = []
     matches = parent.querySelectorAll(pattern)
     if (matches.length === 1) {
       path.unshift(pattern)
@@ -266,7 +266,7 @@ function checkChilds (priority, element, ignore, path) {
       const childPattern = findPattern(priority, child, ignore)
       if (!childPattern) {
         return console.warn(`
-          Element couldn\'t be matched through strict ignore pattern!
+          Element couldn't be matched through strict ignore pattern!
         `, child, ignore, childPattern)
       }
       const pattern = `> ${childPattern}:nth-child(${i+1})`

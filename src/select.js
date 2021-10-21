@@ -4,7 +4,7 @@
  * Construct a unique CSS query selector to access the selected DOM element(s).
  * For longevity it applies different matching and optimization strategies.
  */
-import css2xpath from 'css2xpath';
+import css2xpath from 'css2xpath'
 
 import adapt from './adapt'
 import match from './match'
@@ -61,7 +61,7 @@ export function getMultiSelector (elements, options = {}) {
   }
 
   if (elements.some((element) => element.nodeType !== 1)) {
-    throw new Error(`Invalid input - only an Array of HTMLElements or representations of them is supported!`)
+    throw new Error('Invalid input - only an Array of HTMLElements or representations of them is supported!')
   }
 
   const globalModified = adapt(elements[0], options)
@@ -79,7 +79,7 @@ export function getMultiSelector (elements, options = {}) {
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
     // TODO: cluster matches to split into similar groups for sub selections
     return console.warn(`
-      The selected elements can\'t be efficiently mapped.
+      The selected elements can't be efficiently mapped.
       Its probably best to use multiple single selectors instead!
     `, elements)
   }
