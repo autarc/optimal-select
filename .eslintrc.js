@@ -23,6 +23,30 @@ module.exports = {
     'semi': [
       'error',
       'never'
-    ]
-  }
+    ],
+    'no-unused-expressions': 'warn',
+    'no-unused-vars': 'warn',
+  },
+  'overrides': [
+    {
+      'files': ['tests/**'],
+      'env': {
+        'mocha': true
+      }
+    },
+    {
+      'files': ['example/**'],
+      'env': {
+        'browser': true
+      },
+      'rules': {
+        'indent': 'off',
+        'no-redeclare': 'off',
+        'no-undef': 'off',
+        'no-unused-vars': 'off',
+        'quotes': 'off',
+        'semi': 'off',
+      }
+    }
+  ]
 }
