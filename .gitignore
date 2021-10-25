@@ -20,6 +20,10 @@ lib/
 # debug
 npm-debug.log
 
+#nyc
+.nyc_output
+coverage
+
 
 ######################
 # OS generated files #

@@ -6,6 +6,7 @@
  */
 
 import adapt from './adapt'
+import { getSelect } from './common'
 import { convertNodeList } from './utilities'
 
 /**
@@ -32,12 +33,14 @@ export default function optimize (selector, elements, options = {}) {
   }
 
   const globalModified = adapt(elements[0], options)
+  const select = getSelect(options)
 
-  // chunk parts outside of quotes (http://stackoverflow.com/a/25663729)
-  var path = selector.replace(/> /g, '>').split(/\s+(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+  // chunk parts outside of quotes (http://stackoverflow.com/a/25663729, https://stackoverflow.com/a/16261693)
+  // var path = selector.replace(/> /g, '>').split(/\s+(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+  var path = selector.replace(/> /g, '>').match(/(?:[^\s"]+|"[^"]*")+/g)
 
   if (path.length < 2) {
-    return optimizePart('', selector, '', elements)
+    return optimizePart('', selector, '', elements, select)
   }
 
   const shortened = [path.pop()]
@@ -47,18 +50,18 @@ export default function optimize (selector, elements, options = {}) {
     const postPart = shortened.join(' ')
 
     const pattern = `${prePart} ${postPart}`
-    const matches = document.querySelectorAll(pattern)
+    const matches = select(pattern)
     const hasSameResult = matches.length === elements.length && elements.every((element, i) => element === matches[i])
     if (!hasSameResult) {
-      shortened.unshift(optimizePart(prePart, current, postPart, elements))
+      shortened.unshift(optimizePart(prePart, current, postPart, elements, select))
     }
   }
   shortened.unshift(path[0])
   path = shortened
 
   // optimize start + end
-  path[0] = optimizePart('', path[0], path.slice(1).join(' '), elements)
-  path[path.length-1] = optimizePart(path.slice(0, -1).join(' '), path[path.length-1], '', elements)
+  path[0] = optimizePart('', path[0], path.slice(1).join(' '), elements, select)
+  path[path.length-1] = optimizePart(path.slice(0, -1).join(' '), path[path.length-1], '', elements, select)
 
   if (globalModified) {
     delete global.document
@@ -74,28 +77,34 @@ export default function optimize (selector, elements, options = {}) {
  * @param  {string}              current  - [description]
  * @param  {string}              postPart - [description]
  * @param  {Array.<HTMLElement>} elements - [description]
+ * @param  {function}            select   - [description]
  * @return {string}                       - [description]
  */
-function optimizePart (prePart, current, postPart, elements) {
+function optimizePart (prePart, current, postPart, elements, select) {
   if (prePart.length) prePart = `${prePart} `
   if (postPart.length) postPart = ` ${postPart}`
+
+  // don't optimize contains expression
+  if (/:contains\(/.test(current)) {
+    return current
+  }
 
   // robustness: attribute without value (generalization)
   if (/\[*\]/.test(current)) {
     const key = current.replace(/=.*$/, ']')
     var pattern = `${prePart}${key}${postPart}`
-    var matches = document.querySelectorAll(pattern)
+    var matches = select(pattern)
     if (compareResults(matches, elements)) {
       current = key
     } else {
       // robustness: replace specific key-value with base tag (heuristic)
-      const references = document.querySelectorAll(`${prePart}${key}`)
+      const references = select(`${prePart}${key}`)
       for (var i = 0, l = references.length; i < l; i++) {
         const reference = references[i]
         if (elements.some((element) => reference.contains(element))) {
           const description = reference.tagName.toLowerCase()
           var pattern2 = `${prePart}${description}${postPart}`
-          var matches2 = document.querySelectorAll(pattern2)
+          var matches2 = select(pattern2)
           if (compareResults(matches2, elements)) {
             current = description
           }
@@ -109,7 +118,7 @@ function optimizePart (prePart, current, postPart, elements) {
   if (/>/.test(current)) {
     const descendant = current.replace(/>/, '')
     var pattern3 = `${prePart}${descendant}${postPart}`
-    var matches3 = document.querySelectorAll(pattern3)
+    var matches3 = select(pattern3)
     if (compareResults(matches3, elements)) {
       current = descendant
     }
@@ -120,7 +129,7 @@ function optimizePart (prePart, current, postPart, elements) {
     // TODO: consider complete coverage of 'nth-of-type' replacement
     const type = current.replace(/nth-child/g, 'nth-of-type')
     var pattern4 = `${prePart}${type}${postPart}`
-    var matches4 = document.querySelectorAll(pattern4)
+    var matches4 = select(pattern4)
     if (compareResults(matches4, elements)) {
       current = type
     }
@@ -140,7 +149,7 @@ function optimizePart (prePart, current, postPart, elements) {
       if (!pattern5.length || pattern5.charAt(0) === '>' || pattern5.charAt(pattern5.length-1) === '>') {
         break
       }
-      var matches5 = document.querySelectorAll(pattern5)
+      var matches5 = select(pattern5)
       if (compareResults(matches5, elements)) {
         current = partial
       }
@@ -149,7 +158,7 @@ function optimizePart (prePart, current, postPart, elements) {
     // robustness: degrade complex classname (heuristic)
     names = current && current.match(/\./g)
     if (names && names.length > 2) {
-      const references = document.querySelectorAll(`${prePart}${current}`)
+      const references = select(`${prePart}${current}`)
       for (var i2 = 0, l2 = references.length; i2 < l2; i2++) {
         const reference = references[i2]
         if (elements.some((element) => reference.contains(element) )) {
@@ -157,7 +166,7 @@ function optimizePart (prePart, current, postPart, elements) {
           // - check using attributes + regard excludes
           const description = reference.tagName.toLowerCase()
           var pattern6 = `${prePart}${description}${postPart}`
-          var matches6 = document.querySelectorAll(pattern6)
+          var matches6 = select(pattern6)
           if (compareResults(matches6, elements)) {
             current = description
           }

@@ -8,47 +8,65 @@ import { select } from '../src'
 
 chai.use(chaiSnapshot)
 
-// initialize DOM emulation
-const indexHTML = fs.readFileSync('example/index.html').toString()
-const dom = new JSDOM(indexHTML)
-
-global.window = dom.window
-global.document = dom.window.document
-
-// attach jquery to emulated DOM
-const $ = (global.jQuery = require('jquery'))
-
-// test candidates
-const candidates = [
-  {
-    name: 'optimal-select (css)',
-    generate: select,
-    check: selector => $(selector)
-  },
-  {
-    name: 'optimal-select (xpath)',
-    generate: element => select(element, { format: 1 }),
-    check: function(xpath) {
-      var iterator = global.document.evaluate(xpath, document, null, 0)
-      var elements = []
-      var element
-      while ((element = iterator.iterateNext())) {
-        elements.push(element)
-      }
-      return elements
-    }
-  }
-]
 
 describe('Baseline reference using original benchmark DOM', function() {
-  candidates.forEach(candidate => {
-    var elements
+  var elements
+  var Sizzle
 
-    before(function() {
-      elements = document.querySelector('#wrap').querySelectorAll('*')
-    })
+  before(function() {
+    // load HTML fixture
+    const indexHTML = fs.readFileSync('example/index.html').toString()
+
+    const dom = new JSDOM(indexHTML)
+    global.window = dom.window
+    global.document = dom.window.document
+
+    // attach Sizzle to emulated DOM
+    Sizzle = require('sizzle')
+
+    elements = document.querySelector('#wrap').querySelectorAll('*')
+  })
+
+  // test candidates
+  const candidates = [
+    {
+      name: 'optimal-select (css)',
+      generate: select,
+      check: selector => document.querySelectorAll(selector)
+    },
+    {
+      name: 'optimal-select (xpath)',
+      generate: element => select(element, { format: 'xpath' }),
+      check: function(xpath) {
+        var iterator = document.evaluate(xpath, document, null, 0)
+        var elements = []
+        var element
+        while ((element = iterator.iterateNext())) {
+          elements.push(element)
+        }
+        return elements
+      }
+    },
+    {
+      name: 'optimal-select (jquery)',
+      generate: element => select(element, { format: 'jquery' }),
+      check: selector => {
+        try {
+          return Sizzle(selector, document)
+        }
+        catch(e) {
+          console.log('ERROR', selector)
+          throw e
+        }
+      }
+    },
+  ]
+
+  candidates.forEach(candidate => {
 
     describe(candidate.name, function() {
+      this.timeout(50000)
+
       it('generates selector string', function() {
         elements.forEach(element => {
           expect(candidate.generate(element)).to.matchSnapshot(this)
@@ -56,10 +74,9 @@ describe('Baseline reference using original benchmark DOM', function() {
       })
 
       it('selector string is valid, unique and points to correct element', function() {
-        this.timeout(50000)
-
         elements.forEach(element => {
           const selector = candidate.generate(element)
+          // console.log('SELECTOR', selector)
           const found = candidate.check(selector)
 
           expect(found).to.have.length(1)

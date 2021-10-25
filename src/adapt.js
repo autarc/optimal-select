@@ -162,109 +162,109 @@ function getInstructions (selectors) {
 
     switch (true) {
 
-    // child: '>'
-    case />/.test(type):
-      instruction = function checkParent (node) {
-        return (validate) => validate(node.parent) && node.parent
-      }
-      break
-
-      // class: '.'
-    case /^\./.test(type): {
-      const names = type.substr(1).split('.')
-      validate = (node) => {
-        const nodeClassName = node.attribs.class
-        return nodeClassName && names.every((name) => nodeClassName.indexOf(name) > -1)
-      }
-      instruction = function checkClass (node, root) {
-        if (discover) {
-          return node.getElementsByClassName(names.join(' '))
+      // child: '>'
+      case />/.test(type):
+        instruction = function checkParent (node) {
+          return (validate) => validate(node.parent) && node.parent
         }
-        return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
-      }
-      break
-    }
+        break
 
-    // attribute: '[key="value"]'
-    case /^\[/.test(type): {
-      const [attributeKey, attributeValue] = type.replace(/\[|\]|"/g, '').split('=')
-      validate = (node) => {
-        const hasAttribute = Object.keys(node.attribs).indexOf(attributeKey) > -1
-        if (hasAttribute) { // regard optional attributeValue
-          if (!attributeValue || (node.attribs[attributeKey] === attributeValue)) {
-            return true
+        // class: '.'
+      case /^\./.test(type): {
+        const names = type.substr(1).split('.')
+        validate = (node) => {
+          const nodeClassName = node.attribs.class
+          return nodeClassName && names.every((name) => nodeClassName.indexOf(name) > -1)
+        }
+        instruction = function checkClass (node, root) {
+          if (discover) {
+            return node.getElementsByClassName(names.join(' '))
           }
+          return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
         }
-        return false
+        break
       }
-      instruction = function checkAttribute (node, root) {
-        if (discover) {
-          const NodeList = []
-          traverseDescendants([node], (descendant) => {
-            if (validate(descendant)) {
-              NodeList.push(descendant)
-            }
-          })
-          return NodeList
-        }
-        return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
-      }
-      break
-    }
 
-    // id: '#'
-    case /^#/.test(type): {
-      const id = type.substr(1)
-      validate = (node) => {
-        return node.attribs.id === id
-      }
-      instruction = function checkId (node, root) {
-        if (discover) {
-          const NodeList = []
-          traverseDescendants([node], (descendant, done) => {
-            if (validate(descendant)) {
-              NodeList.push(descendant)
-              done()
+      // attribute: '[key="value"]'
+      case /^\[/.test(type): {
+        const [attributeKey, attributeValue] = type.replace(/\[|\]|"/g, '').split('=')
+        validate = (node) => {
+          const hasAttribute = Object.keys(node.attribs).indexOf(attributeKey) > -1
+          if (hasAttribute) { // regard optional attributeValue
+            if (!attributeValue || (node.attribs[attributeKey] === attributeValue)) {
+              return true
             }
-          })
-          return NodeList
+          }
+          return false
         }
-        return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
+        instruction = function checkAttribute (node, root) {
+          if (discover) {
+            const NodeList = []
+            traverseDescendants([node], (descendant) => {
+              if (validate(descendant)) {
+                NodeList.push(descendant)
+              }
+            })
+            return NodeList
+          }
+          return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
+        }
+        break
       }
-      break
-    }
 
-    // universal: '*'
-    case /\*/.test(type): {
-      validate = () => true
-      instruction = function checkUniversal (node, root) {
-        if (discover) {
-          const NodeList = []
-          traverseDescendants([node], (descendant) => NodeList.push(descendant))
-          return NodeList
+      // id: '#'
+      case /^#/.test(type): {
+        const id = type.substr(1)
+        validate = (node) => {
+          return node.attribs.id === id
         }
-        return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
+        instruction = function checkId (node, root) {
+          if (discover) {
+            const NodeList = []
+            traverseDescendants([node], (descendant, done) => {
+              if (validate(descendant)) {
+                NodeList.push(descendant)
+                done()
+              }
+            })
+            return NodeList
+          }
+          return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
+        }
+        break
       }
-      break
-    }
 
-    // tag: '...'
-    default:
-      validate = (node) => {
-        return node.name === type
-      }
-      instruction = function checkTag (node, root) {
-        if (discover) {
-          const NodeList = []
-          traverseDescendants([node], (descendant) => {
-            if (validate(descendant)) {
-              NodeList.push(descendant)
-            }
-          })
-          return NodeList
+      // universal: '*'
+      case /\*/.test(type): {
+        validate = () => true
+        instruction = function checkUniversal (node, root) {
+          if (discover) {
+            const NodeList = []
+            traverseDescendants([node], (descendant) => NodeList.push(descendant))
+            return NodeList
+          }
+          return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
         }
-        return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
+        break
       }
+
+      // tag: '...'
+      default:
+        validate = (node) => {
+          return node.name === type
+        }
+        instruction = function checkTag (node, root) {
+          if (discover) {
+            const NodeList = []
+            traverseDescendants([node], (descendant) => {
+              if (validate(descendant)) {
+                NodeList.push(descendant)
+              }
+            })
+            return NodeList
+          }
+          return (typeof node === 'function') ? node(validate) : getAncestor(node, root, validate)
+        }
     }
 
     if (!pseudo) {

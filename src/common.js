@@ -4,6 +4,26 @@
  * Process collections for similarities.
  */
 
+
+/**
+ * Query document using correct selector
+ *
+ * @param  {Object}               options - [description]
+ * @return {(selector: string, parent: HTMLElement) => Array.<HTMLElements>} - [description]
+ */
+export function getSelect (options = {}) {
+  if (options.format === 'jquery') {
+    const Sizzle = require('sizzle')
+    return function (selector, parent = null) {
+      return Sizzle(selector, parent || document)
+    }
+  }
+  return function (selector, parent = null) {
+    return (parent || document).querySelectorAll(selector)
+  } 
+}
+
+
 /**
  * Find the last common ancestor of elements
  *
@@ -145,3 +165,4 @@ export function getCommonProperties (elements) {
 
   return commonProperties
 }
+

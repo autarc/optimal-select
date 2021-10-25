@@ -14,7 +14,10 @@ module.exports = {
   'rules': {
     'indent': [
       'error',
-      2
+      2,
+      {
+        'SwitchCase': 1
+      }
     ],
     'quotes': [
       'error',
@@ -35,7 +38,7 @@ module.exports = {
       }
     },
     {
-      'files': ['example/**'],
+      'files': ['example/**', 'tests/**/*.snap.js'],
       'env': {
         'browser': true
       },

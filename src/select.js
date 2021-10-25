@@ -10,7 +10,7 @@ import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
 import { convertNodeList } from './utilities'
-import { getCommonAncestor, getCommonProperties } from './common'
+import { getSelect, getCommonAncestor, getCommonProperties } from './common'
 
 /**
  * Get a selector for the provided element
@@ -65,6 +65,7 @@ export function getMultiSelector (elements, options = {}) {
   }
 
   const globalModified = adapt(elements[0], options)
+  const select = getSelect(options)
 
   const ancestor = getCommonAncestor(elements, options)
   const ancestorSelector = getSingleSelector(ancestor, options)
@@ -74,7 +75,7 @@ export function getMultiSelector (elements, options = {}) {
   const descendantSelector = commonSelectors[0]
 
   const selector = optimize(`${ancestorSelector} ${descendantSelector}`, elements, options)
-  const selectorMatches = convertNodeList(document.querySelectorAll(selector))
+  const selectorMatches = convertNodeList(select(selector))
 
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
     // TODO: cluster matches to split into similar groups for sub selections
@@ -143,10 +144,9 @@ export default function getQuerySelector (input, options = {}) {
     return getMultiSelector(input, options)
   }
   const result = getSingleSelector(input, options)
-
-  if (!options || !options.format) {
-    return result
+  if (options && [1, 'xpath'].includes(options.format)) {
+    return css2xpath(result)
   }
 
-  return css2xpath(result)
+  return result
 }
