@@ -6,7 +6,7 @@
 
 
 /**
- * Query document using correct selector
+ * Query document using correct selector function
  *
  * @param  {Object}               options - [description]
  * @return {(selector: string, parent: HTMLElement) => Array.<HTMLElements>} - [description]

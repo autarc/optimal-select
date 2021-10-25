@@ -24,7 +24,7 @@ const defaultIgnore = {
  * @param  {Object}      options - [description]
  * @return {string}              - [description]
  */
-export default function match (node, options) {
+export default function match (node, options = {}) {
 
   const {
     root = document,
