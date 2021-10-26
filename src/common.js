@@ -9,7 +9,7 @@
  * Query document using correct selector function
  *
  * @param  {Object}               options - [description]
- * @return {(selector: string, parent: HTMLElement) => Array.<HTMLElements>} - [description]
+ * @return {(selector: string, parent: HTMLElement) => Array.<HTMLElement>} - [description]
  */
 export function getSelect (options = {}) {
   if (options.format === 'jquery') {
@@ -27,7 +27,7 @@ export function getSelect (options = {}) {
 /**
  * Find the last common ancestor of elements
  *
- * @param  {Array.<HTMLElements>} elements - [description]
+ * @param  {Array.<HTMLElement>} elements  - [description]
  * @return {HTMLElement}                   - [description]
  */
 export function getCommonAncestor (elements, options = {}) {

@@ -108,6 +108,7 @@ export default function match (node, options = {}) {
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
  * @param  {Array.<string>} path     - [description]
+ * @param  {function}       select   - [description]
  * @param  {HTMLElement}    parent   - [description]
  * @return {boolean}                 - [description]
  */
@@ -161,7 +162,7 @@ function getClassSelector(classes = [], select, parent) {
  * @param  {Array.<string>} priority - [description]
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
-
+ * @param  {function}       select   - [description]
  * @return {string?}                 - [description]
  */
 function findAttributesPattern (priority, element, ignore, select, parent = element.parentNode) {
@@ -266,6 +267,7 @@ function findTagPattern (element, ignore) {
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
  * @param  {Array.<string>} path     - [description]
+ * @param  {function}       select   - [description]
  * @return {boolean}                 - [description]
  */
 function checkChilds (priority, element, ignore, path, select) {
@@ -295,6 +297,7 @@ function checkChilds (priority, element, ignore, path, select) {
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
  * @param  {Array.<string>} path     - [description]
+ * @param  {function}       select   - [description]
  * @return {boolean}                 - [description]
  */
 function checkContains (priority, element, ignore, path, select) {
@@ -324,6 +327,7 @@ function checkContains (priority, element, ignore, path, select) {
  * @param  {Array.<string>} priority - [description]
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
+ * @param  {function}       select   - [description]
  * @return {string}                  - [description]
  */
 function findPattern (priority, element, ignore, select) {

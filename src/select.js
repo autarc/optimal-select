@@ -95,7 +95,7 @@ export function getMultiSelector (elements, options = {}) {
 /**
  * Get selectors to describe a set of elements
  *
- * @param  {Array.<HTMLElements>} elements - [description]
+ * @param  {Array.<HTMLElement>} elements  - [description]
  * @return {string}                        - [description]
  */
 function getCommonSelectors (elements) {
