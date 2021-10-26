@@ -43,6 +43,12 @@ export default function optimize (selector, elements, options = {}) {
     return optimizePart('', selector, '', elements, select)
   }
 
+  var endOptimized = false
+  if (/>/.test(path[path.length-1])) {
+    path[path.length-1] = optimizePart(path.slice(0, -1).join(' '), path[path.length-1], '', elements, select)
+    endOptimized = true
+  }
+
   const shortened = [path.pop()]
   while (path.length > 1)  {
     const current = path.pop()
@@ -61,7 +67,9 @@ export default function optimize (selector, elements, options = {}) {
 
   // optimize start + end
   path[0] = optimizePart('', path[0], path.slice(1).join(' '), elements, select)
-  path[path.length-1] = optimizePart(path.slice(0, -1).join(' '), path[path.length-1], '', elements, select)
+  if (!endOptimized) {
+    path[path.length-1] = optimizePart(path.slice(0, -1).join(' '), path[path.length-1], '', elements, select)
+  }
 
   if (globalModified) {
     delete global.document
@@ -84,9 +92,16 @@ function optimizePart (prePart, current, postPart, elements, select) {
   if (prePart.length) prePart = `${prePart} `
   if (postPart.length) postPart = ` ${postPart}`
 
-  // don't optimize contains expression
-  if (/:contains\(/.test(current)) {
-    return current
+  // optimize contains
+  if (/:contains\(/.test(current) && postPart.length) {
+    let firstIndex = current.indexOf(':')
+    let containsIndex = current.lastIndexOf(':contains(')
+    let optimized = current.slice(0, containsIndex)
+    while (containsIndex > firstIndex && compareResults(select(`${prePart}${optimized}${postPart}`), elements)) {
+      current = optimized
+      containsIndex = current.lastIndexOf(':contains(')
+      optimized = current.slice(0, containsIndex)
+    }
   }
 
   // robustness: attribute without value (generalization)

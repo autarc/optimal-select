@@ -302,19 +302,20 @@ function checkChilds (priority, element, ignore, path, select) {
  */
 function checkContains (priority, element, ignore, path, select) {
   const elementPattern = findPattern(priority, element, ignore, select)
-  const text = element.textContent.trim()
-  if (text.length > 0 && text.indexOf('\n') < 0) {
-    const parent = element.parentNode
-    const children = parent.childTags || parent.children
-    for (var i = 0, l = children.length; i < l; i++) {
-      const child = children[i]
-      if (child !== element) {
-        if (child.textContent.indexOf(text) > 0) {
-          return false
-        }
-      }
-    }
-    const pattern = `${elementPattern}:contains("${text}")`
+  const parent = element.parentNode
+  const texts = element.textContent
+    .replace(/\n+/g, '\n')
+    .split('\n')
+    .map(text => text.trim())
+    .filter(text => text.length > 0)
+
+  let pattern = `> ${elementPattern}`
+  const found = texts.some(text => {
+    pattern = `${pattern}:contains("${text}")`
+    const matches = select(pattern, parent)
+    return matches.length === 1
+  })
+  if (found) {
     path.unshift(pattern)
     return true
   }
