@@ -39,7 +39,7 @@
     "element"
   ],
   "license": "MIT",
-  "main": "lib/index.js",
+  "main": "dist/optimal-select.js",
   "module": "src/index.js",
   "repository": {
     "type": "git",
@@ -49,10 +49,8 @@
     "postinstall": "patch-package",
     "prepublish": "npm run build",
     "check": "npm outdated -depth 0",
-    "build": "SET NODE_ENV=production node build",
-    "dev": "SET NODE_ENV=development node build",
-    "build:linux": "NODE_ENV=production node build",
-    "dev:linux": "NODE_ENV=development node build",
+    "build": "npx cross-env NODE_ENV=production node build",
+    "dev": "npx cross-env NODE_ENV=development node build",
     "example": "open-url 'http:/localhost:8080/example' && http-server"
   }
 }
