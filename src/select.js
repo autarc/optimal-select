@@ -4,20 +4,29 @@
  * Construct a unique CSS query selector to access the selected DOM element(s).
  * For longevity it applies different matching and optimization strategies.
  */
-import css2xpath from 'css2xpath';
+import css2xpath from 'css2xpath'
 
 import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
 import { convertNodeList } from './utilities'
-import { getCommonAncestor, getCommonProperties } from './common'
+import { getSelect, getCommonAncestor, getCommonProperties } from './common'
+
+/**
+ * @typedef  {Object} Options
+ * @property {HTMLElement} [root]                     Optionally specify the root element
+ * @property {function | Array.<HTMLElement>} [skip]  Specify elements to skip
+ * @property {Array.<string>} [priority]              Order of attribute processing
+ * @property {Object<string, function | number | string | boolean} [ignore] Define patterns which shouldn't be included
+ * @property {('css'|'xpath'|'jquery')} [format]      Output format    
+ */
 
 /**
  * Get a selector for the provided element
  *
- * @param  {HTMLElement} element - [description]
- * @param  {Object}      options - [description]
- * @return {string}              - [description]
+ * @param  {HTMLElement} element   - [description]
+ * @param  {Options}     [options] - [description]
+ * @return {string}                - [description]
  */
 export function getSingleSelector (element, options = {}) {
 
@@ -50,9 +59,9 @@ export function getSingleSelector (element, options = {}) {
 /**
  * Get a selector to match multiple descendants from an ancestor
  *
- * @param  {Array.<HTMLElement>|NodeList} elements - [description]
- * @param  {Object}                       options  - [description]
- * @return {string}                                - [description]
+ * @param  {Array.<HTMLElement>|NodeList} elements   - [description]
+ * @param  {Options}                      [options]  - [description]
+ * @return {string}                                  - [description]
  */
 export function getMultiSelector (elements, options = {}) {
 
@@ -61,10 +70,11 @@ export function getMultiSelector (elements, options = {}) {
   }
 
   if (elements.some((element) => element.nodeType !== 1)) {
-    throw new Error(`Invalid input - only an Array of HTMLElements or representations of them is supported!`)
+    throw new Error('Invalid input - only an Array of HTMLElements or representations of them is supported!')
   }
 
   const globalModified = adapt(elements[0], options)
+  const select = getSelect(options)
 
   const ancestor = getCommonAncestor(elements, options)
   const ancestorSelector = getSingleSelector(ancestor, options)
@@ -74,12 +84,12 @@ export function getMultiSelector (elements, options = {}) {
   const descendantSelector = commonSelectors[0]
 
   const selector = optimize(`${ancestorSelector} ${descendantSelector}`, elements, options)
-  const selectorMatches = convertNodeList(document.querySelectorAll(selector))
+  const selectorMatches = convertNodeList(select(selector))
 
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
     // TODO: cluster matches to split into similar groups for sub selections
     return console.warn(`
-      The selected elements can\'t be efficiently mapped.
+      The selected elements can't be efficiently mapped.
       Its probably best to use multiple single selectors instead!
     `, elements)
   }
@@ -94,7 +104,7 @@ export function getMultiSelector (elements, options = {}) {
 /**
  * Get selectors to describe a set of elements
  *
- * @param  {Array.<HTMLElements>} elements - [description]
+ * @param  {Array.<HTMLElement>} elements  - [description]
  * @return {string}                        - [description]
  */
 function getCommonSelectors (elements) {
@@ -134,19 +144,18 @@ function getCommonSelectors (elements) {
  *
  * NOTE: extended detection is used for special cases like the <select> element with <options>
  *
- * @param  {HTMLElement|NodeList|Array.<HTMLElement>} input   - [description]
- * @param  {Object}                                   options - [description]
- * @return {string}                                           - [description]
+ * @param  {HTMLElement|NodeList|Array.<HTMLElement>} input     - [description]
+ * @param  {Options}                                  [options] - [description]
+ * @return {string}                                             - [description]
  */
 export default function getQuerySelector (input, options = {}) {
   if (input.length && !input.name) {
     return getMultiSelector(input, options)
   }
   const result = getSingleSelector(input, options)
-
-  if (!options || !options.format) {
-    return result
+  if (options && [1, 'xpath'].includes(options.format)) {
+    return css2xpath(result)
   }
 
-  return css2xpath(result)
+  return result
 }

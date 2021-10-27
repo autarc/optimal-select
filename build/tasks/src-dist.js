@@ -114,7 +114,7 @@ export default (env) => {
 
     return webpack(ProductionDebugConfig).run((error, stats) => {
       if (error) {
-        return rejec(error)
+        return reject(error)
       }
       return webpack(ProductionMinifiedConfig).run((error, stats) => {
         if (error) {

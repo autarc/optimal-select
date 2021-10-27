@@ -5,9 +5,32 @@
  */
 
 /**
+ * @typedef {import('./select').Options} Options
+ */
+
+/**
+ * Query document using correct selector function
+ *
+ * @param  {Options}              options - [description]
+ * @return {(selector: string, parent: HTMLElement) => Array.<HTMLElement>} - [description]
+ */
+export function getSelect (options = {}) {
+  if (options.format === 'jquery') {
+    const Sizzle = require('sizzle')
+    return function (selector, parent = null) {
+      return Sizzle(selector, parent || document)
+    }
+  }
+  return function (selector, parent = null) {
+    return (parent || document).querySelectorAll(selector)
+  } 
+}
+
+
+/**
  * Find the last common ancestor of elements
  *
- * @param  {Array.<HTMLElements>} elements - [description]
+ * @param  {Array.<HTMLElement>} elements  - [description]
  * @return {HTMLElement}                   - [description]
  */
 export function getCommonAncestor (elements, options = {}) {
@@ -145,3 +168,4 @@ export function getCommonProperties (elements) {
 
   return commonProperties
 }
+

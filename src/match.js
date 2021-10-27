@@ -4,7 +4,12 @@
  * Retrieve selector for a node.
  */
 
+import { getSelect } from './common'
 import { escapeValue } from './utilities'
+
+/**
+ * @typedef {import('./select').Options} Options
+ */
 
 const defaultIgnore = {
   attribute (attributeName) {
@@ -19,22 +24,25 @@ const defaultIgnore = {
 /**
  * Get the path of the element
  *
- * @param  {HTMLElement} node    - [description]
- * @param  {Object}      options - [description]
- * @return {string}              - [description]
+ * @param  {HTMLElement} node      - [description]
+ * @param  {Options}     [options] - [description]
+ * @return {string}                - [description]
  */
-export default function match (node, options) {
+export default function match (node, options = {}) {
 
   const {
     root = document,
     skip = null,
     priority = ['id', 'class', 'href', 'src'],
-    ignore = {}
+    ignore = {},
+    format
   } = options
 
   const path = []
   var element = node
   var length = path.length
+  const jquery = (format === 'jquery')
+  const select = getSelect(options)
 
   const skipCompare = skip && (Array.isArray(skip) ? skip : [skip]).map((entry) => {
     if (typeof entry !== 'function') {
@@ -66,18 +74,22 @@ export default function match (node, options) {
   while (element !== root && element.nodeType !== 11) {
     if (skipChecks(element) !== true) {
       // ~ global
-      if (checkAttributes(priority, element, ignore, path, root)) break
-      if (checkTag(element, ignore, path, root)) break
+      if (checkAttributes(priority, element, ignore, path, select, root)) break
+      if (checkTag(element, ignore, path, select, root)) break
 
       // ~ local
-      checkAttributes(priority, element, ignore, path)
+      checkAttributes(priority, element, ignore, path, select)
       if (path.length === length) {
-        checkTag(element, ignore, path)
+        checkTag(element, ignore, path, select)
+      }
+
+      if (jquery && path.length === length) {
+        checkContains(priority, element, ignore, path, select)
       }
 
       // define only one part each iteration
       if (path.length === length) {
-        checkChilds(priority, element, ignore, path)
+        checkChilds(priority, element, ignore, path, select)
       }
     }
 
@@ -86,7 +98,7 @@ export default function match (node, options) {
   }
 
   if (element === root) {
-    const pattern = findPattern(priority, element, ignore)
+    const pattern = findPattern(priority, element, ignore, select)
     path.unshift(pattern)
   }
 
@@ -100,13 +112,14 @@ export default function match (node, options) {
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
  * @param  {Array.<string>} path     - [description]
+ * @param  {function}       select   - [description]
  * @param  {HTMLElement}    parent   - [description]
  * @return {boolean}                 - [description]
  */
-function checkAttributes (priority, element, ignore, path, parent = element.parentNode) {
-  const pattern = findAttributesPattern(priority, element, ignore, parent)
+function checkAttributes (priority, element, ignore, path, select, parent = element.parentNode) {
+  const pattern = findAttributesPattern(priority, element, ignore, select, parent)
   if (pattern) {
-    const matches = parent.querySelectorAll(pattern)
+    const matches = select(pattern, parent)
     if (matches.length === 1) {
       path.unshift(pattern)
       return true
@@ -119,31 +132,32 @@ function checkAttributes (priority, element, ignore, path, parent = element.pare
  * Get class selector
  *
  * @param  {Array.<string>} classes - [description]
+ * @param  {function}       select  - [description]
  * @param  {HTMLElement}    parent  - [description]
- * @return {string?}                 - [description]
+ * @return {string?}                - [description]
  */
-function getClassSelector(classes = [], parent) {
-  let result = [[]];
+function getClassSelector(classes = [], select, parent) {
+  let result = [[]]
 
   classes.forEach(function(c) {
     result.forEach(function(r) {
-      result.push(r.concat('.' + c));
-    });
-  });
+      result.push(r.concat('.' + c))
+    })
+  })
 
-  result.shift();
+  result.shift()
 
-  result = result.sort(function(a,b) { return a.length - b.length; });
+  result = result.sort(function(a,b) { return a.length - b.length })
 
   for(let i = 0; i < result.length; i++) {
-    let r = result[i].join('');
-    const matches = parent.querySelectorAll(r);
+    let r = result[i].join('')
+    const matches = select(r, parent)
     if (matches.length === 1) {
-      return r;
+      return r
     }
   }
 
-  return null;
+  return null
 }
 
 /**
@@ -152,16 +166,17 @@ function getClassSelector(classes = [], parent) {
  * @param  {Array.<string>} priority - [description]
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
+ * @param  {function}       select   - [description]
  * @return {string?}                 - [description]
  */
-function findAttributesPattern (priority, element, ignore, parent = element.parentNode) {
+function findAttributesPattern (priority, element, ignore, select, parent = element.parentNode) {
   const attributes = element.attributes
   var attributeNames = Object.keys(attributes).map((val) => attributes[val].name)
-    .filter((a) => priority.indexOf(a) < 0);
+    .filter((a) => priority.indexOf(a) < 0)
 
-  var sortedKeys = [ ...priority, ...attributeNames ];
+  var sortedKeys = [ ...priority, ...attributeNames ]
 
-  var tagName = element.tagName.toLowerCase();
+  var tagName = element.tagName.toLowerCase()
 
   for (var i = 0, l = sortedKeys.length; i < l; i++) {
     const key = sortedKeys[i]
@@ -178,7 +193,7 @@ function findAttributesPattern (priority, element, ignore, parent = element.pare
 
     var pattern = `[${attributeName}="${attributeValue}"]`
     if(!attributeValue.trim()) {
-      return null;
+      return null
     }
 
     if (attributeName === 'id') {
@@ -194,7 +209,7 @@ function findAttributesPattern (priority, element, ignore, parent = element.pare
       if (classNames.length === 0) {
         continue
       }
-      pattern = getClassSelector(classNames, parent)
+      pattern = getClassSelector(classNames, select, parent)
 
       if (!pattern) {
         continue
@@ -212,14 +227,15 @@ function findAttributesPattern (priority, element, ignore, parent = element.pare
  * @param  {HTMLElement}    element - [description]
  * @param  {Object}         ignore  - [description]
  * @param  {Array.<string>} path    - [description]
+ * @param  {function}       select  - [description]
  * @param  {HTMLElement}    parent  - [description]
  * @return {boolean}                - [description]
  */
-function checkTag (element, ignore, path, parent = element.parentNode) {
+function checkTag (element, ignore, path, select, parent = element.parentNode) {
   const pattern = findTagPattern(element, ignore)
   if (pattern) {
-    let matches = [];
-    matches = parent.querySelectorAll(pattern)
+    let matches = []
+    matches = select(pattern, parent)
     if (matches.length === 1) {
       path.unshift(pattern)
       if (pattern === 'iframe') {
@@ -255,18 +271,19 @@ function findTagPattern (element, ignore) {
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
  * @param  {Array.<string>} path     - [description]
+ * @param  {function}       select   - [description]
  * @return {boolean}                 - [description]
  */
-function checkChilds (priority, element, ignore, path) {
+function checkChilds (priority, element, ignore, path, select) {
   const parent = element.parentNode
   const children = parent.childTags || parent.children
   for (var i = 0, l = children.length; i < l; i++) {
     const child = children[i]
     if (child === element) {
-      const childPattern = findPattern(priority, child, ignore)
+      const childPattern = findPattern(priority, child, ignore, select)
       if (!childPattern) {
         return console.warn(`
-          Element couldn\'t be matched through strict ignore pattern!
+          Element couldn't be matched through strict ignore pattern!
         `, child, ignore, childPattern)
       }
       const pattern = `> ${childPattern}:nth-child(${i+1})`
@@ -278,15 +295,48 @@ function checkChilds (priority, element, ignore, path) {
 }
 
 /**
+ * Extend path with contains
+ *
+ * @param  {Array.<string>} priority - [description]
+ * @param  {HTMLElement}    element  - [description]
+ * @param  {Object}         ignore   - [description]
+ * @param  {Array.<string>} path     - [description]
+ * @param  {function}       select   - [description]
+ * @return {boolean}                 - [description]
+ */
+function checkContains (priority, element, ignore, path, select) {
+  const elementPattern = findPattern(priority, element, ignore, select)
+  const parent = element.parentNode
+  const texts = element.textContent
+    .replace(/\n+/g, '\n')
+    .split('\n')
+    .map(text => text.trim())
+    .filter(text => text.length > 0)
+
+  let pattern = `> ${elementPattern}`
+  const found = texts.some(text => {
+    pattern = `${pattern}:contains("${text}")`
+    const matches = select(pattern, parent)
+    return matches.length === 1
+  })
+  if (found) {
+    path.unshift(pattern)
+    return true
+  }
+  return false
+}
+
+/**
  * Lookup identifier
  *
  * @param  {Array.<string>} priority - [description]
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
+ * @param  {function}       select   - [description]
  * @return {string}                  - [description]
  */
-function findPattern (priority, element, ignore) {
-  var pattern = findAttributesPattern(priority, element, ignore)
+function findPattern (priority, element, ignore, select) {
+  var pattern = findAttributesPattern(priority, element, ignore, select)
   if (!pattern) {
     pattern = findTagPattern(element, ignore)
   }
