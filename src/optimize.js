@@ -10,12 +10,16 @@ import { getSelect } from './common'
 import { convertNodeList } from './utilities'
 
 /**
+ * @typedef {import('./select').Options} Options
+ */
+
+/**
  * Apply different optimization techniques
  *
- * @param  {string}                          selector - [description]
- * @param  {HTMLElement|Array.<HTMLElement>} element  - [description]
- * @param  {Object}                          options  - [description]
- * @return {string}                                   - [description]
+ * @param  {string}                          selector   - [description]
+ * @param  {HTMLElement|Array.<HTMLElement>} element    - [description]
+ * @param  {Options}                         [options]  - [description]
+ * @return {string}                                     - [description]
  */
 export default function optimize (selector, elements, options = {}) {
 

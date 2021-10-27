@@ -13,11 +13,20 @@ import { convertNodeList } from './utilities'
 import { getSelect, getCommonAncestor, getCommonProperties } from './common'
 
 /**
+ * @typedef  {Object} Options
+ * @property {HTMLElement} [root]                     Optionally specify the root element
+ * @property {function | Array.<HTMLElement>} [skip]  Specify elements to skip
+ * @property {Array.<string>} [priority]              Order of attribute processing
+ * @property {Object<string, function | number | string | boolean} [ignore] Define patterns which shouldn't be included
+ * @property {('css'|'xpath'|'jquery')} [format]      Output format    
+ */
+
+/**
  * Get a selector for the provided element
  *
- * @param  {HTMLElement} element - [description]
- * @param  {Object}      options - [description]
- * @return {string}              - [description]
+ * @param  {HTMLElement} element   - [description]
+ * @param  {Options}     [options] - [description]
+ * @return {string}                - [description]
  */
 export function getSingleSelector (element, options = {}) {
 
@@ -50,9 +59,9 @@ export function getSingleSelector (element, options = {}) {
 /**
  * Get a selector to match multiple descendants from an ancestor
  *
- * @param  {Array.<HTMLElement>|NodeList} elements - [description]
- * @param  {Object}                       options  - [description]
- * @return {string}                                - [description]
+ * @param  {Array.<HTMLElement>|NodeList} elements   - [description]
+ * @param  {Options}                      [options]  - [description]
+ * @return {string}                                  - [description]
  */
 export function getMultiSelector (elements, options = {}) {
 
@@ -135,9 +144,9 @@ function getCommonSelectors (elements) {
  *
  * NOTE: extended detection is used for special cases like the <select> element with <options>
  *
- * @param  {HTMLElement|NodeList|Array.<HTMLElement>} input   - [description]
- * @param  {Object}                                   options - [description]
- * @return {string}                                           - [description]
+ * @param  {HTMLElement|NodeList|Array.<HTMLElement>} input     - [description]
+ * @param  {Options}                                  [options] - [description]
+ * @return {string}                                             - [description]
  */
 export default function getQuerySelector (input, options = {}) {
   if (input.length && !input.name) {

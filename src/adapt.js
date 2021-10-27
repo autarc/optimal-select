@@ -5,10 +5,14 @@
  */
 
 /**
+ * @typedef {import('./select').Options} Options
+ */
+
+/**
  * Modify the context based on the environment
  *
- * @param  {HTMLELement} element - [description]
- * @param  {Object}      options - [description]
+ * @param  {HTMLElement} element - [description]
+ * @param  {Options}     options - [description]
  * @return {boolean}             - [description]
  */
 export default function adapt (element, options) {
@@ -323,10 +327,10 @@ function traverseDescendants (nodes, handler) {
 /**
  * Bubble up from bottom to top
  *
- * @param  {HTMLELement} node     - [description]
- * @param  {HTMLELement} root     - [description]
+ * @param  {HTMLElement} node     - [description]
+ * @param  {HTMLElement} root     - [description]
  * @param  {Function}    validate - [description]
- * @return {HTMLELement}          - [description]
+ * @return {HTMLElement}          - [description]
  */
 function getAncestor (node, root, validate) {
   while (node.parent) {

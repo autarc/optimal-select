@@ -7,6 +7,10 @@
 import { getSelect } from './common'
 import { escapeValue } from './utilities'
 
+/**
+ * @typedef {import('./select').Options} Options
+ */
+
 const defaultIgnore = {
   attribute (attributeName) {
     return [
@@ -20,9 +24,9 @@ const defaultIgnore = {
 /**
  * Get the path of the element
  *
- * @param  {HTMLElement} node    - [description]
- * @param  {Object}      options - [description]
- * @return {string}              - [description]
+ * @param  {HTMLElement} node      - [description]
+ * @param  {Options}     [options] - [description]
+ * @return {string}                - [description]
  */
 export default function match (node, options = {}) {
 

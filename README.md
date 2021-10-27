@@ -76,8 +76,8 @@ var selector = select(element, {
     tag: 'div'
   },
 
-  // output format: 0 - CSS, 1 - XPath (default is CSS)
-  format: 1
+  // output format: 'css' - CSS, 'xpath' - XPath, 'jquery' - jQuery (default is CSS)
+  format: 'xpath'
 })
 ```
 

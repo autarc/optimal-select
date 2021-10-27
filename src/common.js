@@ -4,11 +4,14 @@
  * Process collections for similarities.
  */
 
+/**
+ * @typedef {import('./select').Options} Options
+ */
 
 /**
  * Query document using correct selector function
  *
- * @param  {Object}               options - [description]
+ * @param  {Options}              options - [description]
  * @return {(selector: string, parent: HTMLElement) => Array.<HTMLElement>} - [description]
  */
 export function getSelect (options = {}) {
