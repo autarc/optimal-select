@@ -83,7 +83,7 @@ export default function optimize (selector, elements, options = {}) {
 }
 
 /**
- * Improve a chunk of the selector
+ * Optimize :contains
  *
  * @param  {string}              prePart  - [description]
  * @param  {string}              current  - [description]
@@ -92,13 +92,9 @@ export default function optimize (selector, elements, options = {}) {
  * @param  {function}            select   - [description]
  * @return {string}                       - [description]
  */
-function optimizePart (prePart, current, postPart, elements, select) {
-  if (prePart.length) prePart = `${prePart} `
-  if (postPart.length) postPart = ` ${postPart}`
-
-  // optimize contains
+function optimizeContains (prePart, current, postPart, elements, select) {
   if (/:contains\(/.test(current) && postPart.length) {
-    let firstIndex = current.indexOf(':')
+    let firstIndex = current.indexOf(':contains(')
     let containsIndex = current.lastIndexOf(':contains(')
     let optimized = current.slice(0, containsIndex)
     while (containsIndex > firstIndex && compareResults(select(`${prePart}${optimized}${postPart}`), elements)) {
@@ -107,32 +103,53 @@ function optimizePart (prePart, current, postPart, elements, select) {
       optimized = current.slice(0, containsIndex)
     }
   }
+  return current
+}
 
-  // robustness: attribute without value (generalization)
+/**
+ * Optimize attributes
+ *
+ * @param  {string}              prePart  - [description]
+ * @param  {string}              current  - [description]
+ * @param  {string}              postPart - [description]
+ * @param  {Array.<HTMLElement>} elements - [description]
+ * @param  {function}            select   - [description]
+ * @return {string}                       - [description]
+ */
+function optimizeAttributes (prePart, current, postPart, elements, select) {
+  // reduce attributes: first try without value, then removing completely
   if (/\[*\]/.test(current)) {
-    const key = current.replace(/=.*$/, ']')
-    var pattern = `${prePart}${key}${postPart}`
-    var matches = select(pattern)
-    if (compareResults(matches, elements)) {
-      current = key
-    } else {
-      // robustness: replace specific key-value with base tag (heuristic)
-      const references = select(`${prePart}${key}`)
-      for (var i = 0, l = references.length; i < l; i++) {
-        const reference = references[i]
-        if (elements.some((element) => reference.contains(element))) {
-          const description = reference.tagName.toLowerCase()
-          var pattern2 = `${prePart}${description}${postPart}`
-          var matches2 = select(pattern2)
-          if (compareResults(matches2, elements)) {
-            current = description
-          }
-          break
-        }
-      }
-    }
-  }
+    var items = current.match(/(?:\[[^=]+="[^"]*"\])/g).reverse()
 
+    const simplify = (original, getPartial) =>
+      items.reduce((acc, item) => {
+        const partial = getPartial(acc, item)
+        var pattern = `${prePart}${partial}${postPart}`
+        var matches = select(pattern)
+        return compareResults(matches, elements) ? partial : acc 
+      }, original)
+
+    const simplified = simplify(current, (current, item) => {
+      const key = item.replace(/=.*$/, ']')
+      return current.replace(item, key)
+    })
+
+    return simplify(simplified, (current, item) => current.replace(item, ''))
+  }
+  return current
+}
+
+/**
+ * Optimize descendant
+ *
+ * @param  {string}              prePart  - [description]
+ * @param  {string}              current  - [description]
+ * @param  {string}              postPart - [description]
+ * @param  {Array.<HTMLElement>} elements - [description]
+ * @param  {function}            select   - [description]
+ * @return {string}                       - [description]
+ */
+function optimizeDescendant (prePart, current, postPart, elements, select) {
   // robustness: descendant instead child (heuristic)
   if (/>/.test(current)) {
     const descendant = current.replace(/>/, '')
@@ -142,7 +159,20 @@ function optimizePart (prePart, current, postPart, elements, select) {
       current = descendant
     }
   }
+  return current
+}
 
+/**
+ * Optimize descendant
+ *
+ * @param  {string}              prePart  - [description]
+ * @param  {string}              current  - [description]
+ * @param  {string}              postPart - [description]
+ * @param  {Array.<HTMLElement>} elements - [description]
+ * @param  {function}            select   - [description]
+ * @return {string}                       - [description]
+ */
+function optimizeNthOfType (prePart, current, postPart, elements, select) {
   // robustness: 'nth-of-type' instead 'nth-child' (heuristic)
   if (/:nth-child/.test(current)) {
     // TODO: consider complete coverage of 'nth-of-type' replacement
@@ -153,7 +183,20 @@ function optimizePart (prePart, current, postPart, elements, select) {
       current = type
     }
   }
+  return current
+}
 
+/**
+ * Optimize classes
+ *
+ * @param  {string}              prePart  - [description]
+ * @param  {string}              current  - [description]
+ * @param  {string}              postPart - [description]
+ * @param  {Array.<HTMLElement>} elements - [description]
+ * @param  {function}            select   - [description]
+ * @return {string}                       - [description]
+ */
+function optimizeClasses (prePart, current, postPart, elements, select) {
   // efficiency: combinations of classname (partial permutations)
   if (/^\.\S*[^\s\\]\.\S+/.test(current)) {
     var names = current.trim()
@@ -194,8 +237,32 @@ function optimizePart (prePart, current, postPart, elements, select) {
       }
     }
   }
-
   return current
+}
+
+const optimizers = [
+  optimizeContains,
+  optimizeAttributes,
+  optimizeDescendant,
+  optimizeNthOfType,
+  optimizeClasses,
+]
+
+/**
+ * Improve a chunk of the selector
+ *
+ * @param  {string}              prePart  - [description]
+ * @param  {string}              current  - [description]
+ * @param  {string}              postPart - [description]
+ * @param  {Array.<HTMLElement>} elements - [description]
+ * @param  {function}            select   - [description]
+ * @return {string}                       - [description]
+ */
+function optimizePart (prePart, current, postPart, elements, select) {
+  if (prePart.length) prePart = `${prePart} `
+  if (postPart.length) postPart = ` ${postPart}`
+
+  return optimizers.reduce((acc, optimizer) => optimizer(prePart, acc, postPart, elements, select), current)
 }
 
 /**

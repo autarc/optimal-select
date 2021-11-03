@@ -136,7 +136,7 @@ function checkAttributes (priority, element, ignore, path, select, parent = elem
  * @param  {HTMLElement}    parent  - [description]
  * @return {string?}                - [description]
  */
-function getClassSelector(classes = [], select, parent) {
+function getClassSelector(classes = [], select, parent, prefix = '') {
   let result = [[]]
 
   classes.forEach(function(c) {
@@ -151,7 +151,7 @@ function getClassSelector(classes = [], select, parent) {
 
   for(let i = 0; i < result.length; i++) {
     let r = result[i].join('')
-    const matches = select(r, parent)
+    const matches = select(`${prefix}${r}`, parent)
     if (matches.length === 1) {
       return r
     }
@@ -167,7 +167,7 @@ function getClassSelector(classes = [], select, parent) {
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
  * @param  {function}       select   - [description]
- * @return {string?}                 - [description]
+ * @return {string?}          - [description]
  */
 function findAttributesPattern (priority, element, ignore, select, parent = element.parentNode) {
   const attributes = element.attributes
@@ -175,8 +175,8 @@ function findAttributesPattern (priority, element, ignore, select, parent = elem
     .filter((a) => priority.indexOf(a) < 0)
 
   var sortedKeys = [ ...priority, ...attributeNames ]
-
-  var tagName = element.tagName.toLowerCase()
+  var pattern = element.tagName.toLowerCase()
+  var isOptimal = (pattern) => (select(pattern, parent).length === 1)
 
   for (var i = 0, l = sortedKeys.length; i < l; i++) {
     const key = sortedKeys[i]
@@ -191,35 +191,42 @@ function findAttributesPattern (priority, element, ignore, select, parent = elem
       continue
     }
 
-    var pattern = `[${attributeName}="${attributeValue}"]`
-    if(!attributeValue.trim()) {
-      return null
-    }
-
-    if (attributeName === 'id') {
-      pattern = `#${attributeValue}`
-    }
-
-    if (attributeName === 'class') {
-      let classNames = attributeValue.trim().split(/\s+/g)
-      const classIgnore = ignore.class || defaultIgnore.class
-      if (classIgnore) {
-        classNames = classNames.filter(className => !classIgnore(className))
+    switch (attributeName) {
+      case 'id':
+        pattern = pattern.concat(`#${attributeValue}`)
+        if (isOptimal(pattern)) {
+          return pattern
+        }
+        break
+      case 'class': {
+        let classNames = attributeValue.trim().split(/\s+/g)
+        const classIgnore = ignore.class || defaultIgnore.class
+        if (classIgnore) {
+          classNames = classNames.filter(className => !classIgnore(className))
+        }
+        if (classNames.length > 0) {
+          const classPattern = getClassSelector(classNames, select, parent, pattern)
+          if (classPattern) {
+            pattern = pattern.concat(classPattern)
+            if (isOptimal(pattern)) {
+              return pattern
+            }
+          }
+        }
       }
-      if (classNames.length === 0) {
-        continue
-      }
-      pattern = getClassSelector(classNames, select, parent)
+        break
 
-      if (!pattern) {
-        continue
-      }
+      default:
+        pattern = pattern.concat(`[${attributeName}="${attributeValue}"]`)
+        if (isOptimal(pattern)) {
+          return pattern
+        }
     }
-
-    return tagName + pattern
   }
+
   return null
 }
+
 
 /**
  * Extend path with tag identifier

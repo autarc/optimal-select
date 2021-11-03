@@ -10,8 +10,8 @@ exports[`Baseline reference : CSS : generates selector string : a[href="/dashboa
 exports[`Baseline reference : CSS : generates selector string : i.icon-th 1`] = "i.icon-th";
 exports[`Baseline reference : CSS : generates selector string : ul.main-nav > li:nth-child(3) 1`] = "ul.main-nav li:nth-of-type(3)";
 exports[`Baseline reference : CSS : generates selector string : li#nav-topics 1`] = "li#nav-topics";
-exports[`Baseline reference : CSS : generates selector string : li#nav-topics a[href="/topics"] 1`] = "li#nav-topics a[href]";
-exports[`Baseline reference : CSS : generates selector string : li#nav-topics a[href="/topics"] i.icon-book 1`] = "li#nav-topics i.icon-book";
+exports[`Baseline reference : CSS : generates selector string : a[href="/topics"][title="topics"] 1`] = "a[href=\"\\/topics\"][title]";
+exports[`Baseline reference : CSS : generates selector string : a[href="/topics"][title="topics"] i.icon-book 1`] = "a[href][title] i.icon-book";
 exports[`Baseline reference : CSS : generates selector string : ul.main-nav > li:nth-child(5) 1`] = "ul.main-nav li:nth-of-type(5)";
 exports[`Baseline reference : CSS : generates selector string : li#nav-sites 1`] = "li#nav-sites";
 exports[`Baseline reference : CSS : generates selector string : a[href="/sites"] 1`] = "a[href=\"\\/sites\"]";
@@ -29,9 +29,9 @@ exports[`Baseline reference : CSS : generates selector string : div.nav-account 
 exports[`Baseline reference : CSS : generates selector string : div.nav-account ul.nav 1`] = "div.nav-account ul.nav";
 exports[`Baseline reference : CSS : generates selector string : div.nav-account ul.nav > li:nth-child(1) 1`] = "div.nav-account ul.nav > li:nth-of-type(1)";
 exports[`Baseline reference : CSS : generates selector string : div.btn-group 1`] = "div.btn-group";
-exports[`Baseline reference : CSS : generates selector string : div.btn-group > a[href="/admin"]:nth-child(1) 1`] = "div.btn-group > a[href]";
+exports[`Baseline reference : CSS : generates selector string : div.btn-group a.btn 1`] = "div.btn-group a.btn";
 exports[`Baseline reference : CSS : generates selector string : i.icon-wrench 1`] = "i.icon-wrench";
-exports[`Baseline reference : CSS : generates selector string : button.dropdown-toggle 1`] = "button.dropdown-toggle";
+exports[`Baseline reference : CSS : generates selector string : button.btn 1`] = "button.btn";
 exports[`Baseline reference : CSS : generates selector string : span.caret 1`] = "span.caret";
 exports[`Baseline reference : CSS : generates selector string : ul.dropdown-menu 1`] = "ul.dropdown-menu";
 exports[`Baseline reference : CSS : generates selector string : ul.dropdown-menu > li:nth-child(1) 1`] = "ul.dropdown-menu li:nth-of-type(1)";
@@ -63,7 +63,7 @@ exports[`Baseline reference : CSS : generates selector string : div.nav-account 
 exports[`Baseline reference : CSS : generates selector string : a.user-avatar-link 1`] = "a.user-avatar-link";
 exports[`Baseline reference : CSS : generates selector string : img.user-avatar 1`] = "img.user-avatar";
 exports[`Baseline reference : CSS : generates selector string : div.nav-account ul.nav > li:nth-child(3) 1`] = "div.nav-account ul.nav > li:nth-of-type(3)";
-exports[`Baseline reference : CSS : generates selector string : div.nav-account ul.nav > li:nth-child(3) a[href="/profile"] 1`] = "div.nav-account li:nth-of-type(3) a[href=\"\\/profile\"]";
+exports[`Baseline reference : CSS : generates selector string : a[href="/profile"][title="my account"] 1`] = "a[href=\"\\/profile\"][title]";
 exports[`Baseline reference : CSS : generates selector string : div.nav-account ul.nav > li:nth-child(4) 1`] = "div.nav-account ul.nav > li:nth-of-type(4)";
 exports[`Baseline reference : CSS : generates selector string : a[href="/users/logout"] 1`] = "a[href=\"\\/users\\/logout\"]";
 exports[`Baseline reference : CSS : generates selector string : i.icon-off 1`] = "i.icon-off";
@@ -296,8 +296,8 @@ exports[`Baseline reference : XPath : generates selector string : a[href="/dashb
 exports[`Baseline reference : XPath : generates selector string : i.icon-th 1`] = ".//i[contains(concat(\" \",normalize-space(@class),\" \"),\" icon-th \")]";
 exports[`Baseline reference : XPath : generates selector string : ul.main-nav > li:nth-child(3) 1`] = ".//ul[contains(concat(\" \",normalize-space(@class),\" \"),\" main-nav \")]//li[3]";
 exports[`Baseline reference : XPath : generates selector string : li#nav-topics 1`] = ".//li[@id=\"nav-topics\"]";
-exports[`Baseline reference : XPath : generates selector string : li#nav-topics a[href="/topics"] 1`] = ".//li[@id=\"nav-topics\"]//a[@href]";
-exports[`Baseline reference : XPath : generates selector string : li#nav-topics a[href="/topics"] i.icon-book 1`] = ".//li[@id=\"nav-topics\"]//i[contains(concat(\" \",normalize-space(@class),\" \"),\" icon-book \")]";
+exports[`Baseline reference : XPath : generates selector string : a[href="/topics"][title="topics"] 1`] = ".//a[@href=\"/topics\"][@title]";
+exports[`Baseline reference : XPath : generates selector string : a[href="/topics"][title="topics"] i.icon-book 1`] = ".//a[@href][@title]//i[contains(concat(\" \",normalize-space(@class),\" \"),\" icon-book \")]";
 exports[`Baseline reference : XPath : generates selector string : ul.main-nav > li:nth-child(5) 1`] = ".//ul[contains(concat(\" \",normalize-space(@class),\" \"),\" main-nav \")]//li[5]";
 exports[`Baseline reference : XPath : generates selector string : li#nav-sites 1`] = ".//li[@id=\"nav-sites\"]";
 exports[`Baseline reference : XPath : generates selector string : a[href="/sites"] 1`] = ".//a[@href=\"/sites\"]";
@@ -315,9 +315,9 @@ exports[`Baseline reference : XPath : generates selector string : div.nav-accoun
 exports[`Baseline reference : XPath : generates selector string : div.nav-account ul.nav 1`] = ".//div[contains(concat(\" \",normalize-space(@class),\" \"),\" nav-account \")]//ul[contains(concat(\" \",normalize-space(@class),\" \"),\" nav \")]";
 exports[`Baseline reference : XPath : generates selector string : div.nav-account ul.nav > li:nth-child(1) 1`] = ".//div[contains(concat(\" \",normalize-space(@class),\" \"),\" nav-account \")]//ul[contains(concat(\" \",normalize-space(@class),\" \"),\" nav \")]/li[1]";
 exports[`Baseline reference : XPath : generates selector string : div.btn-group 1`] = ".//div[contains(concat(\" \",normalize-space(@class),\" \"),\" btn-group \")]";
-exports[`Baseline reference : XPath : generates selector string : div.btn-group > a[href="/admin"]:nth-child(1) 1`] = ".//div[contains(concat(\" \",normalize-space(@class),\" \"),\" btn-group \")]/a[@href]";
+exports[`Baseline reference : XPath : generates selector string : div.btn-group a.btn 1`] = ".//div[contains(concat(\" \",normalize-space(@class),\" \"),\" btn-group \")]//a[contains(concat(\" \",normalize-space(@class),\" \"),\" btn \")]";
 exports[`Baseline reference : XPath : generates selector string : i.icon-wrench 1`] = ".//i[contains(concat(\" \",normalize-space(@class),\" \"),\" icon-wrench \")]";
-exports[`Baseline reference : XPath : generates selector string : button.dropdown-toggle 1`] = ".//button[contains(concat(\" \",normalize-space(@class),\" \"),\" dropdown-toggle \")]";
+exports[`Baseline reference : XPath : generates selector string : button.btn 1`] = ".//button[contains(concat(\" \",normalize-space(@class),\" \"),\" btn \")]";
 exports[`Baseline reference : XPath : generates selector string : span.caret 1`] = ".//span[contains(concat(\" \",normalize-space(@class),\" \"),\" caret \")]";
 exports[`Baseline reference : XPath : generates selector string : ul.dropdown-menu 1`] = ".//ul[contains(concat(\" \",normalize-space(@class),\" \"),\" dropdown-menu \")]";
 exports[`Baseline reference : XPath : generates selector string : ul.dropdown-menu > li:nth-child(1) 1`] = ".//ul[contains(concat(\" \",normalize-space(@class),\" \"),\" dropdown-menu \")]//li[1]";
@@ -349,7 +349,7 @@ exports[`Baseline reference : XPath : generates selector string : div.nav-accoun
 exports[`Baseline reference : XPath : generates selector string : a.user-avatar-link 1`] = ".//a[contains(concat(\" \",normalize-space(@class),\" \"),\" user-avatar-link \")]";
 exports[`Baseline reference : XPath : generates selector string : img.user-avatar 1`] = ".//img[contains(concat(\" \",normalize-space(@class),\" \"),\" user-avatar \")]";
 exports[`Baseline reference : XPath : generates selector string : div.nav-account ul.nav > li:nth-child(3) 1`] = ".//div[contains(concat(\" \",normalize-space(@class),\" \"),\" nav-account \")]//ul[contains(concat(\" \",normalize-space(@class),\" \"),\" nav \")]/li[3]";
-exports[`Baseline reference : XPath : generates selector string : div.nav-account ul.nav > li:nth-child(3) a[href="/profile"] 1`] = ".//div[contains(concat(\" \",normalize-space(@class),\" \"),\" nav-account \")]//li[3]//a[@href=\"/profile\"]";
+exports[`Baseline reference : XPath : generates selector string : a[href="/profile"][title="my account"] 1`] = ".//a[@href=\"/profile\"][@title]";
 exports[`Baseline reference : XPath : generates selector string : div.nav-account ul.nav > li:nth-child(4) 1`] = ".//div[contains(concat(\" \",normalize-space(@class),\" \"),\" nav-account \")]//ul[contains(concat(\" \",normalize-space(@class),\" \"),\" nav \")]/li[4]";
 exports[`Baseline reference : XPath : generates selector string : a[href="/users/logout"] 1`] = ".//a[@href=\"/users/logout\"]";
 exports[`Baseline reference : XPath : generates selector string : i.icon-off 1`] = ".//i[contains(concat(\" \",normalize-space(@class),\" \"),\" icon-off \")]";
@@ -582,8 +582,8 @@ exports[`Baseline reference : jQuery : generates selector string : a[href="/dash
 exports[`Baseline reference : jQuery : generates selector string : i.icon-th 1`] = "i.icon-th";
 exports[`Baseline reference : jQuery : generates selector string : ul.main-nav > li:nth-child(3) 1`] = "ul.main-nav li:nth-of-type(3)";
 exports[`Baseline reference : jQuery : generates selector string : li#nav-topics 1`] = "li#nav-topics";
-exports[`Baseline reference : jQuery : generates selector string : li#nav-topics a[href="/topics"] 1`] = "li#nav-topics a[href]";
-exports[`Baseline reference : jQuery : generates selector string : li#nav-topics a[href="/topics"] i.icon-book 1`] = "li#nav-topics i.icon-book";
+exports[`Baseline reference : jQuery : generates selector string : a[href="/topics"][title="topics"] 1`] = "a[href=\"\\/topics\"][title]";
+exports[`Baseline reference : jQuery : generates selector string : a[href="/topics"][title="topics"] i.icon-book 1`] = "a[href][title] i.icon-book";
 exports[`Baseline reference : jQuery : generates selector string : ul.main-nav > li:nth-child(5) 1`] = "ul.main-nav li:nth-of-type(5)";
 exports[`Baseline reference : jQuery : generates selector string : li#nav-sites 1`] = "li#nav-sites";
 exports[`Baseline reference : jQuery : generates selector string : a[href="/sites"] 1`] = "a[href=\"\\/sites\"]";
@@ -601,9 +601,9 @@ exports[`Baseline reference : jQuery : generates selector string : div.nav-accou
 exports[`Baseline reference : jQuery : generates selector string : div.nav-account ul.nav 1`] = "div.nav-account ul.nav";
 exports[`Baseline reference : jQuery : generates selector string : div.nav-account ul.nav > li:nth-child(1) 1`] = "div.nav-account li:contains(\"Administration\")";
 exports[`Baseline reference : jQuery : generates selector string : div.btn-group 1`] = "div.btn-group";
-exports[`Baseline reference : jQuery : generates selector string : div.btn-group > a[href="/admin"]:nth-child(1) 1`] = "div.btn-group > a[href]";
+exports[`Baseline reference : jQuery : generates selector string : div.btn-group a.btn 1`] = "div.btn-group a.btn";
 exports[`Baseline reference : jQuery : generates selector string : i.icon-wrench 1`] = "i.icon-wrench";
-exports[`Baseline reference : jQuery : generates selector string : button.dropdown-toggle 1`] = "button.dropdown-toggle";
+exports[`Baseline reference : jQuery : generates selector string : button.btn 1`] = "button.btn";
 exports[`Baseline reference : jQuery : generates selector string : span.caret 1`] = "span.caret";
 exports[`Baseline reference : jQuery : generates selector string : ul.dropdown-menu 1`] = "ul.dropdown-menu";
 exports[`Baseline reference : jQuery : generates selector string : ul.dropdown-menu > li:nth-child(1) 1`] = "ul.dropdown-menu li:contains(\"Dashboard\")";
@@ -635,7 +635,7 @@ exports[`Baseline reference : jQuery : generates selector string : div.nav-accou
 exports[`Baseline reference : jQuery : generates selector string : a.user-avatar-link 1`] = "a.user-avatar-link";
 exports[`Baseline reference : jQuery : generates selector string : img.user-avatar 1`] = "img.user-avatar";
 exports[`Baseline reference : jQuery : generates selector string : div.nav-account ul.nav > li:nth-child(3) 1`] = "div.nav-account li:contains(\"marek\")";
-exports[`Baseline reference : jQuery : generates selector string : div.nav-account ul.nav > li:nth-child(3) a[href="/profile"] 1`] = "div.nav-account li:contains(\"marek\") a[href]";
+exports[`Baseline reference : jQuery : generates selector string : a[href="/profile"][title="my account"] 1`] = "a[href=\"\\/profile\"][title]";
 exports[`Baseline reference : jQuery : generates selector string : div.nav-account ul.nav > li:nth-child(4) 1`] = "div.nav-account ul.nav > li:nth-of-type(4)";
 exports[`Baseline reference : jQuery : generates selector string : a[href="/users/logout"] 1`] = "a[href=\"\\/users\\/logout\"]";
 exports[`Baseline reference : jQuery : generates selector string : i.icon-off 1`] = "i.icon-off";

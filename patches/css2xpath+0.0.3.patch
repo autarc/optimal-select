@@ -1,7 +1,16 @@
 diff --git a/node_modules/css2xpath/index.js b/node_modules/css2xpath/index.js
-index 8762686..83d1456 100644
+index 8762686..7124e7d 100644
 --- a/node_modules/css2xpath/index.js
 +++ b/node_modules/css2xpath/index.js
+@@ -121,7 +121,7 @@
+         }
+       },
+ 
+-      css_attributes_regex = /\[([^\@\|\*\=\^\~\$\!\(\/\s\x1C-\x1F]+)\s*(([\|\*\~\^\$\!]?)=?\s*(\x1E+))?\]/g,
++      css_attributes_regex = /\[([^\]\@\|\*\=\^\~\$\!\(\/\s\x1C-\x1F]+)\s*(([\|\*\~\^\$\!]?)=?\s*(\x1E+))?\]/g,
+       css_attributes_callback = function (str, attr, comp, op, val, offset, orig) {
+         var axis = '';
+         var prevChar = orig.charAt(offset - 1);
 @@ -453,6 +453,12 @@
      return result;
    }
