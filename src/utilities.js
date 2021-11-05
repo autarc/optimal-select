@@ -10,7 +10,7 @@
  * @param  {NodeList}             nodes - [description]
  * @return {Array.<HTMLElement>}        - [description]
  */
-export function convertNodeList (nodes) {
+export const convertNodeList = (nodes) => {
   const { length } = nodes
   const arr = new Array(length)
   for (var i = 0; i < length; i++) {
@@ -27,7 +27,15 @@ export function convertNodeList (nodes) {
  * @param  {String?} value - [description]
  * @return {String}        - [description]
  */
-export function escapeValue (value) {
-  return value && value.replace(/['"`\\/:?&!#$%^()[\]{|}*+;,.<=>@~]/g, '\\$&')
+export const escapeValue = (value) =>
+  value && value.replace(/['"`\\/:?&!#$%^()[\]{|}*+;,.<=>@~]/g, '\\$&')
     .replace(/\n/g, '\u00a0')
-}
+
+/**
+ * Partition array into two groups determined by predicate
+ */
+export const partition = (array, predicate) =>
+  array.reduce(
+    ([inner, outer], item) => predicate(item) ? [inner.concat(item), outer] : [inner, outer.concat(item)],
+    [[], []]
+  )

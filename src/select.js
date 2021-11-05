@@ -11,6 +11,7 @@ import match from './match'
 import optimize from './optimize'
 import { convertNodeList } from './utilities'
 import { getSelect, getCommonAncestor, getCommonProperties } from './common'
+import { pathToString } from './pattern'
 
 /**
  * @typedef  {Object} Options
@@ -40,8 +41,8 @@ export function getSingleSelector (element, options = {}) {
 
   const globalModified = adapt(element, options)
 
-  const selector = match(element, options)
-  const optimized = optimize(selector, element, options)
+  const path = match(element, options)
+  const optimized = optimize(path, element, options)
 
   // debug
   // console.log(`

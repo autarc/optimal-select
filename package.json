@@ -61,7 +61,7 @@
     "dev": "npx cross-env NODE_ENV=development node build",
     "example": "open-url 'http:/localhost:8080/example' && http-server",
     "lint": "eslint \"src/**/*.js\" \"tests/**/*.spec.js\"",
-    "test": "mocha --require babel-core/register \"tests/**/*.spec.js\"",
+    "test": "mocha --no-parallel --require babel-core/register \"tests/**/*.spec.js\"",
     "test:watch": "npm run test -- --watch",
     "test:coverage": "npx cross-env NODE_ENV=test nyc --reporter=html --reporter=text-summary mocha --require babel-core/register \"tests/**/*.spec.js\"",
     "test:update": "npx cross-env CHAI_SNAPSHOT_UPDATE=true npm run test"
