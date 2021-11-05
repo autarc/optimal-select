@@ -121,11 +121,8 @@ export default function match (node, options = {}) {
 function checkAttributes (priority, element, ignore, path, select, parent = element.parentNode) {
   const pattern = findAttributesPattern(priority, element, ignore, select, parent)
   if (pattern) {
-    const matches = select(patternToString(pattern), parent)
-    if (matches.length === 1) {
-      path.unshift(pattern)
-      return true
-    }
+    path.unshift(pattern)
+    return true
   }
   return false
 }
@@ -224,19 +221,19 @@ function findAttributesPattern (priority, element, ignore, select, parent = elem
     }
   }
 
-  return null // pattern
+  return null
 }
 
 
 /**
  * Extend path with tag identifier
  *
- * @param  {HTMLElement}    element - [description]
- * @param  {Object}         ignore  - [description]
+ * @param  {HTMLElement}     element - [description]
+ * @param  {Object}          ignore  - [description]
  * @param  {Array.<Pattern>} path    - [description]
- * @param  {function}       select  - [description]
- * @param  {HTMLElement}    parent  - [description]
- * @return {boolean}                - [description]
+ * @param  {function}        select  - [description]
+ * @param  {HTMLElement}     parent  - [description]
+ * @return {boolean}                 - [description]
  */
 function checkTag (element, ignore, path, select, parent = element.parentNode) {
   const pattern = findTagPattern(element, ignore)
@@ -259,7 +256,7 @@ function checkTag (element, ignore, path, select, parent = element.parentNode) {
  *
  * @param  {HTMLElement} element - [description]
  * @param  {Object}      ignore  - [description]
- * @return {Pattern?}             - [description]
+ * @return {Pattern?}            - [description]
  */
 function findTagPattern (element, ignore) {
   const tagName = element.tagName.toLowerCase()
@@ -330,7 +327,11 @@ function checkContains (priority, element, ignore, path, select) {
   const contains = []
 
   while (texts.length > 0) {
-    contains.push(`contains("${texts.shift()}")`)
+    const text = texts.shift()
+    if (checkIgnore(ignore.contains, null, text)) {
+      break
+    }
+    contains.push(`contains("${text}")`)
     if (select(`${prefix}${pseudoToString(contains)}`, parent).length === 1) {
       pattern.pseudo = [...pattern.pseudo, ...contains]
       path.unshift(pattern)
@@ -347,7 +348,7 @@ function checkContains (priority, element, ignore, path, select) {
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
  * @param  {function}       select   - [description]
- * @return {Pattern}                  - [description]
+ * @return {Pattern}                 - [description]
  */
 function findPattern (priority, element, ignore, select) {
   var pattern = findAttributesPattern(priority, element, ignore, select)
