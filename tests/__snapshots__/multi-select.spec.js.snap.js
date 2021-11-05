@@ -1,0 +1,9 @@
+exports[`Multi-select : CSS : tag : generates selector string 1`] = "body div";
+exports[`Multi-select : CSS : classes : generates selector string 1`] = "body span.active";
+exports[`Multi-select : CSS : attributes : generates selector string 1`] = "body [data]";
+exports[`Multi-select : XPath : tag : generates selector string 1`] = ".//body//div";
+exports[`Multi-select : XPath : classes : generates selector string 1`] = ".//body//span[contains(concat(\" \",normalize-space(@class),\" \"),\" active \")]";
+exports[`Multi-select : XPath : attributes : generates selector string 1`] = ".//body//*[@data]";
+exports[`Multi-select : jQuery : tag : generates selector string 1`] = "body div";
+exports[`Multi-select : jQuery : classes : generates selector string 1`] = "body span.active";
+exports[`Multi-select : jQuery : attributes : generates selector string 1`] = "body [data]";

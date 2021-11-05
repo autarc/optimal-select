@@ -2,7 +2,7 @@ import chai, { expect } from 'chai'
 import chaiSnapshot from 'mocha-chai-snapshot'
 
 import { select } from '../src'
-import { initDOM, createHTML, candidates, elementMatches } from './helpers'
+import { initDOM, createHTML } from './helpers'
 
 chai.use(chaiSnapshot)
 

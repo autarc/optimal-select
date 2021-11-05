@@ -285,7 +285,7 @@ function optimizePart (prePart, current, postPart, elements, select) {
  * @param  {Array.<HTMLElement>} elements - [description]
  * @return {Boolean}                      - [description]
  */
-function compareResults (matches, elements) {
+export function compareResults (matches, elements) {
   const { length } = matches
   return length === elements.length && elements.every((element) => {
     for (var i = 0; i < length; i++) {

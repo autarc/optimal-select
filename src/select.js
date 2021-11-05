@@ -9,8 +9,9 @@ import css2xpath from 'css2xpath'
 import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
-import { convertNodeList } from './utilities'
+import { convertNodeList, escapeValue } from './utilities'
 import { getSelect, getCommonAncestor, getCommonProperties } from './common'
+import { createPattern } from './pattern'
 
 /**
  * @typedef  {Object} Options
@@ -19,6 +20,10 @@ import { getSelect, getCommonAncestor, getCommonProperties } from './common'
  * @property {Array.<string>} [priority]              Order of attribute processing
  * @property {Object<string, function | number | string | boolean} [ignore] Define patterns which shouldn't be included
  * @property {('css'|'xpath'|'jquery')} [format]      Output format    
+ */
+
+/**
+ * @typedef {import('./pattern').Pattern} Pattern
  */
 
 /**
@@ -77,13 +82,13 @@ export function getMultiSelector (elements, options = {}) {
   const select = getSelect(options)
 
   const ancestor = getCommonAncestor(elements, options)
-  const ancestorSelector = getSingleSelector(ancestor, options)
+  const ancestorPath = match(ancestor, options)
 
   // TODO: consider usage of multiple selectors + parent-child relation + check for part redundancy
-  const commonSelectors = getCommonSelectors(elements)
-  const descendantSelector = commonSelectors[0]
+  const commonPath = getCommonPath(elements)
+  const descendantPattern = commonPath[0]
 
-  const selector = optimize(`${ancestorSelector} ${descendantSelector}`, elements, options)
+  const selector = optimize([...ancestorPath, descendantPattern], elements, options)
   const selectorMatches = convertNodeList(select(selector))
 
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
@@ -98,6 +103,10 @@ export function getMultiSelector (elements, options = {}) {
     delete global.document
   }
 
+  if (options && [1, 'xpath'].includes(options.format)) {
+    return css2xpath(selector)
+  }
+
   return selector
 }
 
@@ -105,37 +114,20 @@ export function getMultiSelector (elements, options = {}) {
  * Get selectors to describe a set of elements
  *
  * @param  {Array.<HTMLElement>} elements  - [description]
- * @return {string}                        - [description]
+ * @return {Array.<Pattern>}               - [description]
  */
-function getCommonSelectors (elements) {
-
+function getCommonPath (elements) {
   const { classes, attributes, tag } = getCommonProperties(elements)
 
-  const selectorPath = []
-
-  if (tag) {
-    selectorPath.push(tag)
-  }
-
-  if (classes) {
-    const classSelector = classes.map((name) => `.${name}`).join('')
-    selectorPath.push(classSelector)
-  }
-
-  if (attributes) {
-    const attributeSelector = Object.keys(attributes).reduce((parts, name) => {
-      parts.push(`[${name}="${attributes[name]}"]`)
-      return parts
-    }, []).join('')
-    selectorPath.push(attributeSelector)
-  }
-
-  if (selectorPath.length) {
-    // TODO: check for parent-child relation
-  }
-
   return [
-    selectorPath.join('')
+    createPattern({
+      tag,
+      classes: classes || [],
+      attributes: attributes ? Object.keys(attributes).map((name) => ({
+        name: escapeValue(name),
+        value: escapeValue(attributes[name])
+      })) : []
+    })
   ]
 }
 
