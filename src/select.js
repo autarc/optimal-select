@@ -11,7 +11,6 @@ import match from './match'
 import optimize from './optimize'
 import { convertNodeList } from './utilities'
 import { getSelect, getCommonAncestor, getCommonProperties } from './common'
-import { pathToString } from './pattern'
 
 /**
  * @typedef  {Object} Options

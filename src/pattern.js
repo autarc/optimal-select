@@ -30,7 +30,7 @@ export const attributesToString = (attributes) =>
  * @param {Array.<string>} classes 
  * @returns {string}
  */
- export const classesToString = (classes) => classes.length ? `.${classes.join('.')}` : ''
+export const classesToString = (classes) => classes.length ? `.${classes.join('.')}` : ''
 
 /**
  * Convert pseudo selectors to string

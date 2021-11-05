@@ -4,7 +4,7 @@
  * Retrieve selector for a node.
  */
 
-import { createPattern, patternToString } from './pattern'
+import { createPattern, patternToString, pseudoToString } from './pattern'
 import { getSelect } from './common'
 import { escapeValue } from './utilities'
 
@@ -91,7 +91,7 @@ export default function match (node, options = {}) {
 
       // define only one part each iteration
       if (path.length === length) {
-        checkChilds(priority, element, ignore, path, select)
+        checkChilds(priority, element, ignore, path)
       }
     }
 
@@ -280,10 +280,9 @@ function findTagPattern (element, ignore) {
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
  * @param  {Array.<Pattern>} path    - [description]
- * @param  {function}       select   - [description]
  * @return {boolean}                 - [description]
  */
-function checkChilds (priority, element, ignore, path, select) {
+function checkChilds (priority, element, ignore, path) {
   const parent = element.parentNode
   const children = parent.childTags || parent.children
   for (var i = 0, l = children.length; i < l; i++) {
@@ -315,7 +314,10 @@ function checkChilds (priority, element, ignore, path, select) {
  * @return {boolean}                 - [description]
  */
 function checkContains (priority, element, ignore, path, select) {
-  const elementPattern = findPattern(priority, element, ignore, select)
+  const pattern = findTagPattern(element, ignore, select)
+  if (!pattern) {
+    return false
+  }
   const parent = element.parentNode
   const texts = element.textContent
     .replace(/\n+/g, '\n')
@@ -323,15 +325,17 @@ function checkContains (priority, element, ignore, path, select) {
     .map(text => text.trim())
     .filter(text => text.length > 0)
 
-  let pattern = { ...elementPattern, relates: 'child' }
-  const found = texts.some(text => {
-    pattern.pseudo.push(`contains("${text}")`)
-    const matches = select(patternToString(pattern), parent)
-    return matches.length === 1
-  })
-  if (found) {
-    path.unshift(pattern)
-    return true
+  pattern.relates = 'child'
+  const prefix = patternToString(pattern)
+  const contains = []
+
+  while (texts.length > 0) {
+    contains.push(`contains("${texts.shift()}")`)
+    if (select(`${prefix}${pseudoToString(contains)}`, parent).length === 1) {
+      pattern.pseudo = [...pattern.pseudo, ...contains]
+      path.unshift(pattern)
+      return true
+    }
   }
   return false
 }
