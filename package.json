@@ -1,7 +1,7 @@
 {
   "name": "@letznav/optimal-select",
   "description": "Get efficient & robust CSS selectors for HTML elements",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "author": "Stefan Dühring | Autarc <autarc@gmail.com>",
   "contributors": [
     "LetzNav | LetzNav <info@letznav.com>"
@@ -9,7 +9,9 @@
   "bugs": {
     "url": "https://github.com/sriniraju-letznav/optimal-select/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "patch-package": "6.4.7"
+  },
   "devDependencies": {
     "babel-loader": "7.1.5",
     "babel-plugin-add-module-exports": "^0.2.1",
@@ -19,6 +21,7 @@
     "babel-register": "^6.16.3",
     "chai": "^4.3.4",
     "cheerio": "^0.22.0",
+    "cross-env": "^7.0.3",
     "css2xpath": "0.0.3",
     "deep-merge": "^1.0.0",
     "eslint": "7.32.0",
@@ -54,17 +57,16 @@
     "url": "https://github.com/sriniraju-letznav/optimal-select.git"
   },
   "scripts": {
-    "postinstall": "npx patch-package@6.4.7",
-    "prepublish": "npm run build",
+    "postinstall": "patch-package",
     "check": "npm outdated -depth 0",
-    "build": "npx cross-env NODE_ENV=production node build",
-    "dev": "npx cross-env NODE_ENV=development node build",
+    "build": "cross-env NODE_ENV=production node build",
+    "dev": "cross-env NODE_ENV=development node build",
     "example": "open-url 'http:/localhost:8080/example' && http-server",
     "lint": "eslint \"src/**/*.js\" \"tests/**/*.spec.js\"",
     "test": "mocha --no-parallel --require babel-core/register \"tests/**/*.spec.js\"",
     "test:watch": "npm run test -- --watch",
-    "test:coverage": "npx cross-env NODE_ENV=test nyc --reporter=html --reporter=text-summary mocha --require babel-core/register \"tests/**/*.spec.js\"",
-    "test:update": "npx cross-env CHAI_SNAPSHOT_UPDATE=true npm run test"
+    "test:coverage": "cross-env NODE_ENV=test nyc --reporter=html --reporter=text-summary mocha --require babel-core/register \"tests/**/*.spec.js\"",
+    "test:update": "cross-env CHAI_SNAPSHOT_UPDATE=true npm run test"
   },
   "nyc": {
     "sourceMap": false,
