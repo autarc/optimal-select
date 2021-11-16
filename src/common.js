@@ -18,11 +18,11 @@ export function getSelect (options = {}) {
   if (options.format === 'jquery') {
     const Sizzle = require('sizzle')
     return function (selector, parent = null) {
-      return Sizzle(selector, parent || document)
+      return Sizzle(selector, parent || options.root || document)
     }
   }
   return function (selector, parent = null) {
-    return (parent || document).querySelectorAll(selector)
+    return (parent || options.root || document).querySelectorAll(selector)
   } 
 }
 
