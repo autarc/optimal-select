@@ -7,7 +7,7 @@
 
 import adapt from './adapt'
 import { getSelect } from './common'
-import { pathToString, patternToString, pseudoToString, attributesToString, classesToString } from './pattern'
+import { pathToSelector, patternToSelector, pseudoToSelector, attributesToSelector, classesToSelector } from './pattern'
 import { convertNodeList, partition } from './utilities'
 
 /**
@@ -21,11 +21,11 @@ import { convertNodeList, partition } from './utilities'
  * @param  {Array.<Pattern>}                 path   - [description]
  * @param  {HTMLElement|Array.<HTMLElement>} element    - [description]
  * @param  {Options}                         [options]  - [description]
- * @return {string}                                     - [description]
+ * @return {Array.<Pattern>}                            - [description]
  */
 export default function optimize (path, elements, options = {}) {
   if (path.length === 0) {
-    return ''
+    return []
   }
 
   if (path[0].relates === 'child') {
@@ -45,20 +45,20 @@ export default function optimize (path, elements, options = {}) {
   const select = getSelect(options)
 
   if (path.length < 2) {
-    return patternToString(optimizePart('', path[0], '', elements, select))
+    return [optimizePart('', path[0], '', elements, select)]
   }
 
   var endOptimized = false
   if (path[path.length-1].relates === 'child') {
-    path[path.length-1] = optimizePart(pathToString(path.slice(0, -1)), path[path.length-1], '', elements, select)
+    path[path.length-1] = optimizePart(pathToSelector(path.slice(0, -1)), path[path.length-1], '', elements, select)
     endOptimized = true
   }
 
   const shortened = [path.pop()]
   while (path.length > 1) {
     const current = path.pop()
-    const prePart = pathToString(path)
-    const postPart = pathToString(shortened)
+    const prePart = pathToSelector(path)
+    const postPart = pathToSelector(shortened)
 
     const matches = select(`${prePart} ${postPart}`)
     const hasSameResult = matches.length === elements.length && elements.every((element, i) => element === matches[i])
@@ -70,16 +70,16 @@ export default function optimize (path, elements, options = {}) {
   path = shortened
 
   // optimize start + end
-  path[0] = optimizePart('', path[0], pathToString(path.slice(1)), elements, select)
+  path[0] = optimizePart('', path[0], pathToSelector(path.slice(1)), elements, select)
   if (!endOptimized) {
-    path[path.length-1] = optimizePart(pathToString(path.slice(0, -1)), path[path.length-1], '', elements, select)
+    path[path.length-1] = optimizePart(pathToSelector(path.slice(0, -1)), path[path.length-1], '', elements, select)
   }
 
   if (globalModified) {
     delete global.document
   }
 
-  return pathToString(path) // path.join(' ').replace(/>/g, '> ').trim()
+  return path
 }
 
 /**
@@ -94,13 +94,13 @@ export default function optimize (path, elements, options = {}) {
  */
 function optimizeContains (prePart, current, postPart, elements, select) {
   const [contains, other] = partition(current.pseudo, (item) => /contains\("/.test(item))
-  const prefix = patternToString({ ...current, pseudo: [] })
+  const prefix = patternToSelector({ ...current, pseudo: [] })
 
   if (contains.length > 0 && postPart.length) {
     const optimized = [...other, ...contains]
     while (optimized.length > other.length) {
       optimized.pop()
-      const pattern = `${prePart}${prefix}${pseudoToString(optimized)}${postPart}`
+      const pattern = `${prePart}${prefix}${pseudoToSelector(optimized)}${postPart}`
       if (!compareResults(select(pattern), elements)) {
         break
       }
@@ -124,14 +124,14 @@ function optimizeAttributes (prePart, current, postPart, elements, select) {
   // reduce attributes: first try without value, then removing completely
   if (current.attributes.length > 0) {
     let attributes = [...current.attributes]
-    let prefix = patternToString({ ...current, attributes: [] })
+    let prefix = patternToSelector({ ...current, attributes: [] })
 
     const simplify = (original, getSimplified) => {
       let i = original.length - 1
       while (i >= 0) {
         let attributes = getSimplified(original, i)
         if (!compareResults(
-          select(`${prePart}${prefix}${attributesToString(attributes)}${postPart}`),
+          select(`${prePart}${prefix}${attributesToSelector(attributes)}${postPart}`),
           elements
         )) {
           break
@@ -169,7 +169,7 @@ function optimizeDescendant (prePart, current, postPart, elements, select) {
   // robustness: descendant instead child (heuristic)
   if (current.relates === 'child') {
     const descendant = { ...current, relates: undefined }
-    let matches = select(`${prePart}${patternToString(descendant)}${postPart}`)
+    let matches = select(`${prePart}${patternToSelector(descendant)}${postPart}`)
     if (compareResults(matches, elements)) {
       return descendant
     }
@@ -194,7 +194,7 @@ function optimizeNthOfType (prePart, current, postPart, elements, select) {
     // TODO: consider complete coverage of 'nth-of-type' replacement
     const type = current.pseudo[i].replace(/^nth-child/, 'nth-of-type')
     const nthOfType = { ...current, pseudo: [...current.pseudo.slice(0, i), type, ...current.pseudo.slice(i + 1)] }
-    var pattern = `${prePart}${patternToString(nthOfType)}${postPart}`
+    var pattern = `${prePart}${patternToSelector(nthOfType)}${postPart}`
     var matches = select(pattern)
     if (compareResults(matches, elements)) {
       current = nthOfType
@@ -217,11 +217,11 @@ function optimizeClasses (prePart, current, postPart, elements, select) {
   // efficiency: combinations of classname (partial permutations)
   if (current.classes.length > 1) {
     let optimized = current.classes.slice().sort((curr, next) => curr.length - next.length)
-    let prefix = patternToString({ ...current, classes: [] })
+    let prefix = patternToSelector({ ...current, classes: [] })
 
     while (optimized.length > 1) {
       optimized.shift()
-      const pattern = `${prePart}${prefix}${classesToString(optimized)}${postPart}`
+      const pattern = `${prePart}${prefix}${classesToSelector(optimized)}${postPart}`
       if (!pattern.length || pattern.charAt(0) === '>' || pattern.charAt(pattern.length-1) === '>') {
         break
       }
@@ -233,7 +233,7 @@ function optimizeClasses (prePart, current, postPart, elements, select) {
 
     optimized = current.classes
     if (optimized.length > 2) {
-      const references = select(`${prePart}${classesToString(current)}`)
+      const references = select(`${prePart}${classesToSelector(current)}`)
       for (var i2 = 0, l2 = references.length; i2 < l2; i2++) {
         const reference = references[i2]
         if (elements.some((element) => reference.contains(element))) {

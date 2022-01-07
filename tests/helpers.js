@@ -2,7 +2,7 @@ import { JSDOM } from 'jsdom'
 
 import { select } from '../src'
 import match from '../src/match'
-import { pathToString } from '../src/pattern'
+import { pathToSelector } from '../src/pattern'
 
 export const initDOM = (html) => {
   return new JSDOM(html).window.document
@@ -93,4 +93,4 @@ export const candidates = (defaultOptions = {}) => {
  * @returns {Array.<{ element: Element, match: string }>}
  */
 export const elementMatches = (elements, document) =>
-  Array.prototype.map.call(elements, element => ({ element, match: pathToString(match(element, { root: document })).replace(/\\/g, '') }))
+  Array.prototype.map.call(elements, element => ({ element, match: pathToSelector(match(element, { root: document })).replace(/\\/g, '') }))
