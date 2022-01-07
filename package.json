@@ -9,9 +9,6 @@
   "bugs": {
     "url": "https://github.com/sriniraju-letznav/optimal-select/issues"
   },
-  "dependencies": {
-    "patch-package": "6.4.7"
-  },
   "devDependencies": {
     "babel-loader": "7.1.5",
     "babel-plugin-add-module-exports": "^0.2.1",
@@ -22,7 +19,6 @@
     "chai": "^4.3.4",
     "cheerio": "^0.22.0",
     "cross-env": "^7.0.3",
-    "css2xpath": "0.0.3",
     "deep-merge": "^1.0.0",
     "eslint": "7.32.0",
     "fs-extra": "^1.0.0",
@@ -57,7 +53,6 @@
     "url": "https://github.com/sriniraju-letznav/optimal-select.git"
   },
   "scripts": {
-    "postinstall": "patch-package",
     "check": "npm outdated -depth 0",
     "build": "cross-env NODE_ENV=production node build",
     "dev": "cross-env NODE_ENV=development node build",

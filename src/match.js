@@ -4,7 +4,7 @@
  * Retrieve selector for a node.
  */
 
-import { createPattern, patternToString, pseudoToString } from './pattern'
+import { createPattern, patternToSelector, pseudoToSelector } from './pattern'
 import { getSelect } from './common'
 import { escapeValue } from './utilities'
 
@@ -148,7 +148,7 @@ function getClassSelector(classes = [], select, parent, base) {
   result.shift()
   result = result.sort(function(a,b) { return a.length - b.length })
 
-  const prefix = patternToString(base)
+  const prefix = patternToSelector(base)
 
   for(let i = 0; i < result.length; i++) {
     const matches = select(`${prefix}.${result[i].join('.')}`, parent)
@@ -179,7 +179,7 @@ function findAttributesPattern (priority, element, ignore, select, parent = elem
   var pattern = createPattern()
   pattern.tag = element.tagName.toLowerCase()
 
-  var isOptimal = (pattern) => (select(patternToString(pattern), parent).length === 1)
+  var isOptimal = (pattern) => (select(patternToSelector(pattern), parent).length === 1)
 
   for (var i = 0, l = sortedKeys.length; i < l; i++) {
     const key = sortedKeys[i]
@@ -239,7 +239,7 @@ function checkTag (element, ignore, path, select, parent = element.parentNode) {
   const pattern = findTagPattern(element, ignore)
   if (pattern) {
     let matches = []
-    matches = select(patternToString(pattern), parent)
+    matches = select(patternToSelector(pattern), parent)
     if (matches.length === 1) {
       path.unshift(pattern)
       if (pattern.tag === 'iframe') {
@@ -323,7 +323,7 @@ function checkContains (priority, element, ignore, path, select) {
     .filter(text => text.length > 0)
 
   pattern.relates = 'child'
-  const prefix = patternToString(pattern)
+  const prefix = patternToSelector(pattern)
   const contains = []
 
   while (texts.length > 0) {
@@ -332,7 +332,7 @@ function checkContains (priority, element, ignore, path, select) {
       break
     }
     contains.push(`contains("${text}")`)
-    if (select(`${prefix}${pseudoToString(contains)}`, parent).length === 1) {
+    if (select(`${prefix}${pseudoToSelector(contains)}`, parent).length === 1) {
       pattern.pseudo = [...pattern.pseudo, ...contains]
       path.unshift(pattern)
       return true

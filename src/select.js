@@ -4,14 +4,12 @@
  * Construct a unique CSS query selector to access the selected DOM element(s).
  * For longevity it applies different matching and optimization strategies.
  */
-import css2xpath from 'css2xpath'
-
 import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
 import { convertNodeList, escapeValue } from './utilities'
 import { getSelect, getCommonAncestor, getCommonProperties } from './common'
-import { createPattern } from './pattern'
+import { createPattern, getPathToString, pathToSelector } from './pattern'
 
 /**
  * @typedef  {Object} Options
@@ -31,9 +29,9 @@ import { createPattern } from './pattern'
  *
  * @param  {HTMLElement} element   - [description]
  * @param  {Options}     [options] - [description]
- * @return {string}                - [description]
+ * @return {Array.<Pattern>}       - [description]
  */
-export function getSingleSelector (element, options = {}) {
+export function getSingleSelectorPath (element, options = {}) {
 
   if (element.nodeType === 3) {
     element = element.parentNode
@@ -46,7 +44,7 @@ export function getSingleSelector (element, options = {}) {
   const globalModified = adapt(element, options)
 
   const path = match(element, options)
-  const optimized = optimize(path, element, options)
+  const optimizedPath = optimize(path, element, options)
 
   // debug
   // console.log(`
@@ -58,7 +56,7 @@ export function getSingleSelector (element, options = {}) {
     delete global.document
   }
 
-  return optimized
+  return optimizedPath
 }
 
 /**
@@ -66,9 +64,9 @@ export function getSingleSelector (element, options = {}) {
  *
  * @param  {Array.<HTMLElement>|NodeList} elements   - [description]
  * @param  {Options}                      [options]  - [description]
- * @return {string}                                  - [description]
+ * @return {Array.<Pattern>}                         - [description]
  */
-export function getMultiSelector (elements, options = {}) {
+export function getMultiSelectorPath (elements, options = {}) {
 
   if (!Array.isArray(elements)) {
     elements = convertNodeList(elements)
@@ -88,8 +86,8 @@ export function getMultiSelector (elements, options = {}) {
   const commonPath = getCommonPath(elements)
   const descendantPattern = commonPath[0]
 
-  const selector = optimize([...ancestorPath, descendantPattern], elements, options)
-  const selectorMatches = convertNodeList(select(selector))
+  const selectorPath = optimize([...ancestorPath, descendantPattern], elements, options)
+  const selectorMatches = convertNodeList(select(pathToSelector(selectorPath)))
 
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
     // TODO: cluster matches to split into similar groups for sub selections
@@ -103,11 +101,7 @@ export function getMultiSelector (elements, options = {}) {
     delete global.document
   }
 
-  if (options && [1, 'xpath'].includes(options.format)) {
-    return css2xpath(selector)
-  }
-
-  return selector
+  return selectorPath
 }
 
 /**
@@ -141,13 +135,9 @@ function getCommonPath (elements) {
  * @return {string}                                             - [description]
  */
 export default function getQuerySelector (input, options = {}) {
-  if (input.length && !input.name) {
-    return getMultiSelector(input, options)
-  }
-  const result = getSingleSelector(input, options)
-  if (options && [1, 'xpath'].includes(options.format)) {
-    return css2xpath(result)
-  }
+  const path = (input.length && !input.name)
+    ? getMultiSelectorPath(input, options)
+    : getSingleSelectorPath(input, options)
 
-  return result
+  return getPathToString(options)(path)
 }
