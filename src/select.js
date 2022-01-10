@@ -8,8 +8,9 @@ import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
 import { convertNodeList, escapeValue } from './utilities'
-import { getSelect, getCommonAncestor, getCommonProperties } from './common'
-import { createPattern, getPathToString, pathToSelector } from './pattern'
+import { getCommonAncestor, getCommonProperties } from './common'
+import { getSelect } from './selector'
+import { createPattern, getToString } from './pattern'
 
 /**
  * @typedef  {Object} Options
@@ -31,7 +32,7 @@ import { createPattern, getPathToString, pathToSelector } from './pattern'
  * @param  {Options}     [options] - [description]
  * @return {Array.<Pattern>}       - [description]
  */
-export function getSingleSelectorPath (element, options = {}) {
+export const getSingleSelectorPath = (element, options = {}) => {
 
   if (element.nodeType === 3) {
     element = element.parentNode
@@ -48,8 +49,8 @@ export function getSingleSelectorPath (element, options = {}) {
 
   // debug
   // console.log(`
-  //   selector:  ${selector}
-  //   optimized: ${optimized}
+  //   selector:  ${path}
+  //   optimized: ${optimizedPath}
   // `)
 
   if (globalModified) {
@@ -66,7 +67,7 @@ export function getSingleSelectorPath (element, options = {}) {
  * @param  {Options}                      [options]  - [description]
  * @return {Array.<Pattern>}                         - [description]
  */
-export function getMultiSelectorPath (elements, options = {}) {
+export const getMultiSelectorPath = (elements, options = {}) => {
 
   if (!Array.isArray(elements)) {
     elements = convertNodeList(elements)
@@ -78,6 +79,7 @@ export function getMultiSelectorPath (elements, options = {}) {
 
   const globalModified = adapt(elements[0], options)
   const select = getSelect(options)
+  const toString = getToString(options)
 
   const ancestor = getCommonAncestor(elements, options)
   const ancestorPath = match(ancestor, options)
@@ -87,7 +89,7 @@ export function getMultiSelectorPath (elements, options = {}) {
   const descendantPattern = commonPath[0]
 
   const selectorPath = optimize([...ancestorPath, descendantPattern], elements, options)
-  const selectorMatches = convertNodeList(select(pathToSelector(selectorPath)))
+  const selectorMatches = convertNodeList(select(toString.path(selectorPath)))
 
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
     // TODO: cluster matches to split into similar groups for sub selections
@@ -110,7 +112,7 @@ export function getMultiSelectorPath (elements, options = {}) {
  * @param  {Array.<HTMLElement>} elements  - [description]
  * @return {Array.<Pattern>}               - [description]
  */
-function getCommonPath (elements) {
+const getCommonPath = (elements) => {
   const { classes, attributes, tag } = getCommonProperties(elements)
 
   return [
@@ -139,5 +141,5 @@ export default function getQuerySelector (input, options = {}) {
     ? getMultiSelectorPath(input, options)
     : getSingleSelectorPath(input, options)
 
-  return getPathToString(options)(path)
+  return getToString(options).path(path)
 }

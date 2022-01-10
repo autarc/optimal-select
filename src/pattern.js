@@ -155,19 +155,42 @@ export const pathToXPath = (path) =>
   `.${path.map(patternToXPath).join('')}`
 
 const toString = {
-  'css': pathToSelector,
-  'xpath': pathToXPath
+  'css': {
+    attributes: attributesToSelector,
+    classes: classesToSelector,
+    pseudo: pseudoToSelector,
+    pattern: patternToSelector,
+    path: pathToSelector
+  },
+  'xpath': {
+    attributes: attributesToXPath,
+    classes: classesToXPath,
+    pseudo: pseudoToXPath,
+    pattern: patternToXPath,
+    path: pathToXPath
+  },
+  'jquery': {}
 }
 
 toString.jquery = toString.css
 toString[0] = toString.css
 toString[1] = toString.xpath
+  
+/**
+ * @typedef  {Object} ToStringApi
+ * @property {(attributes: Array.<{ name: string, value: string? }>) => string} attributes
+ * @property {(classes: Array.<string>) => string}  classes
+ * @property {(pseudo: Array.<string>) => string}   pseudo
+ * @property {(pattern: Pattern) => string}         pattern
+ * @property {(path: Array.<Pattern>) => string}    path
+ */
 
 /**
-* 
-* @param {Options} options 
-* @returns {(path: Array.<Pattern>) => string}
-*/
-export const getPathToString = (options = {}) =>
+ * 
+ * @param {Options} options 
+ * @returns {ToStringApi}
+ */
+export const getToString = (options = {}) =>
   toString[options.format || 'css']
+
 

@@ -9,31 +9,13 @@
  */
 
 /**
- * Query document using correct selector function
- *
- * @param  {Options}              options - [description]
- * @return {(selector: string, parent: HTMLElement) => Array.<HTMLElement>} - [description]
- */
-export function getSelect (options = {}) {
-  if (options.format === 'jquery') {
-    const Sizzle = require('sizzle')
-    return function (selector, parent = null) {
-      return Sizzle(selector, parent || options.root || document)
-    }
-  }
-  return function (selector, parent = null) {
-    return (parent || options.root || document).querySelectorAll(selector)
-  } 
-}
-
-
-/**
  * Find the last common ancestor of elements
  *
  * @param  {Array.<HTMLElement>} elements  - [description]
+ * @param  {Options}              options  - [description]
  * @return {HTMLElement}                   - [description]
  */
-export function getCommonAncestor (elements, options = {}) {
+export const getCommonAncestor = (elements, options = {}) => {
 
   const {
     root = document
@@ -79,7 +61,7 @@ export function getCommonAncestor (elements, options = {}) {
  * @param  {Array.<HTMLElement>} elements - [description]
  * @return {Object}                       - [description]
  */
-export function getCommonProperties (elements) {
+export const getCommonProperties = (elements) => {
 
   const commonProperties = {
     classes: [],

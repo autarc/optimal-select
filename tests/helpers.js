@@ -1,15 +1,15 @@
 import { JSDOM } from 'jsdom'
+import wgxpath from 'wicked-good-xpath'
 
 import { select } from '../src'
 import match from '../src/match'
 import { pathToSelector } from '../src/pattern'
 
 export const initDOM = (html) => {
-  return new JSDOM(html).window.document
-  // global.window = dom.window
-  // global.document = dom.window.document
+  const window = new JSDOM(html).window
+  wgxpath.install(window, true)
 
-  // return dom
+  return window.document
 }
 
 export const createHTML = (content) => `
