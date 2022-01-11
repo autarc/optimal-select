@@ -4,7 +4,6 @@
  * Construct a unique CSS query selector to access the selected DOM element(s).
  * For longevity it applies different matching and optimization strategies.
  */
-import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
 import { convertNodeList, escapeValue } from './utilities'
@@ -42,8 +41,6 @@ export const getSingleSelectorPath = (element, options = {}) => {
     throw new Error(`Invalid input - only HTMLElements or representations of them are supported! (not "${typeof element}")`)
   }
 
-  const globalModified = adapt(element, options)
-
   const path = match(element, options)
   const optimizedPath = optimize(path, element, options)
 
@@ -52,10 +49,6 @@ export const getSingleSelectorPath = (element, options = {}) => {
   //   selector:  ${path}
   //   optimized: ${optimizedPath}
   // `)
-
-  if (globalModified) {
-    delete global.document
-  }
 
   return optimizedPath
 }
@@ -77,7 +70,6 @@ export const getMultiSelectorPath = (elements, options = {}) => {
     throw new Error('Invalid input - only an Array of HTMLElements or representations of them is supported!')
   }
 
-  const globalModified = adapt(elements[0], options)
   const select = getSelect(options)
   const toString = getToString(options)
 
@@ -97,10 +89,6 @@ export const getMultiSelectorPath = (elements, options = {}) => {
       The selected elements can't be efficiently mapped.
       Its probably best to use multiple single selectors instead!
     `, elements)
-  }
-
-  if (globalModified) {
-    delete global.document
   }
 
   return selectorPath

@@ -5,7 +5,6 @@
  * 2.) Improve robustness through selector transformation
  */
 
-import adapt from './adapt'
 import { getSelect } from './selector'
 import { createPattern, getToString } from './pattern'
 import { convertNodeList, partition } from './utilities'
@@ -42,7 +41,6 @@ export default function optimize (path, elements, options = {}) {
     throw new Error('Invalid input - to compare HTMLElements its necessary to provide a reference of the selected node(s)! (missing "elements")')
   }
 
-  const globalModified = adapt(elements[0], options)
   const select = getSelect(options)
   const toString = getToString(options)
 
@@ -73,10 +71,6 @@ export default function optimize (path, elements, options = {}) {
   path[0] = optimizePart([], path[0], path.slice(1), elements, select, toString)
   if (!endOptimized) {
     path[path.length-1] = optimizePart(path.slice(0, -1), path[path.length-1], [], elements, select, toString)
-  }
-
-  if (globalModified) {
-    delete global.document
   }
 
   return path
