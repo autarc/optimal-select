@@ -117,11 +117,24 @@ export const classesToXPath = (classes) =>
 */
 export const pseudoToXPath = (pseudo) =>
   pseudo.map(p => {
-    // note: not supporting non-numeric arguments (never generated)
-    const match = p.match(/^(nth-child|nth-of-type)\((\d+)\)/)
-    return match[1] === 'nth-child' ?
-      `[(count(preceding-sibling::*)+1) = ${match[2]}]` : `[${match[2]}]`
-  })
+    const match = p.match(/^(nth-child|nth-of-type|contains)\((.+)\)$/)
+    if (!match) {
+      return ''
+    }
+
+    switch (match[1]) {
+      case 'nth-child':
+        return `[(count(preceding-sibling::*)+1) = ${match[2]}]`
+
+      case 'nth-of-type':
+        return `[${match[2]}]`
+
+      case 'contains':
+        return `[contains(text(),${match[2]})]`
+      default:
+        return ''
+    }
+  }).join('')
 
 /**
 * Convert pattern to XPath string
@@ -151,8 +164,7 @@ export const patternToXPath = (pattern) => {
 * @param {Array.<Pattern>} path 
 * @returns {string}
 */
-export const pathToXPath = (path) =>
-  `.${path.map(patternToXPath).join('')}`
+export const pathToXPath = (path) => `.${path.map(patternToXPath).join('')}`
 
 const toString = {
   'css': {

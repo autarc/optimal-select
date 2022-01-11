@@ -94,18 +94,18 @@ export default function optimize (path, elements, options = {}) {
  * @return {Pattern}                      - [description]
  */
 const optimizeContains = (pre, current, post, elements, select, toString) => {
-  const [contains, other] = partition(current.pseudo, (item) => /contains\("/.test(item))
+  const [contains, other] = partition(current.pseudo, (item) => item.startsWith('contains'))
 
   if (contains.length > 0 && post.length) {
-    const optimized = [...other, ...contains]
-    while (optimized.length > other.length) {
-      optimized.pop()
-      const pattern = toString.path([...pre, { ...current, pseudo: optimized }, ...post]) // `${prePart}${prefix}${toString.pseudo(optimized)}${postPart}`
-      if (!compareResults(select(pattern), elements)) {
+    const base = { ...current, pseudo: [...other, ...contains] }
+    while (base.pseudo.length > other.length) {
+      const optimized = base.pseudo.slice(0, -1)
+      if (!compareResults(select(toString.path([...pre, { ...base, pseudo: optimized }, ...post])), elements)) {
         break
       }
-      current.pseudo = optimized
+      base.pseudo = optimized
     }
+    return base
   }
   return current
 }
@@ -113,9 +113,9 @@ const optimizeContains = (pre, current, post, elements, select, toString) => {
 /**
  * Optimize attributes
  *
- * @param  {Array.<Pattern>}     pre  - [description]
+ * @param  {Array.<Pattern>}     pre      - [description]
  * @param  {Pattern}             current  - [description]
- * @param  {Array.<Pattern>}     post - [description]
+ * @param  {Array.<Pattern>}     post     - [description]
  * @param  {Array.<HTMLElement>} elements - [description]
  * @param  {function}            select   - [description]
  * @param  {ToStringApi}         toString - [description]

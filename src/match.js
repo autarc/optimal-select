@@ -44,7 +44,6 @@ export default function match (node, options = {}) {
   const path = []
   var element = node
   var length = path.length
-  const jquery = (format === 'jquery')
   const select = getSelect(options)
   const toString = getToString(options)
 
@@ -87,8 +86,8 @@ export default function match (node, options = {}) {
         checkTag(element, ignore, path, select, toString)
       }
 
-      if (jquery && path.length === length) {
-        checkContains(priority, element, ignore, path, select, toString)
+      if ([1, 'xpath', 'jquery'].includes(format) && path.length === length) {
+        checkContains(priority, element, ignore, path, select, toString, format === 'jquery')
       }
 
       // define only one part each iteration
@@ -131,6 +130,23 @@ const checkAttributes = (priority, element, ignore, path, select, toString, pare
 }
 
 /**
+ * Get combinations
+ *
+ * @param  {Array.<string>} values   - [description]
+ * @return {Array.<string>?}        - [description]
+ */
+const combinations = (values) => {
+  let result = [[]]
+
+  values.forEach(c => {
+    result.forEach(r => result.push(r.concat(c)))
+  })
+
+  result.shift()
+  return result
+}
+
+/**
  * Get class selector
  *
  * @param  {Array.<string>} classes - [description]
@@ -141,14 +157,7 @@ const checkAttributes = (priority, element, ignore, path, select, toString, pare
  * @return {Array.<string>?}        - [description]
  */
 const getClassSelector = (classes = [], select, toString, parent, base) => {
-  let result = [[]]
-
-  classes.forEach(c => {
-    result.forEach(r => result.push(r.concat(c)))
-  })
-
-  result.shift()
-  result.sort((a, b) => a.length - b.length)
+  let result = combinations(classes)
 
   for(let i = 0; i < result.length; i++) {
     const pattern = toString.pattern({ ...base, classes: result[i] })
@@ -312,22 +321,27 @@ const checkChilds = (priority, element, ignore, path) => {
  * @param  {Array.<Pattern>} path    - [description]
  * @param  {function}       select   - [description]
  * @param  {ToStringApi}    toString - [description]
+ * @param  {boolean}        nested   - [description]
  * @return {boolean}                 - [description]
  */
-const checkContains = (priority, element, ignore, path, select, toString) => {
+const checkContains = (priority, element, ignore, path, select, toString, nested) => {
   const pattern = findTagPattern(element, ignore, select)
   if (!pattern) {
     return false
   }
+  const textContent = (nested ? element.textContent : (element.firstChild && element.firstChild.nodeValue) || '')
+  if (!textContent) {
+    return false
+  }
+
+  pattern.relates = 'child'
   const parent = element.parentNode
-  const texts = element.textContent
+  const texts = textContent
     .replace(/\n+/g, '\n')
     .split('\n')
     .map(text => text.trim())
     .filter(text => text.length > 0)
 
-  pattern.relates = 'child'
-  const prefix = toString.pattern(pattern)
   const contains = []
 
   while (texts.length > 0) {
@@ -336,10 +350,15 @@ const checkContains = (priority, element, ignore, path, select, toString) => {
       break
     }
     contains.push(`contains("${text}")`)
-    if (select(`${prefix}${toString.pseudo(contains)}`, parent).length === 1) {
-      pattern.pseudo = [...pattern.pseudo, ...contains]
+  
+    const matches = select(toString.pattern({ ...pattern, pseudo: contains }), parent)
+    if (matches.length === 1) {
+      pattern.pseudo = contains
       path.unshift(pattern)
       return true
+    }
+    if (matches.length === 0) {
+      return false
     }
   }
   return false
