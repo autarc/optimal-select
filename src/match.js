@@ -32,18 +32,18 @@ const defaultIgnore = {
  * @return {Array.<Pattern>}       - [description]
  */
 export default function match (node, options = {}) {
-
-  const {
-    root = document,
-    skip = null,
-    priority = ['id', 'class', 'href', 'src'],
-    ignore = {},
-    format
-  } = options
+  options = {
+    root: document,
+    skip: null,
+    priority: ['id', 'class', 'href', 'src'],
+    ignore: {},
+    ...options
+  }
+  const { root, skip, priority, ignore, format } = options
 
   const path = []
-  var element = node
-  var length = path.length
+  let element = node
+  let length = path.length
   const select = getSelect(options)
   const toString = getToString(options)
 
@@ -86,13 +86,16 @@ export default function match (node, options = {}) {
         checkTag(element, ignore, path, select, toString)
       }
 
-      if ([1, 'xpath', 'jquery'].includes(format) && path.length === length) {
-        checkContains(priority, element, ignore, path, select, toString, format === 'jquery')
+      if (path.length === length && [1, 'xpath'].includes(format)) {
+        checkRecursiveDescendants(element, path, select, toString, options)
       }
 
-      // define only one part each iteration
+      if (path.length === length && [1, 'xpath', 'jquery'].includes(format)) {
+        checkText(priority, element, ignore, path, select, toString, format === 'jquery')
+      }
+
       if (path.length === length) {
-        checkChilds(priority, element, ignore, path)
+        checkNthChild(priority, element, ignore, path)
       }
     }
 
@@ -283,17 +286,15 @@ const findTagPattern = (element, ignore) => {
 /**
  * Extend path with specific child identifier
  *
- * NOTE: 'childTags' is a custom property to use as a view filter for tags using 'adapter.js'
- *
  * @param  {Array.<string>} priority - [description]
  * @param  {HTMLElement}    element  - [description]
  * @param  {Object}         ignore   - [description]
  * @param  {Array.<Pattern>} path    - [description]
  * @return {boolean}                 - [description]
  */
-const checkChilds = (priority, element, ignore, path) => {
+const checkNthChild = (priority, element, ignore, path) => {
   const parent = element.parentNode
-  const children = parent.childTags || parent.children
+  const children = parent.children
   for (var i = 0, l = children.length; i < l; i++) {
     const child = children[i]
     if (child === element) {
@@ -324,8 +325,8 @@ const checkChilds = (priority, element, ignore, path) => {
  * @param  {boolean}        nested   - [description]
  * @return {boolean}                 - [description]
  */
-const checkContains = (priority, element, ignore, path, select, toString, nested) => {
-  const pattern = findTagPattern(element, ignore, select)
+const checkText = (priority, element, ignore, path, select, toString, nested) => {
+  const pattern = findTagPattern(element, ignore)
   if (!pattern) {
     return false
   }
@@ -361,6 +362,41 @@ const checkContains = (priority, element, ignore, path, select, toString, nested
       return false
     }
   }
+  return false
+}
+
+/**
+ * Extend path with descendant tag
+ *
+ * @param  {HTMLElement}    element   - [description]
+ * @param  {Array.<Pattern>} path    - [description]
+ * @param  {function}       select    - [description]
+ * @param  {ToStringApi}    toString  - [description]
+ * @param  {Options}        [options] - [description]
+ * @return {boolean}                  - [description]
+ */
+const checkRecursiveDescendants = (element, path, select, toString, options) => {
+  const pattern = findTagPattern(element, options.ignore)
+  if (!pattern) {
+    return false
+  }
+
+  const descendants = Array.from(element.querySelectorAll('*'))
+  while (descendants.length > 0) {
+    const descendant = descendants.shift()
+    const descendantPath = match(descendant, { ...options, root: element })
+    // avoid descendant selectors with nth-child
+    if (!descendantPath.some(pattern => pattern.pseudo.some(p => p.startsWith('nth-child')))) {
+      const parent = element.parentElement
+      const matches = select(toString.pattern({ ...pattern, descendants: [descendantPath] }), parent)
+      if (matches.length === 1) {
+        pattern.descendants = [descendantPath]
+        path.unshift(pattern)
+        return true
+      }
+    }
+  }
+
   return false
 }
 

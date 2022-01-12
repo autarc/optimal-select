@@ -28,7 +28,7 @@ exports[`Single Select : XPath : attributes : generates selector string : span.n
 exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(1) 1`] = ".//body//div[contains(text(),\"first\")]";
 exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(2) 1`] = ".//body//div[contains(text(),\"second\")]";
 exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(3) 1`] = ".//body//div[contains(text(),\"third\")]";
-exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(4) 1`] = ".//body//div[contains(text(),\"forth\")]";
+exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(4) 1`] = ".//body//div[.//div]";
 exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(4) div 1`] = ".//body//div//div";
 exports[`Single Select : jQuery : classes : generates selector string : span.nav2 1`] = "span.nav2";
 exports[`Single Select : jQuery : classes : generates selector string : span.nav1.active 1`] = "span.nav1.active";

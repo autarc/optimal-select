@@ -5,7 +5,17 @@
  * @property {Array.<{ name: string, value: string? }>}  attributes
  * @property {Array.<string>}                            classes
  * @property {Array.<string>}                            pseudo
+ * @property {Array.<Array.<Pattern>>}                   descendants
  */
+
+/**
+ * Creates a new pattern structure
+ * 
+ * @param {Partial<Pattern>} pattern
+ * @returns {Pattern}
+ */
+export const createPattern = (base = {}) =>
+  ({ attributes: [], classes: [], pseudo: [], descendants: [], ...base })
 
 /**
  * Convert attributes to CSS selector
@@ -61,15 +71,6 @@ export const patternToSelector = (pattern) => {
   }`
   return value
 }
-
-/**
- * Creates a new pattern structure
- * 
- * @param {Partial<Pattern>} pattern
- * @returns {Pattern}
- */
-export const createPattern = (base = {}) =>
-  ({ attributes: [], classes: [], pseudo: [], ...base })
 
 /**
  * Converts path to string
@@ -131,6 +132,7 @@ export const pseudoToXPath = (pseudo) =>
 
       case 'contains':
         return `[contains(text(),${match[2]})]`
+
       default:
         return ''
     }
@@ -143,7 +145,7 @@ export const pseudoToXPath = (pseudo) =>
 * @returns {string}
 */
 export const patternToXPath = (pattern) => {
-  const { relates, tag, attributes, classes, pseudo } = pattern
+  const { relates, tag, attributes, classes, pseudo, descendants } = pattern
   const value = `${
     relates === 'child' ? '/' : '//'
   }${
@@ -154,6 +156,8 @@ export const patternToXPath = (pattern) => {
     classesToXPath(classes)
   }${
     pseudoToXPath(pseudo)
+  }${
+    descendantsToXPath(descendants)
   }`
   return value
 }
@@ -166,6 +170,16 @@ export const patternToXPath = (pattern) => {
 */
 export const pathToXPath = (path) => `.${path.map(patternToXPath).join('')}`
 
+/**
+* Convert child selectors to XPath string
+* 
+* @param {Array.<Array.<Pattern>>} children 
+* @returns {string}
+*/
+export const descendantsToXPath = (children) =>
+  children.length ? `[${children.map(pathToXPath).join('][')}]` : ''
+
+  
 const toString = {
   'css': {
     attributes: attributesToSelector,

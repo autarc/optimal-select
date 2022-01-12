@@ -87,7 +87,7 @@ export default function optimize (path, elements, options = {}) {
  * @param  {ToStringApi}         toString - [description]
  * @return {Pattern}                      - [description]
  */
-const optimizeContains = (pre, current, post, elements, select, toString) => {
+const optimizeText = (pre, current, post, elements, select, toString) => {
   const [contains, other] = partition(current.pseudo, (item) => item.startsWith('contains'))
 
   if (contains.length > 0 && post.length) {
@@ -172,6 +172,32 @@ const optimizeDescendant = (pre, current, post, elements, select, toString) => {
 }
 
 /**
+ * Optimize recursive descendants
+ * 
+ * @param  {Array.<Pattern>}     pre      - [description]
+ * @param  {Pattern}             current  - [description]
+ * @param  {Array.<Pattern>}     post     - [description]
+ * @param  {Array.<HTMLElement>} elements - [description]
+ * @param  {function}            select   - [description]
+ * @param  {ToStringApi}         toString - [description]
+ * @return {Pattern}                      - [description]
+ */
+const optimizeRecursiveDescendants = (pre, current, post, elements, select, toString) => {
+  if (current.descendants.length > 0 && post.length) {
+    const base = { ...current, descendants: [...current.descendants] }
+    while (base.descendants.length > 0) {
+      const optimized = base.descendants.slice(0, -1)
+      if (!compareResults(select(toString.path([...pre, { ...base, descendants: optimized }, ...post])), elements)) {
+        break
+      }
+      base.descendants = optimized
+    }
+    return base
+  }
+  return current
+}
+
+/**
  * Optimize nth of type
  *
  * @param  {Array.<Pattern>}     pre      - [description]
@@ -248,9 +274,10 @@ const optimizeClasses = (pre, current, post, elements, select, toString) => {
 }
 
 const optimizers = [
-  optimizeContains,
+  optimizeText,
   optimizeAttributes,
   optimizeDescendant,
+  optimizeRecursiveDescendants,
   optimizeNthOfType,
   optimizeClasses,
 ]
