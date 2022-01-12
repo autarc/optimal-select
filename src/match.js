@@ -39,7 +39,7 @@ export default function match (node, options = {}) {
     ignore: {},
     ...options
   }
-  const { root, skip, priority, ignore, format } = options
+  const { root, skip, ignore, format } = options
 
   const path = []
   let element = node
@@ -77,25 +77,25 @@ export default function match (node, options = {}) {
   while (element !== root && element.nodeType !== 11) {
     if (skipChecks(element) !== true) {
       // ~ global
-      if (checkAttributes(priority, element, ignore, path, select, toString, root)) break
-      if (checkTag(element, ignore, path, select, toString, root)) break
+      if (checkAttributes(element, path, options, select, toString, root)) break
+      if (checkTag(element, path, options, select, toString, root)) break
 
       // ~ local
-      checkAttributes(priority, element, ignore, path, select, toString)
+      checkAttributes(element, path, options, select, toString)
       if (path.length === length) {
-        checkTag(element, ignore, path, select, toString)
+        checkTag(element, path, options, select, toString)
       }
 
       if (path.length === length && [1, 'xpath'].includes(format)) {
-        checkRecursiveDescendants(element, path, select, toString, options)
+        checkRecursiveDescendants(element, path, options, select, toString)
       }
 
       if (path.length === length && [1, 'xpath', 'jquery'].includes(format)) {
-        checkText(priority, element, ignore, path, select, toString, format === 'jquery')
+        checkText(element, path, options, select, toString, format === 'jquery')
       }
 
       if (path.length === length) {
-        checkNthChild(priority, element, ignore, path)
+        checkNthChild(element, path, options)
       }
     }
 
@@ -104,7 +104,7 @@ export default function match (node, options = {}) {
   }
 
   if (element === root) {
-    const pattern = findPattern(priority, element, ignore, select, toString)
+    const pattern = findPattern(element, options, select, toString)
     path.unshift(pattern)
   }
 
@@ -114,16 +114,15 @@ export default function match (node, options = {}) {
 /**
  * Extend path with attribute identifier
  *
- * @param  {Array.<string>} priority - [description]
- * @param  {HTMLElement}    element  - [description]
- * @param  {Object}         ignore   - [description]
- * @param  {Array.<Pattern>} path    - [description]
- * @param  {function}       select   - [description]
- * @param  {ToStringApi}    toString - [description]
- * @param  {HTMLElement}    parent   - [description]
- * @return {boolean}                 - [description]
+ * @param  {HTMLElement}     element  - [description]
+ * @param  {Array.<Pattern>} path     - [description]
+ * @param  {Options}         options  - [description]
+ * @param  {function}        select   - [description]
+ * @param  {ToStringApi}     toString - [description]
+ * @param  {HTMLElement}     parent   - [description]
+ * @return {boolean}                  - [description]
  */
-const checkAttributes = (priority, element, ignore, path, select, toString, parent = element.parentNode) => {
+const checkAttributes = (element, path, { priority, ignore }, select, toString, parent = element.parentNode) => {
   const pattern = findAttributesPattern(priority, element, ignore, select, toString, parent)
   if (pattern) {
     path.unshift(pattern)
@@ -243,14 +242,14 @@ const findAttributesPattern = (priority, element, ignore, select, toString, pare
  * Extend path with tag identifier
  *
  * @param  {HTMLElement}     element - [description]
- * @param  {Object}          ignore  - [description]
+ * @param  {Options}         options  - [description]
  * @param  {Array.<Pattern>} path    - [description]
  * @param  {function}        select  - [description]
  * @param  {ToStringApi}     toString - [description]
  * @param  {HTMLElement}     parent  - [description]
  * @return {boolean}                 - [description]
  */
-const checkTag = (element, ignore, path, select, toString, parent = element.parentNode) => {
+const checkTag = (element, path, { ignore }, select, toString, parent = element.parentNode) => {
   const pattern = findTagPattern(element, ignore)
   if (pattern) {
     let matches = []
@@ -286,13 +285,12 @@ const findTagPattern = (element, ignore) => {
 /**
  * Extend path with specific child identifier
  *
- * @param  {Array.<string>} priority - [description]
- * @param  {HTMLElement}    element  - [description]
- * @param  {Object}         ignore   - [description]
+ * @param  {HTMLElement}     element - [description]
+ * @param  {Options}         options - [description]
  * @param  {Array.<Pattern>} path    - [description]
  * @return {boolean}                 - [description]
  */
-const checkNthChild = (priority, element, ignore, path) => {
+const checkNthChild = (element, path, { ignore }) => {
   const parent = element.parentNode
   const children = parent.children
   for (var i = 0, l = children.length; i < l; i++) {
@@ -316,16 +314,15 @@ const checkNthChild = (priority, element, ignore, path) => {
 /**
  * Extend path with contains
  *
- * @param  {Array.<string>} priority - [description]
- * @param  {HTMLElement}    element  - [description]
- * @param  {Object}         ignore   - [description]
- * @param  {Array.<Pattern>} path    - [description]
- * @param  {function}       select   - [description]
- * @param  {ToStringApi}    toString - [description]
- * @param  {boolean}        nested   - [description]
- * @return {boolean}                 - [description]
+ * @param  {HTMLElement}     element  - [description]
+ * @param  {Array.<Pattern>} path     - [description]
+ * @param  {Options}         options  - [description]
+ * @param  {function}        select   - [description]
+ * @param  {ToStringApi}     toString - [description]
+ * @param  {boolean}         nested   - [description]
+ * @return {boolean}                  - [description]
  */
-const checkText = (priority, element, ignore, path, select, toString, nested) => {
+const checkText = (element, path, { ignore }, select, toString, nested) => {
   const pattern = findTagPattern(element, ignore)
   if (!pattern) {
     return false
@@ -368,14 +365,14 @@ const checkText = (priority, element, ignore, path, select, toString, nested) =>
 /**
  * Extend path with descendant tag
  *
- * @param  {HTMLElement}    element   - [description]
- * @param  {Array.<Pattern>} path    - [description]
- * @param  {function}       select    - [description]
- * @param  {ToStringApi}    toString  - [description]
- * @param  {Options}        [options] - [description]
+ * @param  {HTMLElement}     element  - [description]
+ * @param  {Array.<Pattern>} path     - [description]
+ * @param  {Options}         options  - [description]
+ * @param  {function}        select   - [description]
+ * @param  {ToStringApi}     toString - [description]
  * @return {boolean}                  - [description]
  */
-const checkRecursiveDescendants = (element, path, select, toString, options) => {
+const checkRecursiveDescendants = (element, path, options, select, toString) => {
   const pattern = findTagPattern(element, options.ignore)
   if (!pattern) {
     return false
@@ -383,8 +380,7 @@ const checkRecursiveDescendants = (element, path, select, toString, options) => 
 
   const descendants = Array.from(element.querySelectorAll('*'))
   while (descendants.length > 0) {
-    const descendant = descendants.shift()
-    const descendantPath = match(descendant, { ...options, root: element })
+    const descendantPath = match(descendants.shift(), { ...options, root: element })
     // avoid descendant selectors with nth-child
     if (!descendantPath.some(pattern => pattern.pseudo.some(p => p.startsWith('nth-child')))) {
       const parent = element.parentElement
@@ -403,14 +399,13 @@ const checkRecursiveDescendants = (element, path, select, toString, options) => 
 /**
  * Lookup identifier
  *
- * @param  {Array.<string>} priority - [description]
  * @param  {HTMLElement}    element  - [description]
- * @param  {Object}         ignore   - [description]
+ * @param  {Options}        options   - [description]
  * @param  {function}       select   - [description]
  * @param  {ToStringApi}    toString - [description]
  * @return {Pattern}                 - [description]
  */
-const findPattern = (priority, element, ignore, select, toString) => {
+const findPattern = (element, { priority, ignore }, select, toString) => {
   var pattern = findAttributesPattern(priority, element, ignore, select, toString)
   if (!pattern) {
     pattern = findTagPattern(element, ignore)
