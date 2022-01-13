@@ -9,7 +9,7 @@ import optimize from './optimize'
 import { convertNodeList, escapeValue } from './utilities'
 import { getCommonAncestor, getCommonProperties } from './common'
 import { getSelect } from './selector'
-import { createPattern, getToString } from './pattern'
+import { createPattern, getPathToString } from './pattern'
 
 /**
  * @typedef  {Object} Options
@@ -25,7 +25,7 @@ import { createPattern, getToString } from './pattern'
  */
 
 /**
- * Get a selector for the provided element
+ * Get a selector path for the provided element
  *
  * @param  {HTMLElement} element   - [description]
  * @param  {Options}     [options] - [description]
@@ -54,7 +54,17 @@ export const getSingleSelectorPath = (element, options = {}) => {
 }
 
 /**
- * Get a selector to match multiple descendants from an ancestor
+ * Get a selector string for the provided element
+ *
+ * @param  {HTMLElement} element   - [description]
+ * @param  {Options}     [options] - [description]
+ * @return {string}       - [description]
+ */
+export const getSingleSelector = (element, options ={}) =>
+  getPathToString(options.format)(getSingleSelectorPath(element, options))
+
+/**
+ * Get a selector path to match multiple descendants from an ancestor
  *
  * @param  {Array.<HTMLElement>|NodeList} elements   - [description]
  * @param  {Options}                      [options]  - [description]
@@ -71,7 +81,7 @@ export const getMultiSelectorPath = (elements, options = {}) => {
   }
 
   const select = getSelect(options)
-  const toString = getToString(options)
+  const toString = getPathToString(options.format)
 
   const ancestor = getCommonAncestor(elements, options)
   const ancestorPath = match(ancestor, options)
@@ -81,7 +91,7 @@ export const getMultiSelectorPath = (elements, options = {}) => {
   const descendantPattern = commonPath[0]
 
   const selectorPath = optimize([...ancestorPath, descendantPattern], elements, options)
-  const selectorMatches = convertNodeList(select(toString.path(selectorPath)))
+  const selectorMatches = convertNodeList(select(toString(selectorPath)))
 
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
     // TODO: cluster matches to split into similar groups for sub selections
@@ -93,6 +103,16 @@ export const getMultiSelectorPath = (elements, options = {}) => {
 
   return selectorPath
 }
+
+/**
+ * Get a selector string to match multiple descendants from an ancestor
+ *
+ * @param  {Array.<HTMLElement>|NodeList} elements   - [description]
+ * @param  {Options}                      [options]  - [description]
+ * @return {Array.<Pattern>}                         - [description]
+ */
+export const getMultiSelector = (elements, options = {}) =>
+  getPathToString(options.format)(getMultiSelectorPath(elements, options))
 
 /**
  * Get selectors to describe a set of elements
@@ -125,9 +145,7 @@ const getCommonPath = (elements) => {
  * @return {string}                                             - [description]
  */
 export default function getQuerySelector (input, options = {}) {
-  const path = (input.length && !input.name)
-    ? getMultiSelectorPath(input, options)
-    : getSingleSelectorPath(input, options)
-
-  return getToString(options).path(path)
+  return (input.length && !input.name)
+    ? getMultiSelector(input, options)
+    : getSingleSelector(input, options)
 }

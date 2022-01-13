@@ -45,7 +45,7 @@ export default function match (node, options = {}) {
   let element = node
   let length = path.length
   const select = getSelect(options)
-  const toString = getToString(options)
+  const toString = getToString(options.format)
 
   const skipCompare = skip && (Array.isArray(skip) ? skip : [skip]).map((entry) => {
     if (typeof entry !== 'function') {

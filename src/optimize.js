@@ -42,7 +42,7 @@ export default function optimize (path, elements, options = {}) {
   }
 
   const select = getSelect(options)
-  const toString = getToString(options)
+  const toString = getToString(options.format)
 
   if (path.length === 1) {
     return [optimizePart([], path[0], [], elements, select, toString)]

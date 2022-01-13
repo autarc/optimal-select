@@ -212,11 +212,21 @@ toString[1] = toString.xpath
  */
 
 /**
+ * Get api to convert paths, patterns and their parts to string of specified format
  * 
- * @param {Options} options 
+ * @param {'css' | 'xpath' | 'jquery' | 0 | 1} [format] 
  * @returns {ToStringApi}
  */
-export const getToString = (options = {}) =>
-  toString[options.format || 'css']
+export const getToString = (format) =>
+  toString[format || 'css']
+
+/**
+ * Get function to convert pattern to string of specified format
+ * 
+ * @param {Options} options 
+ * @returns {(path: Array.<Pattern>) => string}
+ */
+export const getPathToString = (format) =>
+  getToString(format).path
 
 
