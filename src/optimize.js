@@ -5,14 +5,14 @@
  * 2.) Improve robustness through selector transformation
  */
 
-import adapt from './adapt'
-import { getSelect } from './common'
-import { pathToString, patternToString, pseudoToString, attributesToString, classesToString } from './pattern'
+import { getSelect } from './selector'
+import { createPattern, getToString } from './pattern'
 import { convertNodeList, partition } from './utilities'
 
 /**
  * @typedef {import('./select').Options} Options
  * @typedef {import('./pattern').Pattern} Pattern
+ * @typedef {import('./pattern').ToStringApi} Pattern
  */
 
 /**
@@ -21,11 +21,11 @@ import { convertNodeList, partition } from './utilities'
  * @param  {Array.<Pattern>}                 path   - [description]
  * @param  {HTMLElement|Array.<HTMLElement>} element    - [description]
  * @param  {Options}                         [options]  - [description]
- * @return {string}                                     - [description]
+ * @return {Array.<Pattern>}                            - [description]
  */
 export default function optimize (path, elements, options = {}) {
   if (path.length === 0) {
-    return ''
+    return []
   }
 
   if (path[0].relates === 'child') {
@@ -41,71 +41,65 @@ export default function optimize (path, elements, options = {}) {
     throw new Error('Invalid input - to compare HTMLElements its necessary to provide a reference of the selected node(s)! (missing "elements")')
   }
 
-  const globalModified = adapt(elements[0], options)
   const select = getSelect(options)
+  const toString = getToString(options)
 
-  if (path.length < 2) {
-    return patternToString(optimizePart('', path[0], '', elements, select))
+  if (path.length === 1) {
+    return [optimizePart([], path[0], [], elements, select, toString)]
   }
 
   var endOptimized = false
   if (path[path.length-1].relates === 'child') {
-    path[path.length-1] = optimizePart(pathToString(path.slice(0, -1)), path[path.length-1], '', elements, select)
+    path[path.length-1] = optimizePart(path.slice(0, -1), path[path.length-1], [], elements, select, toString)
     endOptimized = true
   }
 
+  path = [...path]
   const shortened = [path.pop()]
   while (path.length > 1) {
     const current = path.pop()
-    const prePart = pathToString(path)
-    const postPart = pathToString(shortened)
-
-    const matches = select(`${prePart} ${postPart}`)
+    const matches = select(toString.path([...path, ...shortened]))
     const hasSameResult = matches.length === elements.length && elements.every((element, i) => element === matches[i])
     if (!hasSameResult) {
-      shortened.unshift(optimizePart(prePart, current, postPart, elements, select))
+      shortened.unshift(optimizePart(path, current, shortened, elements, select, toString))
     }
   }
   shortened.unshift(path[0])
   path = shortened
 
   // optimize start + end
-  path[0] = optimizePart('', path[0], pathToString(path.slice(1)), elements, select)
+  path[0] = optimizePart([], path[0], path.slice(1), elements, select, toString)
   if (!endOptimized) {
-    path[path.length-1] = optimizePart(pathToString(path.slice(0, -1)), path[path.length-1], '', elements, select)
+    path[path.length-1] = optimizePart(path.slice(0, -1), path[path.length-1], [], elements, select, toString)
   }
 
-  if (globalModified) {
-    delete global.document
-  }
-
-  return pathToString(path) // path.join(' ').replace(/>/g, '> ').trim()
+  return path
 }
 
 /**
  * Optimize :contains
  *
- * @param  {string}              prePart  - [description]
+ * @param  {Array.<Pattern>}     pre      - [description]
  * @param  {Pattern}             current  - [description]
- * @param  {string}              postPart - [description]
+ * @param  {Array.<Pattern>}     post     - [description]
  * @param  {Array.<HTMLElement>} elements - [description]
  * @param  {function}            select   - [description]
+ * @param  {ToStringApi}         toString - [description]
  * @return {Pattern}                      - [description]
  */
-function optimizeContains (prePart, current, postPart, elements, select) {
-  const [contains, other] = partition(current.pseudo, (item) => /contains\("/.test(item))
-  const prefix = patternToString({ ...current, pseudo: [] })
+const optimizeText = (pre, current, post, elements, select, toString) => {
+  const [contains, other] = partition(current.pseudo, (item) => item.startsWith('contains'))
 
-  if (contains.length > 0 && postPart.length) {
-    const optimized = [...other, ...contains]
-    while (optimized.length > other.length) {
-      optimized.pop()
-      const pattern = `${prePart}${prefix}${pseudoToString(optimized)}${postPart}`
-      if (!compareResults(select(pattern), elements)) {
+  if (contains.length > 0 && post.length) {
+    const base = { ...current, pseudo: [...other, ...contains] }
+    while (base.pseudo.length > other.length) {
+      const optimized = base.pseudo.slice(0, -1)
+      if (!compareResults(select(toString.path([...pre, { ...base, pseudo: optimized }, ...post])), elements)) {
         break
       }
-      current.pseudo = optimized
+      base.pseudo = optimized
     }
+    return base
   }
   return current
 }
@@ -113,25 +107,25 @@ function optimizeContains (prePart, current, postPart, elements, select) {
 /**
  * Optimize attributes
  *
- * @param  {string}              prePart  - [description]
+ * @param  {Array.<Pattern>}     pre      - [description]
  * @param  {Pattern}             current  - [description]
- * @param  {string}              postPart - [description]
+ * @param  {Array.<Pattern>}     post     - [description]
  * @param  {Array.<HTMLElement>} elements - [description]
  * @param  {function}            select   - [description]
+ * @param  {ToStringApi}         toString - [description]
  * @return {Pattern}                      - [description]
  */
-function optimizeAttributes (prePart, current, postPart, elements, select) {
+const optimizeAttributes = (pre, current, post, elements, select, toString) => {
   // reduce attributes: first try without value, then removing completely
   if (current.attributes.length > 0) {
     let attributes = [...current.attributes]
-    let prefix = patternToString({ ...current, attributes: [] })
 
     const simplify = (original, getSimplified) => {
       let i = original.length - 1
       while (i >= 0) {
         let attributes = getSimplified(original, i)
         if (!compareResults(
-          select(`${prePart}${prefix}${attributesToString(attributes)}${postPart}`),
+          select(toString.path([...pre, { ...current, attributes }, ...post])),
           elements
         )) {
           break
@@ -149,8 +143,7 @@ function optimizeAttributes (prePart, current, postPart, elements, select) {
       }
       return [...attributes.slice(0, i), { name, value: null }, ...attributes.slice(i + 1)]
     })
-
-    return { ...current, attributes: simplify(simplified, attributes => attributes.slice(0, -1)) }
+    return { ...current, attributes: simplify(simplified, attributes => attributes.slice(0, -1)) }    
   }
   return current
 }
@@ -158,18 +151,19 @@ function optimizeAttributes (prePart, current, postPart, elements, select) {
 /**
  * Optimize descendant
  *
- * @param  {string}              prePart  - [description]
+ * @param  {Array.<Pattern>}     pre      - [description]
  * @param  {Pattern}             current  - [description]
- * @param  {string}              postPart - [description]
+ * @param  {Array.<Pattern>}     post     - [description]
  * @param  {Array.<HTMLElement>} elements - [description]
  * @param  {function}            select   - [description]
+ * @param  {ToStringApi}         toString - [description]
  * @return {Pattern}                      - [description]
  */
-function optimizeDescendant (prePart, current, postPart, elements, select) {
+const optimizeDescendant = (pre, current, post, elements, select, toString) => {
   // robustness: descendant instead child (heuristic)
   if (current.relates === 'child') {
     const descendant = { ...current, relates: undefined }
-    let matches = select(`${prePart}${patternToString(descendant)}${postPart}`)
+    let matches = select(toString.path([...pre, descendant, ...post]))
     if (compareResults(matches, elements)) {
       return descendant
     }
@@ -178,26 +172,53 @@ function optimizeDescendant (prePart, current, postPart, elements, select) {
 }
 
 /**
- * Optimize nth of type
- *
- * @param  {string}              prePart  - [description]
+ * Optimize recursive descendants
+ * 
+ * @param  {Array.<Pattern>}     pre      - [description]
  * @param  {Pattern}             current  - [description]
- * @param  {string}              postPart - [description]
+ * @param  {Array.<Pattern>}     post     - [description]
  * @param  {Array.<HTMLElement>} elements - [description]
  * @param  {function}            select   - [description]
+ * @param  {ToStringApi}         toString - [description]
  * @return {Pattern}                      - [description]
  */
-function optimizeNthOfType (prePart, current, postPart, elements, select) {
+const optimizeRecursiveDescendants = (pre, current, post, elements, select, toString) => {
+  if (current.descendants.length > 0 && post.length) {
+    const base = { ...current, descendants: [...current.descendants] }
+    while (base.descendants.length > 0) {
+      const optimized = base.descendants.slice(0, -1)
+      if (!compareResults(select(toString.path([...pre, { ...base, descendants: optimized }, ...post])), elements)) {
+        break
+      }
+      base.descendants = optimized
+    }
+    return base
+  }
+  return current
+}
+
+/**
+ * Optimize nth of type
+ *
+ * @param  {Array.<Pattern>}     pre      - [description]
+ * @param  {Pattern}             current  - [description]
+ * @param  {Array.<Pattern>}     post     - [description]
+ * @param  {Array.<HTMLElement>} elements - [description]
+ * @param  {function}            select   - [description]
+ * @param  {ToStringApi}         toString - [description]
+ * @return {Pattern}                      - [description]
+ */
+const optimizeNthOfType = (pre, current, post, elements, select, toString) => {
   const i = current.pseudo.findIndex(item => item.startsWith('nth-child'))
   // robustness: 'nth-of-type' instead 'nth-child' (heuristic)
   if (i >= 0) {
     // TODO: consider complete coverage of 'nth-of-type' replacement
     const type = current.pseudo[i].replace(/^nth-child/, 'nth-of-type')
     const nthOfType = { ...current, pseudo: [...current.pseudo.slice(0, i), type, ...current.pseudo.slice(i + 1)] }
-    var pattern = `${prePart}${patternToString(nthOfType)}${postPart}`
-    var matches = select(pattern)
+    let pattern = toString.path([...pre, nthOfType, ...post])
+    let matches = select(pattern)
     if (compareResults(matches, elements)) {
-      current = nthOfType
+      return nthOfType
     }
   }
   return current
@@ -206,25 +227,22 @@ function optimizeNthOfType (prePart, current, postPart, elements, select) {
 /**
  * Optimize classes
  *
- * @param  {string}              prePart  - [description]
+ * @param  {Array.<Pattern>}     pre      - [description]
  * @param  {Pattern}             current  - [description]
- * @param  {string}              postPart - [description]
+ * @param  {Array.<Pattern>}     post     - [description]
  * @param  {Array.<HTMLElement>} elements - [description]
  * @param  {function}            select   - [description]
+ * @param  {ToStringApi}         toString - [description]
  * @return {Pattern}                      - [description]
  */
-function optimizeClasses (prePart, current, postPart, elements, select) {
+const optimizeClasses = (pre, current, post, elements, select, toString) => {
   // efficiency: combinations of classname (partial permutations)
   if (current.classes.length > 1) {
     let optimized = current.classes.slice().sort((curr, next) => curr.length - next.length)
-    let prefix = patternToString({ ...current, classes: [] })
 
     while (optimized.length > 1) {
       optimized.shift()
-      const pattern = `${prePart}${prefix}${classesToString(optimized)}${postPart}`
-      if (!pattern.length || pattern.charAt(0) === '>' || pattern.charAt(pattern.length-1) === '>') {
-        break
-      }
+      const pattern = toString.path([...pre, { ...current, classes: optimized }, ...post])
       if (!compareResults(select(pattern), elements)) {
         break
       }
@@ -232,18 +250,20 @@ function optimizeClasses (prePart, current, postPart, elements, select) {
     }
 
     optimized = current.classes
+
     if (optimized.length > 2) {
-      const references = select(`${prePart}${classesToString(current)}`)
-      for (var i2 = 0, l2 = references.length; i2 < l2; i2++) {
-        const reference = references[i2]
+      const base = createPattern({ classes: optimized })
+      const references = select(toString.path([...pre, base]))
+      for (var i = 0; i < references.length; i++) {
+        const reference = references[i]
         if (elements.some((element) => reference.contains(element))) {
           // TODO:
           // - check using attributes + regard excludes
-          const description = reference.tagName.toLowerCase()
-          var pattern = `${prePart}${description}${postPart}`
+          const description = createPattern({ tagName: reference.tagName })
+          var pattern = toString.path([...pre, createPattern({ tagName: reference.tagName }), ...post])
           var matches = select(pattern)
           if (compareResults(matches, elements)) {
-            current = { tag: description }
+            current = description
           }
           break
         }
@@ -254,9 +274,10 @@ function optimizeClasses (prePart, current, postPart, elements, select) {
 }
 
 const optimizers = [
-  optimizeContains,
+  optimizeText,
   optimizeAttributes,
   optimizeDescendant,
+  optimizeRecursiveDescendants,
   optimizeNthOfType,
   optimizeClasses,
 ]
@@ -264,19 +285,16 @@ const optimizers = [
 /**
  * Improve a chunk of the selector
  *
- * @param  {string}              prePart  - [description]
+ * @param  {Array.<Pattern>}     pre      - [description]
  * @param  {Pattern}             current  - [description]
- * @param  {string}              postPart - [description]
+ * @param  {Array.<Pattern>}     post     - [description]
  * @param  {Array.<HTMLElement>} elements - [description]
  * @param  {function}            select   - [description]
+ * @param  {ToStringApi}         toString - [description]
  * @return {Pattern}                      - [description]
  */
-function optimizePart (prePart, current, postPart, elements, select) {
-  if (prePart.length) prePart = `${prePart} `
-  if (postPart.length) postPart = ` ${postPart}`
-
-  return optimizers.reduce((acc, optimizer) => optimizer(prePart, acc, postPart, elements, select), current)
-}
+const optimizePart = (pre, current, post, elements, select, toString) =>
+  optimizers.reduce((acc, optimizer) => optimizer(pre, acc, post, elements, select, toString), current)
 
 /**
  * Evaluate matches with expected elements
@@ -285,7 +303,7 @@ function optimizePart (prePart, current, postPart, elements, select) {
  * @param  {Array.<HTMLElement>} elements - [description]
  * @return {Boolean}                      - [description]
  */
-export function compareResults (matches, elements) {
+export const compareResults = (matches, elements) => {
   const { length } = matches
   return length === elements.length && elements.every((element) => {
     for (var i = 0; i < length; i++) {

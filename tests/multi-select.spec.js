@@ -39,8 +39,6 @@ const tests = [
 describe('Multi-select', function() {
   candidates().forEach(candidate => {
     describe(`${candidate.name}`, function() {
-      this.timeout(50000)
-
       tests.forEach(function({ name, content }) {
         describe(name, function () {
           const doc = initDOM(createHTML(content))

@@ -53,7 +53,6 @@ const tests = [
 describe('Single Select', function() {
   candidates().forEach(candidate => {
     describe(`${candidate.name}`, function() {
-      this.timeout(50000)
 
       tests.forEach(function({ name, content }) {
         describe(name, function () {

@@ -25,11 +25,11 @@ exports[`Single Select : XPath : href : generates selector string : body > a:nth
 exports[`Single Select : XPath : attributes : generates selector string : body > span:nth-child(1) 1`] = ".//body//span[1]";
 exports[`Single Select : XPath : attributes : generates selector string : span[title="two"] 1`] = ".//span[@title=\"two\"]";
 exports[`Single Select : XPath : attributes : generates selector string : span.nav2 1`] = ".//span[contains(concat(\" \",normalize-space(@class),\" \"),\" nav2 \")]";
-exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(1) 1`] = ".//body/div[1]";
-exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(2) 1`] = ".//body//div[2]";
-exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(3) 1`] = ".//body//div[3]";
-exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(4) 1`] = ".//body//div[4]";
-exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(4) div 1`] = ".//body//div[4]//div";
+exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(1) 1`] = ".//body//div[contains(text(),\"first\")]";
+exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(2) 1`] = ".//body//div[contains(text(),\"second\")]";
+exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(3) 1`] = ".//body//div[contains(text(),\"third\")]";
+exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(4) 1`] = ".//body//div[.//div]";
+exports[`Single Select : XPath : contains : generates selector string : body > div:nth-child(4) div 1`] = ".//body//div//div";
 exports[`Single Select : jQuery : classes : generates selector string : span.nav2 1`] = "span.nav2";
 exports[`Single Select : jQuery : classes : generates selector string : span.nav1.active 1`] = "span.nav1.active";
 exports[`Single Select : jQuery : classes : generates selector string : span.hidden 1`] = "span.hidden";

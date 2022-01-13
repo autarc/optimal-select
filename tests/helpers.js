@@ -1,15 +1,15 @@
 import { JSDOM } from 'jsdom'
+import wgxpath from 'wicked-good-xpath'
 
 import { select } from '../src'
 import match from '../src/match'
-import { pathToString } from '../src/pattern'
+import { pathToSelector } from '../src/pattern'
 
 export const initDOM = (html) => {
-  return new JSDOM(html).window.document
-  // global.window = dom.window
-  // global.document = dom.window.document
+  const window = new JSDOM(html).window
+  wgxpath.install(window, true)
 
-  // return dom
+  return window.document
 }
 
 export const createHTML = (content) => `
@@ -93,4 +93,4 @@ export const candidates = (defaultOptions = {}) => {
  * @returns {Array.<{ element: Element, match: string }>}
  */
 export const elementMatches = (elements, document) =>
-  Array.prototype.map.call(elements, element => ({ element, match: pathToString(match(element, { root: document })).replace(/\\/g, '') }))
+  Array.prototype.map.call(elements, element => ({ element, match: pathToSelector(match(element, { root: document })).replace(/\\/g, '') }))
