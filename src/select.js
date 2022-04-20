@@ -4,21 +4,34 @@
  * Construct a unique CSS query selector to access the selected DOM element(s).
  * For longevity it applies different matching and optimization strategies.
  */
-
-import adapt from './adapt'
 import match from './match'
 import optimize from './optimize'
-import { convertNodeList } from './utilities'
+import { convertNodeList, escapeValue } from './utilities'
 import { getCommonAncestor, getCommonProperties } from './common'
+import { getSelect } from './selector'
+import { createPattern, getToString } from './pattern'
+
+/**
+ * @typedef  {Object} Options
+ * @property {HTMLElement} [root]                     Optionally specify the root element
+ * @property {function | Array.<HTMLElement>} [skip]  Specify elements to skip
+ * @property {Array.<string>} [priority]              Order of attribute processing
+ * @property {Object<string, function | number | string | boolean} [ignore] Define patterns which shouldn't be included
+ * @property {('css'|'xpath'|'jquery')} [format]      Output format    
+ */
+
+/**
+ * @typedef {import('./pattern').Pattern} Pattern
+ */
 
 /**
  * Get a selector for the provided element
  *
- * @param  {HTMLElement} element - [description]
- * @param  {Object}      options - [description]
- * @return {string}              - [description]
+ * @param  {HTMLElement} element   - [description]
+ * @param  {Options}     [options] - [description]
+ * @return {Array.<Pattern>}       - [description]
  */
-export function getSingleSelector (element, options = {}) {
+export const getSingleSelectorPath = (element, options = {}) => {
 
   if (element.nodeType === 3) {
     element = element.parentNode
@@ -28,103 +41,77 @@ export function getSingleSelector (element, options = {}) {
     throw new Error(`Invalid input - only HTMLElements or representations of them are supported! (not "${typeof element}")`)
   }
 
-  const globalModified = adapt(element, options)
-
-  const selector = match(element, options)
-  const optimized = optimize(selector, element, options)
+  const path = match(element, options)
+  const optimizedPath = optimize(path, element, options)
 
   // debug
   // console.log(`
-  //   selector:  ${selector}
-  //   optimized: ${optimized}
+  //   selector:  ${path}
+  //   optimized: ${optimizedPath}
   // `)
 
-  if (globalModified) {
-    delete global.document
-  }
-
-  return optimized
+  return optimizedPath
 }
 
 /**
  * Get a selector to match multiple descendants from an ancestor
  *
- * @param  {Array.<HTMLElement>|NodeList} elements - [description]
- * @param  {Object}                       options  - [description]
- * @return {string}                                - [description]
+ * @param  {Array.<HTMLElement>|NodeList} elements   - [description]
+ * @param  {Options}                      [options]  - [description]
+ * @return {Array.<Pattern>}                         - [description]
  */
-export function getMultiSelector (elements, options = {}) {
+export const getMultiSelectorPath = (elements, options = {}) => {
 
   if (!Array.isArray(elements)) {
     elements = convertNodeList(elements)
   }
 
   if (elements.some((element) => element.nodeType !== 1)) {
-    throw new Error(`Invalid input - only an Array of HTMLElements or representations of them is supported!`)
+    throw new Error('Invalid input - only an Array of HTMLElements or representations of them is supported!')
   }
 
-  const globalModified = adapt(elements[0], options)
+  const select = getSelect(options)
+  const toString = getToString(options)
 
   const ancestor = getCommonAncestor(elements, options)
-  const ancestorSelector = getSingleSelector(ancestor, options)
+  const ancestorPath = match(ancestor, options)
 
   // TODO: consider usage of multiple selectors + parent-child relation + check for part redundancy
-  const commonSelectors = getCommonSelectors(elements)
-  const descendantSelector = commonSelectors[0]
+  const commonPath = getCommonPath(elements)
+  const descendantPattern = commonPath[0]
 
-  const selector = optimize(`${ancestorSelector} ${descendantSelector}`, elements, options)
-  const selectorMatches = convertNodeList(document.querySelectorAll(selector))
+  const selectorPath = optimize([...ancestorPath, descendantPattern], elements, options)
+  const selectorMatches = convertNodeList(select(toString.path(selectorPath)))
 
   if (!elements.every((element) => selectorMatches.some((entry) => entry === element) )) {
     // TODO: cluster matches to split into similar groups for sub selections
     return console.warn(`
-      The selected elements can\'t be efficiently mapped.
+      The selected elements can't be efficiently mapped.
       Its probably best to use multiple single selectors instead!
     `, elements)
   }
 
-  if (globalModified) {
-    delete global.document
-  }
-
-  return selector
+  return selectorPath
 }
 
 /**
  * Get selectors to describe a set of elements
  *
- * @param  {Array.<HTMLElements>} elements - [description]
- * @return {string}                        - [description]
+ * @param  {Array.<HTMLElement>} elements  - [description]
+ * @return {Array.<Pattern>}               - [description]
  */
-function getCommonSelectors (elements) {
-
+const getCommonPath = (elements) => {
   const { classes, attributes, tag } = getCommonProperties(elements)
 
-  const selectorPath = []
-
-  if (tag) {
-    selectorPath.push(tag)
-  }
-
-  if (classes) {
-    const classSelector = classes.map((name) => `.${name}`).join('')
-    selectorPath.push(classSelector)
-  }
-
-  if (attributes) {
-    const attributeSelector = Object.keys(attributes).reduce((parts, name) => {
-      parts.push(`[${name}="${attributes[name]}"]`)
-      return parts
-    }, []).join('')
-    selectorPath.push(attributeSelector)
-  }
-
-  if (selectorPath.length) {
-    // TODO: check for parent-child relation
-  }
-
   return [
-    selectorPath.join('')
+    createPattern({
+      tag,
+      classes: classes || [],
+      attributes: attributes ? Object.keys(attributes).map((name) => ({
+        name: escapeValue(name),
+        value: escapeValue(attributes[name])
+      })) : []
+    })
   ]
 }
 
@@ -133,13 +120,14 @@ function getCommonSelectors (elements) {
  *
  * NOTE: extended detection is used for special cases like the <select> element with <options>
  *
- * @param  {HTMLElement|NodeList|Array.<HTMLElement>} input   - [description]
- * @param  {Object}                                   options - [description]
- * @return {string}                                           - [description]
+ * @param  {HTMLElement|NodeList|Array.<HTMLElement>} input     - [description]
+ * @param  {Options}                                  [options] - [description]
+ * @return {string}                                             - [description]
  */
 export default function getQuerySelector (input, options = {}) {
-  if (input.length && !input.name) {
-    return getMultiSelector(input, options)
-  }
-  return getSingleSelector(input, options)
+  const path = (input.length && !input.name)
+    ? getMultiSelectorPath(input, options)
+    : getSingleSelectorPath(input, options)
+
+  return getToString(options).path(path)
 }

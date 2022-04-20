@@ -13,11 +13,39 @@
 
   <script src="./benchmark.js"></script>
   <script src="../dist/optimal-select.js"></script>
+  <script src="../node_modules/sizzle/dist/sizzle.js"></script>
 
   <script>
-    addLibrary('autarc/optimal-select', function (element) {
-      return OptimalSelect.select(element)
-    })
+    addLibrary('autarc/optimal-select (css)', {
+      generate: function (element) {
+        return OptimalSelect.select(element);
+      },
+      check: document.querySelectorAll.bind(document),
+    });
+
+    addLibrary('autarc/optimal-select (xpath)', {
+      generate: function (element) {
+        return OptimalSelect.select(element, { format: 'xpath' });
+      },
+      check: function (xpath) {
+        var iterator = document.evaluate(xpath, document, null, 0);
+        var elements = [];
+        var element;
+        while (element = iterator.iterateNext()) {
+          elements.push(element);
+        }
+        return elements;
+      },
+    });
+
+    addLibrary('autarc/optimal-select (jquery)', {
+      generate: function (element) {
+        return OptimalSelect.select(element, { format: 'jquery' });
+      },
+      check: function (selector) {
+        return Sizzle(selector, document)
+      }
+    });
 
     window.onload = function(){
       // var element = document.getElementById('case')
@@ -33,7 +61,7 @@
 
 </head>
 
-<body onload="runTests()">
+<body>
 
   <h1>CSS Selector Generator Benchmark</h1>
 
@@ -41,11 +69,7 @@
 
   <h2>Results</h2>
 
-  <select name="select">
-    <option value="value1">Value 1</option>
-    <option value="value2" selected>Value 2</option>
-    <option value="value3">Value 3</option>
-  </select>
+  <button onclick="runTests();">Run tests</button>
 
   <table id='case' data="'test'">
     <thead>
@@ -520,6 +544,10 @@
       </div>
       <!-- end of #main -->
       <div id="push"></div>
+
+      <div class=" "></div>
+      
+      <div id="3_outer"></div>
     </div>
     <!-- end of #wrap -->
 

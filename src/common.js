@@ -5,12 +5,17 @@
  */
 
 /**
+ * @typedef {import('./select').Options} Options
+ */
+
+/**
  * Find the last common ancestor of elements
  *
- * @param  {Array.<HTMLElements>} elements - [description]
+ * @param  {Array.<HTMLElement>} elements  - [description]
+ * @param  {Options}              options  - [description]
  * @return {HTMLElement}                   - [description]
  */
-export function getCommonAncestor (elements, options = {}) {
+export const getCommonAncestor = (elements, options = {}) => {
 
   const {
     root = document
@@ -56,7 +61,7 @@ export function getCommonAncestor (elements, options = {}) {
  * @param  {Array.<HTMLElement>} elements - [description]
  * @return {Object}                       - [description]
  */
-export function getCommonProperties (elements) {
+export const getCommonProperties = (elements) => {
 
   const commonProperties = {
     classes: [],
@@ -145,3 +150,4 @@ export function getCommonProperties (elements) {
 
   return commonProperties
 }
+
