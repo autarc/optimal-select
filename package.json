@@ -48,7 +48,6 @@
   ],
   "license": "MIT",
   "main": "dist/optimal-select.js",
-  "module": "src/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/sriniraju-letznav/optimal-select.git"
