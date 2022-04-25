@@ -4,6 +4,8 @@
  * Convenience helpers.
  */
 
+const cssesc = require('cssesc');
+
 /**
  * Create an array with the DOM nodes of the list
  *
@@ -28,6 +30,5 @@ export function convertNodeList (nodes) {
  * @return {String}        - [description]
  */
 export function escapeValue (value) {
-  return value && value.replace(/['"`\\/:\?&!#$%^()[\]{|}*+;,.<=>@~]/g, '\\$&')
-                       .replace(/\n/g, '\A')
+  return value && cssesc(value);
 }
