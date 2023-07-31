@@ -139,11 +139,12 @@ function findAttributesPattern (priority, element, ignore) {
   const sortedKeys = Object.keys(attributes).sort((curr, next) => {
     const currPos = priority.indexOf(attributes[curr].name)
     const nextPos = priority.indexOf(attributes[next].name)
-    if (nextPos === -1) {
-      if (currPos === -1) {
-        return 0
-      }
-      return -1
+    if (nextPos === -1 || currPos === -1) {
+        if (nextPos === -1) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
     return currPos - nextPos
   })
