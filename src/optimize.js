@@ -129,7 +129,7 @@ function optimizePart (prePart, current, postPart, elements) {
     while (names.length) {
       const partial = current.replace(names.shift(), '').trim()
       var pattern = `${prePart}${partial}${postPart}`.trim()
-      if (!pattern.length || pattern.charAt(0) === '>' || pattern.charAt(pattern.length-1) === '>') {
+      if (!pattern.length || pattern.charAt(0) === '>' || pattern.charAt(pattern.length-1) === '>' || partial === '>') {
         break
       }
       var matches = document.querySelectorAll(pattern)
